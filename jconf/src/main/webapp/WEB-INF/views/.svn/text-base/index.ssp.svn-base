@@ -1,0 +1,19 @@
+<%@ val name: String %>
+<html>
+  <head>
+    <title>jconf . csail</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  </head>
+<body>
+  <div id="wrapper">
+    ${include("header.ssp")}
+
+    <div id="content">
+    <h1>Welcome to jcal.</h1>
+    <p>Hello, <%= name %>.</p>
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>
