@@ -1,0 +1,30 @@
+<%@ val title: String = "jconf . csail" %>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>${title}</title>
+  <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="wrapper">
+  <div id="header">
+  <h1>${title}</h1>
+  </div>
+  <div id="menu">
+    <ul>
+      <li><a href="signup" accesskey="7" title="">Sign Up</a></li>
+    </ul>
+  </div>
+  <div id="content">
+    <form action="login_user" method="post">
+    <input type="hidden" name="ac" value="log">
+    Username: <input type="text" name="username" /><br />
+    Password: <input type="password" name="password" /><br />
+    <input type="submit" class="button" value="Login" />
+    </form>
+  </div>
+  <div id="footer">
+    <p>&copy; 2011 Jean Yang.</p>
+  </div>
+</div>
+</body>
+</html>
