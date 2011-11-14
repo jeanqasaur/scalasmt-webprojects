@@ -1,9 +1,14 @@
 package cap.scalasmt.webapp
 
-class Calendar() {
-  private val dummyVal: String = "hello"
+/**
+ * Created by IntelliJ IDEA.
+ * User: Arjun
+ * Date: 11/1/11
+ * Time: 10:24 PM
+ * To change this template use File | Settings | File Templates.
+ */
 
-  def getDummyVal(): String = {
-    return dummyVal;
-  }
+class Calendar()
+{
+  val Dates: List[Date] = Nil
 }
