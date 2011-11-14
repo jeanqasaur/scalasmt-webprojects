@@ -1,0 +1,21 @@
+<%@ val title: String = "jconf . csail" %>
+<html>
+  <head>
+    <title>${title}</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  </head>
+<body>
+  <div id="wrapper">
+    ${include("header.ssp")}
+
+    <div id="content">
+    <h1>Profile.</h1>
+    <table>
+      <tr></tr>
+    </table>
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>
