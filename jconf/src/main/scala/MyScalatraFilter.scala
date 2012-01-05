@@ -7,6 +7,8 @@ import java.net.URL
 import scalate.ScalateSupport
 
 class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib {
+  System.setProperty("smt.home", "/opt/z3/bin/z3")
+
   val path = "/WEB-INF/views/"
   val title = "jeeves social net"
   val paperStage = Submission
@@ -49,10 +51,9 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
     session.get("user") match {
       case Some(user) =>
         val cur_user = user.asInstanceOf[ConfUser];
-        contentType = "text/html";
-        templateEngine.layout(path + "index.ssp"
+        renderPage("index.ssp"
           , Map("name" -> cur_user.name.name
-                    , "papers" -> searchByAuthor(cur_user)))
+               , "papers" -> searchByAuthor(cur_user)))
       case None => redirect("login")
     }
   }
@@ -98,8 +99,13 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
     session.get("user") match {
       case Some(user) => redirect("*")
       case None =>
-        contentType = "text/html"
-        templateEngine.layout(path + "login_screen.ssp")
+        val tmp =
+          Option(System.getProperty("smt.home")) match {
+            case Some(path) => path
+            case None => System.getProperty("user.home") + "/opt/z3/bin/z3"
+          }
+        renderPage("login_screen.ssp"
+          , Map("x" -> tmp) )
     }
   }
 
@@ -115,9 +121,17 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
 
   get("/profile") {
     session.get("user") match {
-      case Some(user) =>
-        contentType = "text/html"
-        templateEngine.layout(path + "profile.ssp")
+      case Some(u) =>
+        val user = u.asInstanceOf[ConfUser];
+        val role =
+          user.role match {
+            case PublicStatus => "Public viewer"
+            case AuthorStatus => "Author"
+            case ReviewerStatus => "Reviewer"
+            case PCStatus => "Program committee member"
+          }
+        renderPage("profile.ssp"
+          , Map("user" -> user, "role" -> role))
       case None => redirect("login")
     }
   }

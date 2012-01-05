@@ -1,4 +1,6 @@
 <%@ val title: String = "jconf . csail" %>
+<%@ val user: cap.jeeves.jconf.ConfUser %>
+<%@ val role: String %>
 <html>
   <head>
     <title>${title}</title>
@@ -11,7 +13,15 @@
     <div id="content">
     <h1>Profile.</h1>
     <table>
-      <tr></tr>
+      <tr>
+        <td><b>Username</b></td><td><%= user.username.name %></td></td>
+      </tr>
+      <tr>
+        <td><b>Name</b></td><td><%= user.name.name %></td>
+      </tr>
+      <tr>
+        <td><b>Role</b></td><td><%= role %></td>
+      </tr>
     </table>
     </div>
 
