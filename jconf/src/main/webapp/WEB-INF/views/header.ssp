@@ -5,7 +5,7 @@
   <ul>
     <li><a href="/" accesskey="1" title="Home">Home</a></li>
     <li><a href="profile" accesskey="2" title="Profile">Profile</a></li>
-    <li><a href="" accesskey="3" title="Papers">My Papers</a></li>
+    <li><a href="papers" accesskey="3" title="Papers">My Papers</a></li>
     <li><a href="logout" accesskey="7" title="Logout">Logout</a></li>
   </ul>
 </div>

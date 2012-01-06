@@ -86,7 +86,7 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
     addUser(u);
     session("user") = u;
     val context = new ConfContext(u, paperStage);
-    val pwd = u.getPassword(context);
+    val pwd = concretize(context, u.getPassword()).asInstanceOf[Password];
     println(pwd);
 
     renderPage("index.ssp"
@@ -115,8 +115,7 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
   }
 
   post("/signup_confirm") {
-    contentType = "text/html"
-    templateEngine.layout(path + "signup_confirm.ssp")
+    renderPage("signup_confirm.ssp")
   }
 
   get("/profile") {

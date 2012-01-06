@@ -107,11 +107,11 @@ object JConfBackend extends JeevesLib {
   def getById(id: Int) = 
     papers.find ((p: PaperRecord) => p.id == id)
   
-  def searchByName(name: String) = 
-    papers.filter(_.name === Title(name))
+  def searchByTitle(title: String) = 
+    papers.filter(_.getTitle() === Title(title))
   
   def searchByAuthor(author: ConfUser) = 
-    papers.filter(_.authors.has(author))
+    papers.filter(_.getAuthors().has(author))
   
   def searchByTag(tag: PaperTag) = papers.filter(_.getTags().has(tag))
   
@@ -123,7 +123,7 @@ object JConfBackend extends JeevesLib {
       case Some(user) =>
         // Stage should not matter...
         val userCtxt = new ConfContext(user, Submission);
-        val pwd : Password = user.getPassword(userCtxt);
+        val pwd : Password = concretize(userCtxt, user.getPassword()).asInstanceOf[Password];
         if (pwd.pwd.equals(password)) Some(user) else None
       case None =>
         println("user not found");

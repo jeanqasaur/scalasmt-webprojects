@@ -9,16 +9,27 @@ import cap.scalasmt._
 
 import JConfBackend._
 
-class PaperReview(id: Int, reviewerV: ConfUser, var body: String, var score: Int) extends JeevesRecord {
-  val reviewer = {
-    val level = mkLevel();
-    val vrole = CONTEXT.viewer.role;
-    val isInternal = (vrole === ReviewerStatus) || (vrole === PCStatus)
-    policy(level, isInternal, HIGH);
-    policy(level, !isInternal, LOW);
-    mkSensitive(level, reviewerV, NULL)
-  }
+class PaperReview(val id: Int, reviewer: ConfUser, body: String, score: Int)
+  extends JeevesRecord {
+  private val _reviewer: ConfUser = reviewer
 
-  def updateBody (newbody: String) = body = newbody
-  def updateScore (newscore: Int) = score = newscore
+  private val _reviewerL = mkLevel ();
+  private val _isInternalF: Formula = {
+    val vrole = CONTEXT.viewer.role;
+    (vrole === ReviewerStatus) || (vrole === PCStatus);
+  }
+  policy(_reviewerL, _isInternalF, HIGH);
+  policy(_reviewerL, !_isInternalF, LOW);
+  def getReviewer(): Symbolic = mkSensitive(_reviewerL, _reviewer, NULL)
+  def getReviewerTag(): Symbolic =
+    mkSensitive(_reviewerL, ReviewedBy(_reviewer), NULL)
+
+  private var _body: String = body
+  def setBody (newbody: String) = _body = newbody
+  def getBody (): String = _body
+
+  private var _score: Int = score
+  private val _scoreL = mkLevel ();
+  def setScore (newscore: Int) = _score = newscore
+  def getScore (): Int = _score
 }

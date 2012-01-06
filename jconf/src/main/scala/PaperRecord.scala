@@ -21,39 +21,38 @@ object Public extends PaperStage
 
 sealed trait PaperTag extends JeevesRecord
 object NeedsReview extends PaperTag
-case class ReviewedBy (reviewer: ConfUser) extends PaperTag
+case class ReviewedBy (reviewer: Symbolic) extends PaperTag
 object Accepted extends PaperTag
 
 case class Title (name : String) extends JeevesRecord
 
 class PaperRecord( val id : Int
-                 , _name : Title, _authors : List[ConfUser]
-                 , _papertags : List[PaperTag] ) extends JeevesRecord {
+                 , _name : Title, authors : List[ConfUser]
+                 , tags : List[PaperTag] ) extends JeevesRecord {
   private def isPublic (curtags : List[Symbolic]) : Formula =
     (CONTEXT.stage === Public) && curtags.has(Accepted)
 
-  // Some predicates...
-  private val isAuthor: Formula = _authors.has(CONTEXT.viewer);
+  // Some formulas.
+  private val isAuthor: Formula = (getAuthors()).has(CONTEXT.viewer);
   private val isInternal: Formula =
     (CONTEXT.viewer.role === ReviewerStatus) ||
     (CONTEXT.viewer.role === PCStatus)
 
   // The name of the paper is always visible to the authors.
-  def updateName(_name: Title): Symbolic = {
-    val level = mkLevel ();
-    policy (level, !(isAuthor || isInternal || isPublic(getTags ())), LOW);
-    mkSensitive(level, _name, Title(""))
-  }
-  var name = updateName(_name);
+  private var name = _name;
+  private val titleL = mkLevel();
+  policy (titleL, !(isAuthor || isInternal || isPublic(getTags ())), LOW);
+  def setTitle(_name: Title) = name = _name
+  def getTitle(): Symbolic =  mkSensitive(titleL, name, Title(""))
 
-  val authors: List[Symbolic] = {
-    val level = mkLevel ();
-    policy ( level
-           , !(isAuthor || (isInternal && (CONTEXT.stage === Decision)) ||
-              isPublic(getTags ()))
-           , LOW);
-    _authors.map(a => mkSensitive(level, a, NULL))
-  }
+  private var _authors: List[ConfUser] = authors
+  private var _authorL = mkLevel()
+  policy ( _authorL
+         , !(isAuthor || (isInternal && (CONTEXT.stage === Decision)) ||
+            isPublic(getTags ()))
+         , LOW);
+  def getAuthors() : List[Symbolic] =
+    _authors.map(a => mkSensitive(_authorL, a, NULL))
 
   /* Managing tags. */
   private def addTagPermission (tag : PaperTag) : Symbolic = {
@@ -78,18 +77,12 @@ class PaperRecord( val id : Int
     mkSensitive(level, tag, NULL)
   }
 
-  private var actualTags : Map[PaperTag, Symbolic] = {
-    val m = Map[PaperTag, Symbolic]();
-    _papertags foreach { tag => m += (tag -> addTagPermission(tag)) };
-    m
-  }
-  def getTags () : List[Symbolic] =
-    (actualTags.toList).map(x => x._2)
-  def addTag (newtag : PaperTag) : Unit = {
-    actualTags += (newtag -> addTagPermission(newtag))
-  }
-  def removeTag (oldtag : PaperTag) : Unit = actualTags -= oldtag
-  def hasTag (tag : PaperTag) : Formula = (getTags ()).has(tag)
+  private var _tags : List[PaperTag] = tags
+  def addTag (newtag: PaperTag) = _tags = newtag::_tags
+  def getTags (): List[Symbolic] = _tags.map(t => addTagPermission(t))
+  def removeTag (tag : PaperTag) : Unit =
+    _tags = _tags.filterNot(t => t.equals(tag))
+  def hasTag (tag : Symbolic) : Formula = (getTags ()).has(tag)
 
   /* Managing reviews. */
   private var reviewIds = 0;
@@ -99,25 +92,24 @@ class PaperRecord( val id : Int
     id
   }
   
-  var reviews : List[Symbolic] = Nil
-  def addReview (reviewer: ConfUser, rtext: String, score: Int)
-  : Symbolic = {
-    val reviewId = getReviewId ();
-    val r = {
-      val level = mkLevel();
-      val s = new PaperReview(reviewId, reviewer, rtext, score);
-      policy( level
-            , !((CONTEXT.stage === Review && (hasTag (ReviewedBy (reviewer)))) ||
-                ((CONTEXT.stage === Decision) && isInternal) ||
-                (isAuthor &&
-                  ((CONTEXT.stage === Rebuttal) ||
-                    (CONTEXT.stage === Decision))))
-
-            , LOW);
-      mkSensitive(level, s, NULL)
-    }
-    reviews = r::reviews;
-    addTag (ReviewedBy(reviewer))
-    r
+  private var _reviews: List[PaperReview] = Nil
+  private var authorCanSeeReview: Formula =
+    (CONTEXT.stage === Rebuttal) || (CONTEXT.stage === Decision)
+  def addReview (reviewer: ConfUser, body: String, score: Int) = {
+    val reviewId = getReviewId();
+    val r = new PaperReview(reviewId, reviewer, body, score);
+    _reviews = r::_reviews;
+    addTag(ReviewedBy(reviewer))
   }
+  def addReviewPolicy (r: PaperReview): Symbolic = {
+    val reviewerTag = r.getReviewerTag ();
+    val level = mkLevel();
+    policy( level
+            , !((CONTEXT.stage === Review && (hasTag (reviewerTag))) ||
+                ((CONTEXT.stage === Decision) && isInternal) ||
+                (isAuthor && authorCanSeeReview))
+            , LOW);
+    mkSensitive(level, r, NULL)
+  }
+  def getReviews (): List[Symbolic] = _reviews.map(r => addReviewPolicy(r))
 }
