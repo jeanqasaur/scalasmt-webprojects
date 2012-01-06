@@ -9,7 +9,7 @@ import cap.scalasmt._
 
 import JConfBackend._
 
-class PaperReview(val id: Int, reviewer: ConfUser, body: String, score: Int)
+class PaperReview(val id: Int = -1, reviewer: ConfUser = new ConfUser(), body: String = "", score: Int = -1)
   extends JeevesRecord {
   private val _reviewer: ConfUser = reviewer
 
@@ -20,9 +20,10 @@ class PaperReview(val id: Int, reviewer: ConfUser, body: String, score: Int)
   }
   policy(_reviewerL, _isInternalF, HIGH);
   policy(_reviewerL, !_isInternalF, LOW);
-  def getReviewer(): Symbolic = mkSensitive(_reviewerL, _reviewer, NULL)
+  def getReviewer(): Symbolic =
+    mkSensitive(_reviewerL, _reviewer, new ConfUser())
   def getReviewerTag(): Symbolic =
-    mkSensitive(_reviewerL, ReviewedBy(_reviewer), NULL)
+    mkSensitive(_reviewerL, ReviewedBy(_reviewer), new ConfUser())
 
   private var _body: String = body
   def setBody (newbody: String) = _body = newbody

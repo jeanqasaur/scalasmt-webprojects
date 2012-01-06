@@ -30,8 +30,10 @@ trait UserID {
 case class Username (name: String) extends JeevesRecord
 case class Name (name: String) extends JeevesRecord
 case class Password (val pwd: String) extends JeevesRecord
-case class ConfUser( val username: Username, val name: Name, pwd: String
-  , val role: UserStatus )
+case class ConfUser(
+  val username: Username = Username("-"), val name: Name = new Name("")
+  , pwd: String = ""
+  , val role: UserStatus = PublicStatus )
   extends JeevesRecord {
     // Level variables and policies.
     private val self: Formula = CONTEXT.viewer === this;
@@ -43,19 +45,19 @@ case class ConfUser( val username: Username, val name: Name, pwd: String
     def addSubmittedPaper (p: PaperRecord): Unit =
       _submittedPapers = p::_submittedPapers
     def getSubmittedPapers (): List[Symbolic] =
-      _submittedPapers.map(p => mkSensitive(selfL, p, NULL))
+      _submittedPapers.map(p => mkSensitive(selfL, p, new PaperRecord()))
 
     // Papers to review.
     private var _reviewPapers: List[PaperRecord] = Nil
     def addReviewPaper (r: PaperRecord): Unit = _reviewPapers = r::_reviewPapers
     def getReviewPapers (): List[Symbolic] =
-      _reviewPapers.map(r => mkSensitive(selfL, r, NULL))
+      _reviewPapers.map(p => mkSensitive(selfL, p, new PaperRecord()))
 
     // Reviews submitted.
     private var _reviews: List[PaperReview] = Nil
     def addReview (r: PaperReview): Unit =_reviews = r::_reviews
     def getReviews (): List[Symbolic] =
-      _reviews.map(r => mkSensitive(selfL, r, NULL))
+      _reviews.map(r => mkSensitive(selfL, r, new PaperReview()))
 
     // Password.
     private var _password = pwd
