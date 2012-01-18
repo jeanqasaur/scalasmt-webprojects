@@ -92,10 +92,10 @@ class Event(var title:String, var date:Date, var description:String, var locatio
 	override def toString() = { if (date == null) title else title + " at " + date.toString() }
 
 	def compareTo(e:Event):Int = {
-		if (date.compareTo(e.date) == 0) return date.compareTo(e.date)
-		else if (title.compareTo(e.title) == 0) return title.compareTo(e.title)
-		else if (description.compareTo(e.description) == 0) return description.compareTo(e.description) 
-		else if (location.compareTo(e.location) == 0) return location.compareTo(e.location)
+		if (date.compareTo(e.date) != 0) return date.compareTo(e.date)
+		else if (title.compareTo(e.title) != 0) return title.compareTo(e.title)
+		else if (description.compareTo(e.description) != 0) return description.compareTo(e.description)
+		else if (location.compareTo(e.location) != 0) return location.compareTo(e.location)
 		else return 0
 	}
 }
