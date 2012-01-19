@@ -31,37 +31,66 @@ case class Username (name: String) extends JeevesRecord
 case class Name (name: String) extends JeevesRecord
 case class Password (val pwd: String) extends JeevesRecord
 case class ConfUser(
-  val username: Username = Username("-"), val name: Name = new Name("")
-  , pwd: String = ""
-  , val role: UserStatus = PublicStatus )
+  val username: Username = Username("-")
+  , private var _name: Name = new Name("")
+  , private var _password: String = ""
+  , val role: UserStatus = PublicStatus
+  , private var _submittedPapers: List[PaperRecord] = Nil
+  , private var _reviewPapers: List[PaperRecord] = Nil
+  , private var _reviews: List[PaperReview] = Nil )
   extends JeevesRecord {
-    // Level variables and policies.
-    private val self: Formula = CONTEXT.viewer === this;
+    /*************/
+    /* Policies. */
+    /*************/
+    private val self: Formula = (CONTEXT.viewer.username === this.username);
+    private val isReviewer: Formula =
+      CONTEXT.viewer.status === ReviewerStatus
+    private val isPC: Formula = CONTEXT.viewer.status === PCStatus
+
     private val selfL = mkLevel ();
     policy (selfL, !self, LOW);
 
+    // For now, everyone can see the name.
+    private val nameL = mkLevel ();
+    policy (nameL, false, LOW);
+
+    def setName (n: Name): Unit = {
+      _name = n
+    }
+    def getName (): Symbolic = mkSensitive(nameL, _name, Name("--"))
+    def showName (ctxt: ConfContext): String = {
+      concretize(ctxt, getName ()).asInstanceOf[Name].name
+    }
+
     // Submitted papers.
-    private var _submittedPapers: List[PaperRecord] = Nil
     def addSubmittedPaper (p: PaperRecord): Unit =
       _submittedPapers = p::_submittedPapers
     def getSubmittedPapers (): List[Symbolic] =
       _submittedPapers.map(p => mkSensitive(selfL, p, new PaperRecord()))
+    def showSubmittedPapers (ctxt: ConfContext): List[PaperRecord] = {
+      (getSubmittedPapers ()).map(
+        p => concretize(ctxt, p).asInstanceOf[PaperRecord])
+    }
 
     // Papers to review.
-    private var _reviewPapers: List[PaperRecord] = Nil
     def addReviewPaper (r: PaperRecord): Unit = _reviewPapers = r::_reviewPapers
     def getReviewPapers (): List[Symbolic] =
       _reviewPapers.map(p => mkSensitive(selfL, p, new PaperRecord()))
+    def showReviewPapers (ctxt: ConfContext): List[PaperRecord] = {
+      (getReviewPapers ()).map(p => concretize(ctxt, p).asInstanceOf[PaperRecord])
+    }
 
     // Reviews submitted.
-    private var _reviews: List[PaperReview] = Nil
     def addReview (r: PaperReview): Unit =_reviews = r::_reviews
     def getReviews (): List[Symbolic] =
       _reviews.map(r => mkSensitive(selfL, r, new PaperReview()))
+    def showReviews (ctxt: ConfContext): List[PaperReview] = {
+      (getReviews ()).map(r => concretize(ctxt, r).asInstanceOf[PaperReview])
+    }
 
     // Password.
-    private var _password = pwd
     def setPassword (p: String) = _password = p
     def getPassword (): Symbolic =
       mkSensitive(selfL, Password(_password), Password("default"))
+
   }

@@ -27,35 +27,56 @@ object EmptyTag extends PaperTag
 
 case class Title (name : String) extends JeevesRecord
 
-class PaperRecord( val id : Int = -1
-                 , _name : Title = Title(""), authors : List[ConfUser] = Nil
-                 , tags : List[PaperTag] = Nil ) extends JeevesRecord {
-  private var _authors: List[ConfUser] = authors
+class PaperRecord( val id: Int = -1
+                 , name: Title = Title("Untitled")
+                 , authors: List[ConfUser] = Nil
+                 , tags: List[PaperTag] = Nil
+                 , reviews: List[PaperReview] = Nil )
+               extends JeevesRecord with Serializable {
+  /**************/
+  /* Variables. */
+  /**************/
   private var _authorL = mkLevel()
-  policy ( _authorL
-         , !(isAuthor || (isInternal && (CONTEXT.stage === Decision)) ||
-            isPublic(getTags ()))
-         , LOW);
+  private val titleL = mkLevel();
 
-  private def isPublic (curtags : List[Symbolic]) : Formula =
-    (CONTEXT.stage === Public) && curtags.has(Accepted)
+  private var _title = name;
+  val title: Symbolic = mkSensitive(titleL, _title, Title("No permission"))
 
+  private var _authors: List[ConfUser] = authors
+  private var _tags : List[PaperTag] = tags
+  private var _reviews: List[PaperReview] = reviews
 
-  // Some formulas.
+  /*************/
+  /* Policies. */
+  /*************/
   private val isAuthor: Formula = (getAuthors()).has(CONTEXT.viewer);
   private val isInternal: Formula =
     (CONTEXT.viewer.role === ReviewerStatus) ||
     (CONTEXT.viewer.role === PCStatus)
+  private val authorCanSeeReview: Formula =
+    (CONTEXT.stage === Rebuttal) || (CONTEXT.stage === Decision)
+  private def isPublic (curtags : List[Symbolic]) : Formula =
+    (CONTEXT.stage === Public) && curtags.has(Accepted)
 
-  // The name of the paper is always visible to the authors.
-  private var name = _name;
-  private val titleL = mkLevel();
+  policy ( _authorL
+         , !(isAuthor || (isInternal && (CONTEXT.stage === Decision)) ||
+            isPublic(getTags ()))
+         , LOW);
   policy (titleL, !(isAuthor || isInternal || isPublic(getTags ())), LOW);
-  def setTitle(_name: Title) = name = _name
-  def getTitle(): Symbolic =  mkSensitive(titleL, name, Title(""))
+
+  /************************/
+  /* Getters and setters. */
+  /************************/
+  def setTitle(name: Title) = _title = name
+  def getTitle(): Symbolic =  mkSensitive(titleL, _title, Title("No permission"))
+  def showTitle(ctxt: ConfContext): String =
+    (concretize(ctxt, getTitle ()).asInstanceOf[Title]).name
 
   def getAuthors() : List[Symbolic] = {
     _authors.map(a => mkSensitive(_authorL, a, new ConfUser()))
+  }
+  def showAuthors(ctxt: ConfContext): List[ConfUser] = {
+    _authors.map(a => concretize(ctxt, a).asInstanceOf[ConfUser])
   }
 
   /* Managing tags. */
@@ -82,7 +103,6 @@ class PaperRecord( val id : Int = -1
     mkSensitive(level, tag, EmptyTag)
   }
 
-  private var _tags : List[PaperTag] = tags
   def addTag (newtag: PaperTag) = _tags = newtag::_tags
   def getTags (): List[Symbolic] = _tags.map(t => addTagPermission(t))
   def removeTag (tag : PaperTag) : Unit =
@@ -97,14 +117,12 @@ class PaperRecord( val id : Int = -1
     id
   }
   
-  private var _reviews: List[PaperReview] = Nil
-  private var authorCanSeeReview: Formula =
-    (CONTEXT.stage === Rebuttal) || (CONTEXT.stage === Decision)
-  def addReview (reviewer: ConfUser, body: String, score: Int) = {
+  def addReview (reviewer: ConfUser, body: String, score: Int): PaperReview = {
     val reviewId = getReviewId();
     val r = new PaperReview(reviewId, reviewer, body, score);
     _reviews = r::_reviews;
     addTag(ReviewedBy(reviewer))
+    r
   }
   def addReviewPolicy (r: PaperReview): Symbolic = {
     val reviewerTag = r.getReviewerTag ();
@@ -117,4 +135,7 @@ class PaperRecord( val id : Int = -1
     mkSensitive(level, r, new PaperReview())
   }
   def getReviews (): List[Symbolic] = _reviews.map(r => addReviewPolicy(r))
+  def showReviews (ctxt: ConfContext): List[PaperReview] = {
+    (getReviews ()).map(r => concretize(ctxt, r).asInstanceOf[PaperReview])
+  }
 }

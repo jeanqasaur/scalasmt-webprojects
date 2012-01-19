@@ -26,7 +26,7 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
   val pcArmando =
     mkUser("armando", "Armando Solar-Lezama", "armando", PCStatus);
   val authorJean =
-    mkUser("jeanyang", "Jean Yang", "jean", AuthorStatus);
+    mkUser("jeanyang", "Jean Yang", "jean", ReviewerStatus);
   val reviewerKuat =
     mkUser("kuat", "Kuat Yessenov", "kuat", ReviewerStatus);
 
@@ -34,6 +34,10 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
   val paper0Name = Title("A Language for Automatically Enforcing Privacy");
   val paper0 = addPaper(paper0Name, List(authorJean), Nil);
   assignReview(paper0, reviewerKuat);
+
+  val paper1Name = Title("Matchmaker");
+  val paper1 = addPaper(paper1Name, List(reviewerKuat), Nil);
+  assignReview(paper1, authorJean);
 
   def checkLoggedIn() {
     session.get("user") match {
@@ -49,11 +53,11 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
 
   get("/") {
     session.get("user") match {
-      case Some(user) =>
-        val cur_user = user.asInstanceOf[ConfUser];
+      case Some(u) =>
+        val user = u.asInstanceOf[ConfUser];
         renderPage("index.ssp"
-          , Map("name" -> cur_user.name.name
-               , "papers" -> searchByAuthor(cur_user)))
+          , Map("name" -> user.showName(getContext(user))
+               , "papers" -> searchByAuthor(user)))
       case None => redirect("login")
     }
   }
@@ -64,7 +68,7 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
       case Some(user) =>
         session("user") = user
         renderPage("index.ssp"
-          , Map( "name" -> user.name.name
+          , Map( "name" -> user.showName(getContext(user))
           , "papers" -> searchByAuthor(user)))
       case None => redirect("login")
     }
@@ -85,13 +89,11 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
                   , params("password"), role );
     addUser(u);
     session("user") = u;
-    val context = new ConfContext(u, paperStage);
-    val pwd = concretize(context, u.getPassword()).asInstanceOf[Password];
-    println(pwd);
 
     renderPage("index.ssp"
-      , Map("user" -> u, "name" -> u.name.name, "role" -> params("role")
-           , "papers" -> searchByAuthor(u) )
+      , Map("user" -> u, "name" -> u.showName(getContext(u))
+      , "role" -> params("role")
+      , "papers" -> searchByAuthor(u) )
        )
   }
 
@@ -118,19 +120,47 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
     renderPage("signup_confirm.ssp")
   }
 
+  get("/papers") {
+    session.get("user") match {
+      case Some(u) =>
+        val user = u.asInstanceOf[ConfUser];
+        val ctxt = getContext(user);
+        renderPage("papers.ssp"
+          , Map(
+            "user" -> user, "ctxt" -> ctxt
+          , "submittedPapers" -> user.showSubmittedPapers(ctxt)
+          , "reviewPapers" -> user.showReviewPapers(ctxt)))
+      case None => redirect("login")
+    }
+  }
+
+  post("/profile") {
+    session.get("user") match {
+      case Some(u) =>
+        val user = u.asInstanceOf[ConfUser];
+        user.setName(Name(params("name")));
+        session("user") = user;
+        renderPage("profile.ssp"
+          , Map("user" -> user, "ctxt" -> getContext(user)))
+      case None => redirect("login")
+    }
+  }
   get("/profile") {
     session.get("user") match {
       case Some(u) =>
         val user = u.asInstanceOf[ConfUser];
-        val role =
-          user.role match {
-            case PublicStatus => "Public viewer"
-            case AuthorStatus => "Author"
-            case ReviewerStatus => "Reviewer"
-            case PCStatus => "Program committee member"
-          }
         renderPage("profile.ssp"
-          , Map("user" -> user, "role" -> role))
+          , Map("user" -> user, "ctxt" -> getContext(user)))
+      case None => redirect("login")
+    }
+  }
+
+  get("/edit_profile") {
+    session.get("user") match {
+      case Some(u) =>
+        val user = u.asInstanceOf[ConfUser];
+        renderPage("edit_profile.ssp"
+          , Map("user" -> user, "ctxt" -> getContext(user)))
       case None => redirect("login")
     }
   }
