@@ -1,3 +1,4 @@
+<%@ val x: String %>
 <%@ val title: String = "jconf . csail" %>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -15,6 +16,8 @@
     </ul>
   </div>
   <div id="content">
+    <h1>Test</h1>
+    <%= x %><br>
     <form action="login_user" method="post">
     <input type="hidden" name="ac" value="log">
     Username: <input type="text" name="username" /><br />
