@@ -28,10 +28,10 @@ object EmptyTag extends PaperTag
 case class Title (name : String) extends JeevesRecord
 
 class PaperRecord( val id: Int = -1
-                 , name: Title = Title("Untitled")
-                 , authors: List[ConfUser] = Nil
-                 , tags: List[PaperTag] = Nil
-                 , reviews: List[PaperReview] = Nil )
+                 , private var _title: Title = Title("Untitled")
+                 , private var _authors: List[ConfUser] = Nil
+                 , private var _tags: List[PaperTag] = Nil
+                 , private var _reviews: List[PaperReview] = Nil )
                extends JeevesRecord with Serializable {
   /**************/
   /* Variables. */
@@ -39,12 +39,7 @@ class PaperRecord( val id: Int = -1
   private var _authorL = mkLevel()
   private val titleL = mkLevel();
 
-  private var _title = name;
   val title: Symbolic = mkSensitive(titleL, _title, Title("No permission"))
-
-  private var _authors: List[ConfUser] = authors
-  private var _tags : List[PaperTag] = tags
-  private var _reviews: List[PaperReview] = reviews
 
   /*************/
   /* Policies. */

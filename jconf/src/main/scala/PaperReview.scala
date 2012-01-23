@@ -10,18 +10,10 @@ import cap.scalasmt._
 import JConfBackend._
 
 class PaperReview(val id: Int = -1
-  , reviewer: ConfUser = new ConfUser()
-  , body: String = ""
-  , score: Int = -1
-  , isDeclassified: Boolean = false)
+  , private val _reviewer: ConfUser = new ConfUser()
+  , private var _body: String = ""
+  , private var _score: Int = -1)
   extends JeevesRecord with Serializable {
-
-  /**************/
-  /* Variables. */
-  /**************/
-  private val _reviewer: ConfUser = reviewer
-  private var _body: String = body
-  private var _score: Int = score
 
   /*************/
   /* Policies. */
