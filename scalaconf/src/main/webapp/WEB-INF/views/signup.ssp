@@ -1,0 +1,48 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>jeeves social net</title>
+  <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="wrapper">
+  <div id="header">
+    <h1>jeeves social net</h1>
+  </div>
+  <div id="menu">
+    <ul>
+      <li class="active"><a href="signup" accesskey="1" title="">Start Over</a></li>
+    </ul>
+  </div>
+  <div id="content">
+    <h3>Sign Up</h3>
+
+    <p>Please enter your information below.</p>
+
+    <form action="signup_confirm" method="post">
+    <p>
+    <table>
+    <tr><td>Name</td><td><input type="text" name="yourname" /></td></tr>
+    <tr><td>E-mail</td><td><input type="text" name="email" /></td></tr>
+    <tr><td>Username</td><td><input type="text" name="username" /></td></tr>
+    <tr><td>Password</td><td><input type="password" name="password" /></td></tr>
+    <tr><td>Status</td>
+        <td>
+          <input type="radio" name="role" value="Author" checked> Author
+          <input type="radio" name="role" value="Reviewer" > Reviewer
+          <input type="radio" name="role" value="PC" > PC Member
+        </td>
+    </tr>
+    </table>
+    </p>
+
+    <p><input type="submit" class="button" value="Submit"></p>
+    </form>
+<hr>
+  </div>
+  <div id="footer">
+    <p>&copy; 2011 Jean Yang.</p>
+  </div>
+</div>
+</body>
+</html>
+

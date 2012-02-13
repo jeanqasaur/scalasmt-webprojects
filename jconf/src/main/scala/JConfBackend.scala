@@ -18,6 +18,7 @@ object Util {
 object JConfBackend extends JeevesLib {
   class AccessError extends Exception
   class PermissionsError extends Exception
+  class NoSuchUserError extends Exception
 
   private val usercache = ".jconfusers.cache"
   private val assignmentcache = ".jconfassignments.cache"
@@ -88,7 +89,8 @@ object JConfBackend extends JeevesLib {
 
   def addPaper(name : Title, authors : List[ConfUser], tags : List[PaperTag])
       : PaperRecord = {
-    val paper = new PaperRecord(getPaperUid(), name, authors, tags);
+    val uid = getPaperUid ();
+    val paper = new PaperRecord(uid, name, authors, tags);
     papers = paper::papers;
 
     // For each author, add this paper to their submitted papers.
@@ -145,13 +147,13 @@ object JConfBackend extends JeevesLib {
   def searchByTag(tag: PaperTag) = papers.filter(_.getTags().has(tag))
 
   /* More mundane logistical things. */
+  def getUserById(id: String): Option[ConfUser] = users.get(Username(id))
   def loginUser(id: String, password: String): Option[ConfUser] = {
     users.get(Username(id)) match {
       case Some(user) =>
         // Stage should not matter...
         val userCtxt = new ConfContext(user, Submission);
-        val pwd : Password =
-          concretize(userCtxt, user.getPassword()).asInstanceOf[Password];
+        val pwd : Password = user.showPassword(userCtxt);
         if (pwd.pwd.equals(password)) Some(user) else None
       case None =>
         println("user not found");

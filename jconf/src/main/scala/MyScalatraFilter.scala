@@ -138,6 +138,7 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
     session.get("user") match {
       case Some(u) =>
         val user = u.asInstanceOf[ConfUser];
+        // TODO: Need to update other fields as well.
         user.setName(Name(params("name")));
         session("user") = user;
         renderPage("profile.ssp"
@@ -148,9 +149,18 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
   get("/profile") {
     session.get("user") match {
       case Some(u) =>
-        val user = u.asInstanceOf[ConfUser];
+        val curUser: ConfUser = u.asInstanceOf[ConfUser];
+        var user: ConfUser = null;
+        if (!(params.exists(_ == "id"))) {
+          user = curUser;
+        } else {
+          getUserById(params("id")) match {
+            case Some(idUser) => user = idUser
+            case None => ()
+          }
+        }
         renderPage("profile.ssp"
-          , Map("user" -> user, "ctxt" -> getContext(user)))
+          , Map("user" -> user, "ctxt" -> getContext(curUser)))
       case None => redirect("login")
     }
   }

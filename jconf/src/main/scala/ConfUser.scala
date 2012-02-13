@@ -42,13 +42,12 @@ case class ConfUser(
     /*************/
     /* Policies. */
     /*************/
-    private val self: Formula = (CONTEXT.viewer.username === this.username);
     private val isReviewer: Formula =
       CONTEXT.viewer.status === ReviewerStatus
     private val isPC: Formula = CONTEXT.viewer.status === PCStatus
 
     private val selfL = mkLevel ();
-    policy (selfL, !self, LOW);
+    policy (selfL, !(CONTEXT.viewer.username === username), LOW);
 
     // For now, everyone can see the name.
     private val nameL = mkLevel ();
@@ -92,5 +91,7 @@ case class ConfUser(
     def setPassword (p: String) = _password = p
     def getPassword (): Symbolic =
       mkSensitive(selfL, Password(_password), Password("default"))
-
+    def showPassword (ctxt: ConfContext): Password = {
+      concretize(ctxt, getPassword ()).asInstanceOf[Password]
+    }
   }

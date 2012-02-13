@@ -119,6 +119,12 @@ class PaperRecord( val id: Int = -1
     addTag(ReviewedBy(reviewer))
     r
   }
+  def isReviewedBy(reviewer: ConfUser): Formula = {
+    hasTag(ReviewedBy(reviewer))
+  }
+  def showIsReviewedBy(ctxt: ConfContext, reviewer: ConfUser): Boolean = {
+    concretize(ctxt, isReviewedBy(reviewer))
+  }
   def addReviewPolicy (r: PaperReview): Symbolic = {
     val reviewerTag = r.getReviewerTag ();
     val level = mkLevel();

@@ -11,32 +11,36 @@
     ${include("header.ssp")}
 
     <div id="content">
-    <h1>Profile.</h1>
-    <small><a href="edit_profile">Edit Profile</a></small><br>
-    <table>
-      <tr>
-        <td><b>Username</b></td><td><%= user.username.name %></td></td>
-      </tr>
-      <tr>
-        <td><b>Name</b></td><td><%= user.showName (ctxt) %></td>
-      </tr>
-      <tr>
-        <td><b>Role</b></td>
-        <td>#match (user.role)
-            #case(cap.jeeves.jconf.PublicStatus)
-              Public viewer
-            #case(cap.jeeves.jconf.AuthorStatus)
-              Author
-            #case(cap.jeeves.jconf.ReviewerStatus)
-              Reviewer
-            #case(cap.jeeves.jconf.PCStatus)
-              PC member
-            #otherwise
-              <i>Internal error.</i>
-            #end
-        </td>
-      </tr>
-    </table>
+    #if (user == null)
+      <p><i>The profile you have requested is not available.</i></p>
+    #else
+      <h1>User Profile.</h1>
+      <small><a href="edit_profile">Edit Profile</a></small><br>
+      <table>
+        <tr>
+          <td><b>Username</b></td><td><%= user.username.name %></td></td>
+        </tr>
+        <tr>
+          <td><b>Name</b></td><td><%= user.showName (ctxt) %></td>
+        </tr>
+        <tr>
+          <td><b>Role</b></td>
+          <td>#match (user.role)
+              #case(cap.jeeves.jconf.PublicStatus)
+                Public viewer
+              #case(cap.jeeves.jconf.AuthorStatus)
+                Author
+              #case(cap.jeeves.jconf.ReviewerStatus)
+                Reviewer
+              #case(cap.jeeves.jconf.PCStatus)
+                PC member
+              #otherwise
+                <i>Internal error.</i>
+              #end
+          </td>
+        </tr>
+      </table>
+    #end
     </div>
 
     ${include("footer.ssp")}

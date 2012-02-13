@@ -45,11 +45,6 @@
               #for (author <- authors)
                 <%= author.showName(ctxt) %><br>
               #end
-              #if (p.showIsReviewedBy(ctxt, user))
-                <i>Reviewed</i>
-              #else
-                <a href="">Submit Review</a>
-              #end
           </li>
         #end
       </ul>
