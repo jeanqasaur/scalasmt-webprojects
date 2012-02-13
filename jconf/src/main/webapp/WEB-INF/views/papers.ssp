@@ -1,0 +1,62 @@
+<%@ val title: String = "jconf . csail" %>
+<%@ val user: cap.jeeves.jconf.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.ConfContext %>
+<%@ val submittedPapers: List[cap.jeeves.jconf.PaperRecord] %>
+<%@ val reviewPapers: List[cap.jeeves.jconf.PaperRecord] %>
+<html>
+  <head>
+    <title>${title}</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  </head>
+<body>
+  <div id="wrapper">
+    ${include("header.ssp")}
+
+    <div id="content">
+    <h1>Papers.</h1>
+    <h2>Submitted.</h2>
+    <ul>
+      #for (p <- submittedPapers)
+        <li><b><%= p.showTitle(ctxt) %></b><br>
+            #{
+              val authors = p.showAuthors(ctxt)
+            }#
+            #for (author <- authors)
+              <%= author.showName(ctxt) %><br>
+            #end
+            #{
+              val reviews = p.showReviews(ctxt)
+            }#
+            #for (review <- reviews)
+              Review</br>
+            #end
+        </li>
+      #end
+    </ul>
+
+    #if (user.role == cap.jeeves.jconf.ReviewerStatus)
+      <h2>To Review.</h2>
+      <ul>
+        #for (p <- reviewPapers)
+          <li><b><%= p.showTitle(ctxt) %></b><br>
+            #{
+                val authors = p.showAuthors(ctxt)
+              }#
+              #for (author <- authors)
+                <%= author.showName(ctxt) %><br>
+              #end
+              #if (p.showIsReviewedBy(ctxt, user))
+                <i>Reviewed</i>
+              #else
+                <a href="">Submit Review</a>
+              #end
+          </li>
+        #end
+      </ul>
+    #end
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<%@ val title: String = "jconf . csail" %>
+<%@ val user: cap.jeeves.jconf.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.ConfContext %>
+<html>
+  <head>
+    <title>${title}</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  </head>
+<body>
+  <div id="wrapper">
+    ${include("header.ssp")}
+
+    <div id="content">
+    <h1>Edit Profile.</h1>
+    <form action="profile" method="post">
+    <table>
+      <tr>
+        <td><b>Username</b></td><td><%= user.username.name %></td></td>
+      </tr>
+      <tr>
+        <td><b>Name</b></td>
+        <td>
+          <input type="text" name="name" value="<%= user.showName(ctxt) %>" />
+        </td>
+      </tr>
+      <tr>
+        <td><b>Role</b></td>
+        <td>#match (user.role)
+            #case(cap.jeeves.jconf.PublicStatus)
+              Public viewer
+            #case(cap.jeeves.jconf.AuthorStatus)
+              Author
+            #case(cap.jeeves.jconf.ReviewerStatus)
+              Reviewer
+            #case(cap.jeeves.jconf.PCStatus)
+              PC member
+            #otherwise
+              <i>Internal error.</i>
+            #end
+        </td>
+      </tr>
+      <tr><td><input type="submit" value="Submit" /></td></tr>
+    </table>
+    </form>
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>

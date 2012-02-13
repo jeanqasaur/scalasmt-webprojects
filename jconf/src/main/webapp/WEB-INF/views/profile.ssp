@@ -1,0 +1,49 @@
+<%@ val title: String = "jconf . csail" %>
+<%@ val user: cap.jeeves.jconf.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.ConfContext %>
+<html>
+  <head>
+    <title>${title}</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  </head>
+<body>
+  <div id="wrapper">
+    ${include("header.ssp")}
+
+    <div id="content">
+    #if (user == null)
+      <p><i>The profile you have requested is not available.</i></p>
+    #else
+      <h1>User Profile.</h1>
+      <small><a href="edit_profile">Edit Profile</a></small><br>
+      <table>
+        <tr>
+          <td><b>Username</b></td><td><%= user.username.name %></td></td>
+        </tr>
+        <tr>
+          <td><b>Name</b></td><td><%= user.showName (ctxt) %></td>
+        </tr>
+        <tr>
+          <td><b>Role</b></td>
+          <td>#match (user.role)
+              #case(cap.jeeves.jconf.PublicStatus)
+                Public viewer
+              #case(cap.jeeves.jconf.AuthorStatus)
+                Author
+              #case(cap.jeeves.jconf.ReviewerStatus)
+                Reviewer
+              #case(cap.jeeves.jconf.PCStatus)
+                PC member
+              #otherwise
+                <i>Internal error.</i>
+              #end
+          </td>
+        </tr>
+      </table>
+    #end
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>
