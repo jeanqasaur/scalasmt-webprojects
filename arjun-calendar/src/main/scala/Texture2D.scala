@@ -4,11 +4,11 @@ package cap.scalasmt.webapp
  * Created by IntelliJ IDEA.
  * User: Arjun
  * Date: 11/1/11
- * Time: 10:24 PM
+ * Time: 9:44 PM
  * To change this template use File | Settings | File Templates.
  */
 
-class Calendar()
+class Texture2D //for tiles
 {
-  val Dates: List[Date] = Nil
+
 }
