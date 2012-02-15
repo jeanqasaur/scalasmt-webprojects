@@ -59,14 +59,14 @@ object JConfBackend extends JeevesLib {
     count
   }
 
-  private def logToFile() {
-    // TODO: Get persistence working.
-    /* if (actionQueue > 5) {
+  private def writeObjects() {
+    println ("logging to file...");
+    if (actionQueue > 5) {
       Persistence.writeToFile(users, usercache);
       Persistence.writeToFile(assignments, assignmentcache);
       Persistence.writeToFile(papers, papercache)
       actionQueue = 0
-    } else */ actionQueue = actionQueue + 1
+    } else actionQueue = actionQueue + 1
   }
 
   def getContext(user: ConfUser): ConfContext = new ConfContext(user, confStage)
@@ -84,7 +84,7 @@ object JConfBackend extends JeevesLib {
 
   def addUser(newUser: ConfUser) = {
     users += (newUser.username -> newUser)
-    logToFile ()
+    writeObjects ()
   }
 
   def addPaper(name : Title, authors : List[ConfUser], tags : List[PaperTag])
@@ -98,7 +98,7 @@ object JConfBackend extends JeevesLib {
       author => author.addSubmittedPaper(paper)
     }
 
-    logToFile();
+    writeObjects();
     paper
   }
  
@@ -114,7 +114,7 @@ object JConfBackend extends JeevesLib {
         assignments += (p.id -> reviewers)
     };
     reviewer.addReviewPaper(p);
-    logToFile()
+    writeObjects()
   }
   def isAssigned (p: PaperRecord, reviewer: ConfUser): Boolean = {
     assignments.get(p.id) match {
@@ -127,7 +127,7 @@ object JConfBackend extends JeevesLib {
     : PaperReview = {
     if (isAssigned (p, reviewer)) {
       val r = p.addReview(reviewer, rtext, score);
-      logToFile();
+      writeObjects();
       r
     } else {
       throw new PermissionsError        
