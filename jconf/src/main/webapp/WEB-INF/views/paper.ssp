@@ -1,0 +1,72 @@
+<%@ val title: String = "jconf . csail" %>
+<%@ val paper: cap.jeeves.jconf.PaperRecord %>
+<%@ val ctxt: cap.jeeves.jconf.ConfContext %>
+<html>
+  <head>
+    <title>${title}</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  </head>
+<body>
+  <div id="wrapper">
+    ${include("header.ssp")}
+
+    <div id="content">
+    #if (paper == null)
+      <p><i>The paper you have requested is not available.</i></p>
+    #else
+      <h1>Paper Details.</h1>
+      <table>
+        <tr>
+          <td><b>Title</b></td>
+          <td><%= paper.showTitle(ctxt) %></td>
+        </tr>
+        <tr>
+          <td><b>Authors</b></td>
+          <td>
+          #{
+            val authors = paper.showAuthors(ctxt)
+          }#
+          #for (author <- authors)
+            <%= author.showName(ctxt) %><br>
+          #end
+          </td>
+        </tr>
+        <tr>
+          <td><b>Tags</b></td>
+          <td>
+          #{
+            val tags = paper.showTags(ctxt)
+          }#
+          #for (tag <- tags)
+            #match (tag)
+            #case(cap.jeeves.jconf.NeedsReview)
+              Needs Review<br>
+            #case(cap.jeeves.jconf.ReviewedBy(reviewer))
+              Reviewed by<br>
+            #case(cap.jeeves.jconf.Accepted)
+              Accepted<br>
+            #otherwise
+              <i>Internal error.</i>
+            #end
+          #end
+          </td>
+        </tr>
+        <tr>
+          <td><b>Reviews</b></td>
+          <td>
+          #{
+            val reviews = paper.showReviews(ctxt)
+          }#
+          #for (review <- reviews)
+            review.showReviewer(ctxt).showName(ctxt)<br>
+          #end
+          </td>
+        </tr>
+      </table>
+    #end
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>

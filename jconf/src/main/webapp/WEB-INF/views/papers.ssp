@@ -36,23 +36,27 @@
 
     #if (user.role == cap.jeeves.jconf.ReviewerStatus)
       <h2>To Review.</h2>
-      <ul>
+      <table>
+          <tr>
+            <td><b>#</b></td>
+            <td><b>Title</b></td>
+            <td><b>Review Status</b></td>
+          </tr>
         #for (p <- reviewPapers)
-          <li><b><%= p.showTitle(ctxt) %></b><br>
-            #{
-                val authors = p.showAuthors(ctxt)
-              }#
-              #for (author <- authors)
-                <%= author.showName(ctxt) %><br>
-              #end
+          <tr>
+          <td><a href="/paper?id=<%= p.id %>"><%= p.id %></a></td>
+          <td><b><%= p.showTitle(ctxt) %></b><br></td>
+          <td>
               #if (p.showIsReviewedBy(ctxt, user))
                 <i>Reviewed</i>
               #else
                 <a href="">Submit Review</a>
               #end
-          </li>
+          </td>
+          </tr>
         #end
       </ul>
+      </table>
     #end
     </div>
 

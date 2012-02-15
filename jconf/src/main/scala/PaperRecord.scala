@@ -25,7 +25,7 @@ case class ReviewedBy (reviewer: Symbolic) extends PaperTag
 object Accepted extends PaperTag
 object EmptyTag extends PaperTag
 
-case class Title (name : String) extends JeevesRecord
+case class Title (title : String) extends JeevesRecord
 
 class PaperRecord( val id: Int = -1
                  , private var _title: Title = Title("Untitled")
@@ -65,7 +65,7 @@ class PaperRecord( val id: Int = -1
   def setTitle(name: Title) = _title = name
   def getTitle(): Symbolic =  mkSensitive(titleL, _title, Title("No permission"))
   def showTitle(ctxt: ConfContext): String =
-    (concretize(ctxt, getTitle ()).asInstanceOf[Title]).name
+    (concretize(ctxt, getTitle ()).asInstanceOf[Title]).title
 
   def getAuthors() : List[Symbolic] = {
     _authors.map(a => mkSensitive(_authorL, a, new ConfUser()))
@@ -103,6 +103,9 @@ class PaperRecord( val id: Int = -1
   def removeTag (tag : PaperTag) : Unit =
     _tags = _tags.filterNot(t => t.equals(tag))
   def hasTag (tag : Symbolic) : Formula = (getTags ()).has(tag)
+  def showTags (ctxt: ConfContext): List[PaperTag] = {
+    _tags.map(t => concretize(ctxt, t).asInstanceOf[PaperTag])
+  }
 
   /* Managing reviews. */
   private var reviewIds = 0;
