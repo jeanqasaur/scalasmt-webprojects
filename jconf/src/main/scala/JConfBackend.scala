@@ -135,8 +135,10 @@ object JConfBackend extends JeevesLib {
   }
 
   /* Searching. */
-  def getById(id: Int) = papers.find ((p: PaperRecord) => p.id == id)
-  def getByIds(ids: List[Int]) = ids.map(id => getById(id))
+  def getPaperById(id: Int): Option[PaperRecord] =
+    papers.find ((p: PaperRecord) => p.id == id)
+  def getPapersByIds(ids: List[Int]): List[Option[PaperRecord]] =
+    ids.map(id => getPaperById(id))
  
   def searchByTitle(title: String) = 
     papers.filter(_.title === Title(title))

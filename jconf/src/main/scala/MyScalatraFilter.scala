@@ -165,6 +165,24 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
     }
   }
 
+  // TODO: Edit review?
+  get("/paper") {
+    session.get("user") match {
+      case Some(u) =>
+        val user: ConfUser = u.asInstanceOf[ConfUser];
+        var paper: PaperRecord = new PaperRecord();
+        getPaperById(multiParams("id").head.toInt) match {
+          case Some(p) =>  paper = p
+          case None =>
+            println ("No paper found.");
+            ()
+        }
+        renderPage("paper.ssp"
+          , Map("paper" -> paper, "ctxt" -> getContext(user)))
+      case None => redirect("login")
+    }
+  }
+
   get("/edit_profile") {
     session.get("user") match {
       case Some(u) =>
