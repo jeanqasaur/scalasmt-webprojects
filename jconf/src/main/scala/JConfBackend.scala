@@ -3,70 +3,53 @@ package cap.jeeves.jconf
 import cap.scalasmt._
 import cap.jeeves._
 
+import org.squeryl.adapters.MySQLAdapter
+import org.squeryl.PrimitiveTypeMode._
+// import org.squeryl.customtypes.CustomTypesMode._
+// import org.squeryl.customtypes._
+import org.squeryl.Session
+import org.squeryl.SessionFactory
+
 import scala.collection.mutable.Map
 import scala.collection.mutable.Set
 
+import org.squeryl.Schema
+
 import Expr._
 
-object Util {
-  def addShutdownHook(body: => Unit) = 
-    Runtime.getRuntime.addShutdownHook(new Thread {
-      override def run { body }
-    })
-}
-
-object JConfBackend extends JeevesLib {
+object JConfBackend extends JeevesLib with Schema {
   class AccessError extends Exception
   class PermissionsError extends Exception
   class NoSuchUserError extends Exception
 
-  private val usercache = ".jconfusers.cache"
-  private val assignmentcache = ".jconfassignments.cache"
-  private val papercache = ".jconfpapers.cache"
-
-  private var users : Map[Username, ConfUser] = Map[Username, ConfUser]()
+  private val users = table[ConfUserRecord]
   private var assignments : Map[Int, Set[ConfUser]] = Map[Int, Set[ConfUser]]()
   private var papers : List[PaperRecord] = Nil
 
   private var actionQueue = 0
   private var confStage = Submission
 
-  def JConfBackend() {
-    /* TODO: Figure out if there is some way to log errors in deployed web
-       applications. */
-    try {
-      Persistence.readFromFile[Map[Username, ConfUser]](usercache);
-    } catch {
-      case e: Exception => ()
-    }
-    try {
-      Persistence.readFromFile[Map[Int, Set[ConfUser]]](assignmentcache);
-    } catch {
-      case e: Exception => ()
-    }
-    try {
-      Persistence.readFromFile[List[PaperRecord]](papercache)
-    } catch {
-      case e: Exception => ()
-    }
-  }
+  Class.forName("com.mysql.jdbc.Driver");
+  val dbUsername = "jeanyang";
+  val dbPassword = "scalasmt";
+  val dbConnection = "jdbc:mysql://mysql.csail.mit.edu/JConfDB";
+  SessionFactory.concreteFactory = Some(()=>
+     Session.create(
+       java.sql.DriverManager.getConnection(dbConnection, dbUsername, dbPassword)
+       , new MySQLAdapter))
 
   /* Making papers. */
+  private var _usercount = 0;
+  private def getUserUid (): Int = {
+    val count = _usercount;
+    _usercount = _usercount + 1;
+    count
+  }
   private var _papercount = 0;
   private def getPaperUid () : Int = {
     val count = _papercount;
     _papercount = _papercount + 1;
     count
-  }
-
-  private def writeObjects() {
-    println ("logging to file...");
-    if (actionQueue > 5) {
-      Persistence.writeToFile(users, usercache);
-      Persistence.writeToFile(assignments, assignmentcache);
-      Persistence.writeToFile(papers, papercache)
-      actionQueue = 0
-    } else actionQueue = actionQueue + 1
   }
 
   def getContext(user: ConfUser): ConfContext = new ConfContext(user, confStage)
@@ -82,9 +65,15 @@ object JConfBackend extends JeevesLib {
     vs.map(x => show[T](user, x))
   }
 
-  def addUser(newUser: ConfUser) = {
-    users += (newUser.username -> newUser)
-    writeObjects ()
+  def addUser(username: String
+    , name: String, password: String, role: UserStatus): ConfUser = {
+    val id = getUserUid ();
+    val user =
+      new ConfUser(id, Username(username), Name(name), password, role);
+    transaction {
+      val u = users.insert(new ConfUserRecord(id, username, name, password))
+      user
+    }
   }
 
   def addPaper(name : Title, authors : List[ConfUser], tags : List[PaperTag])
@@ -98,7 +87,6 @@ object JConfBackend extends JeevesLib {
       author => author.addSubmittedPaper(paper)
     }
 
-    writeObjects();
     paper
   }
  
@@ -114,7 +102,6 @@ object JConfBackend extends JeevesLib {
         assignments += (p.id -> reviewers)
     };
     reviewer.addReviewPaper(p);
-    writeObjects()
   }
   def isAssigned (p: PaperRecord, reviewer: ConfUser): Boolean = {
     assignments.get(p.id) match {
@@ -127,7 +114,6 @@ object JConfBackend extends JeevesLib {
     : PaperReview = {
     if (isAssigned (p, reviewer)) {
       val r = p.addReview(reviewer, rtext, score);
-      writeObjects();
       r
     } else {
       throw new PermissionsError        
@@ -148,18 +134,35 @@ object JConfBackend extends JeevesLib {
   
   def searchByTag(tag: PaperTag) = papers.filter(_.getTags().has(tag))
 
+ 
+  def record2User(u: ConfUserRecord): ConfUser = {
+    ConfUser(u.id, Username(u.username), Name(u.name), u.pwd, PublicStatus)
+  }
+
   /* More mundane logistical things. */
-  def getUserById(id: String): Option[ConfUser] = users.get(Username(id))
+  def getUserById(id: Int): Option[ConfUser] = {
+    // users.get(id)
+    transaction {
+      try {
+        val userRecord: Option[ConfUserRecord] = users.lookup(id)
+        userRecord match {
+          case Some(u) => Some(record2User(u))
+          case None => None
+        }
+      } catch {
+        case e: Exception => None
+      }
+    }
+  }
   def loginUser(id: String, password: String): Option[ConfUser] = {
-    users.get(Username(id)) match {
-      case Some(user) =>
-        // Stage should not matter...
-        val userCtxt = new ConfContext(user, Submission);
-        val pwd : Password = user.showPassword(userCtxt);
-        if (pwd.pwd.equals(password)) Some(user) else None
-      case None =>
-        println("user not found");
-        None
+    transaction {
+      val userRecord = from(users)(u =>
+        where(u.username like id)
+        select(u)).single;
+      val user = record2User(userRecord)
+      val userCtxt = new ConfContext(user, Submission);
+      val pwd : Password = user.showPassword(userCtxt);
+      if (pwd.pwd.equals(password)) Some(user) else None
     }
   }
 }

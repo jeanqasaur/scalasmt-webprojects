@@ -20,7 +20,7 @@ object Decision extends PaperStage
 object Public extends PaperStage
 
 sealed trait PaperTag extends JeevesRecord
-object NeedsReview extends PaperTag
+case class NeedsReview (reviewer: Symbolic) extends PaperTag
 case class ReviewedBy (reviewer: Symbolic) extends PaperTag
 object Accepted extends PaperTag
 object EmptyTag extends PaperTag
@@ -78,7 +78,7 @@ class PaperRecord( val id: Int = -1
   private def addTagPermission (tag : PaperTag) : Symbolic = {
     val level = mkLevel ();
     tag match {
-      case NeedsReview =>
+      case NeedsReview (reviewer) =>
         val canSee : Formula = isInternal && CONTEXT.stage === Review;
         policy (level, canSee, HIGH);
         policy (level, !canSee, LOW);
@@ -124,6 +124,9 @@ class PaperRecord( val id: Int = -1
   }
   def isReviewedBy(reviewer: ConfUser): Formula = {
     hasTag(ReviewedBy(reviewer))
+  }
+  def needsReviewBy(ctxt: ConfContext): Formula = {
+    hasTag(NeedsReview(ctxt.viewer))
   }
   def showIsReviewedBy(ctxt: ConfContext, reviewer: ConfUser): Boolean = {
     concretize(ctxt, isReviewedBy(reviewer))

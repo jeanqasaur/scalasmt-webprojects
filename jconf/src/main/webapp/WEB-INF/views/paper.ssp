@@ -39,7 +39,7 @@
           }#
           #for (tag <- tags)
             #match (tag)
-            #case(cap.jeeves.jconf.NeedsReview)
+            #case(cap.jeeves.jconf.NeedsReview(reviewer))
               Needs Review<br>
             #case(cap.jeeves.jconf.ReviewedBy(reviewer))
               Reviewed by<br>
@@ -58,7 +58,10 @@
             val reviews = paper.showReviews(ctxt)
           }#
           #for (review <- reviews)
-            review.showReviewer(ctxt).showName(ctxt)<br>
+            <a href="review?paperid=<%= paper.id %>?reviewid=<%= review.id %>">review.showReviewer(ctxt).showName(ctxt)</a><br>
+          #end
+          #if (paper.needsReviewBy(ctxt))
+            <a href="/review">Review Paper</a>
           #end
           </td>
         </tr>
