@@ -15,9 +15,7 @@ object TestUtil {
   def mkUser( userName : String, name: String
             , pwd: String, userStatus : UserStatus)
     : ConfUser = {
-    val u = new ConfUser(Username (userName), Name(name), pwd, userStatus);
-    addUser(u);
-    u
+    addUser(userName, name, pwd, userStatus)
   }
 
   // jconf users.

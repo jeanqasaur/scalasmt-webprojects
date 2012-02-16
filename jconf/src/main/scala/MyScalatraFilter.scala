@@ -15,11 +15,8 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
   def emptyName = Title("")
 
   def mkUser( userName : String, name: String
-            , pwd: String, userStatus : UserStatus)
-    : ConfUser = {
-    val u = new ConfUser(Username (userName), Name(name), pwd, userStatus);
-    addUser(u);
-    u
+            , pwd: String, userStatus : UserStatus): ConfUser = {
+    addUser(userName, name, pwd, userStatus)
   }
 
   // Add some dummy users.
@@ -85,9 +82,7 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
 
     // Make a new user and add them to the database.
     val u =
-      new ConfUser( Username(params("username")), Name(params("yourname"))
-                  , params("password"), role );
-    addUser(u);
+      addUser(params("username"), params("yourname"), params("password"), role);
     session("user") = u;
 
     renderPage("index.ssp"
@@ -154,7 +149,7 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
         if (!(params.exists(_ == "id"))) {
           user = curUser;
         } else {
-          getUserById(params("id")) match {
+          getUserById(params("id").toInt) match {
             case Some(idUser) => user = idUser
             case None => ()
           }
@@ -179,6 +174,16 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
         }
         renderPage("paper.ssp"
           , Map("paper" -> paper, "ctxt" -> getContext(user)))
+      case None => redirect("login")
+    }
+  }
+
+  get("/review") {
+    session.get("user") match {
+      case Some(u) =>
+        val user: ConfUser = u.asInstanceOf[ConfUser];
+        renderPage("review.ssp"
+          , Map("ctxt" -> getContext(user)))
       case None => redirect("login")
     }
   }

@@ -10,28 +10,18 @@ import cap.scalasmt._
 import JConfBackend._
 
 sealed trait UserStatus extends JeevesRecord
-object PublicStatus extends UserStatus
-object AuthorStatus extends UserStatus
-object ReviewerStatus extends UserStatus
-object PCStatus extends UserStatus
-
-/*
-trait UserID {
-  var count = 0
-  def genID() : String = {
-    val curID = count;
-    count = count + 1;
-    "id" + curID.toString
-  }
-}
-*/
+case object PublicStatus extends UserStatus
+case object AuthorStatus extends UserStatus
+case object ReviewerStatus extends UserStatus
+case object PCStatus extends UserStatus
 
 /* Conference User */
 case class Username (name: String) extends JeevesRecord
 case class Name (name: String) extends JeevesRecord
 case class Password (val pwd: String) extends JeevesRecord
 case class ConfUser(
-  val username: Username = Username("-")
+    val id: Int = -1
+  , val username: Username = Username("-")
   , private var _name: Name = new Name("")
   , private var _password: String = ""
   , val role: UserStatus = PublicStatus
@@ -39,6 +29,8 @@ case class ConfUser(
   , private var _reviewPapers: List[PaperRecord] = Nil
   , private var _reviews: List[PaperReview] = Nil )
   extends JeevesRecord {
+    def this() = this(-1, Username("-"), Name(""), "", PublicStatus, Nil, Nil, Nil)
+
     /*************/
     /* Policies. */
     /*************/
@@ -94,4 +86,10 @@ case class ConfUser(
     def showPassword (ctxt: ConfContext): Password = {
       concretize(ctxt, getPassword ()).asInstanceOf[Password]
     }
+
+    /*
+    override def equals(other: ConfUser): Boolean = {
+      this.id == other.id
+    }
+    */
   }
