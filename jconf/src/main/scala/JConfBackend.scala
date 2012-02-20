@@ -17,38 +17,67 @@ import org.squeryl.Schema
 
 import Expr._
 
-object JConfBackend extends JeevesLib with Schema {
+object JConfBackend extends JeevesLib {
   class AccessError extends Exception
   class PermissionsError extends Exception
   class NoSuchUserError extends Exception
 
-  private val users = table[ConfUserRecord]
-  private var assignments : Map[Int, Set[ConfUser]] = Map[Int, Set[ConfUser]]()
-  private var papers : List[PaperRecord] = Nil
+  println("JConfBackend initialization");
 
-  private var actionQueue = 0
-  private var confStage = Submission
+  /* Database initialization. */
+  private val TEST = true;
 
   Class.forName("com.mysql.jdbc.Driver");
   val dbUsername = "jeanyang";
   val dbPassword = "scalasmt";
-  val dbConnection = "jdbc:mysql://mysql.csail.mit.edu/JConfDB";
+  val dbConnection = {
+    if (TEST)
+      "jdbc:mysql://mysql.csail.mit.edu/JYTestDB"
+    else
+      "jdbc:mysql://mysql.csail.mit.edu/JeevesConfDB"
+  }
   SessionFactory.concreteFactory = Some(()=>
      Session.create(
        java.sql.DriverManager.getConnection(dbConnection, dbUsername, dbPassword)
        , new MySQLAdapter))
+  // If we are testing, initialize tables.
+  if (TEST) {
+    try {
+      transaction {
+        JConfTables.create;
+      }
+    } catch {
+      case e: Exception =>
+        try {
+          transaction {
+            JConfTables.users.deleteWhere(u => u.id.~ > -1)
+            JConfTables.assignments.deleteWhere(a => a.reviewerId.~ > -1)
+            JConfTables.reviews.deleteWhere(r => r.id.~ >= -1)
+            JConfTables.tags.deleteWhere(t => t.paperId.~ > -1)
+          }
+        }
+    }
+  }
+
+  private var confStage = Submission
 
   /* Making papers. */
-  private var _usercount = 0;
+  private var _usercount = 1;
   private def getUserUid (): Int = {
     val count = _usercount;
     _usercount = _usercount + 1;
     count
   }
-  private var _papercount = 0;
+  private var _papercount = 1;
   private def getPaperUid () : Int = {
     val count = _papercount;
     _papercount = _papercount + 1;
+    count
+  }
+  private var _reviewcount = 1;
+  def getReviewUid (): Int = {
+    val count = _reviewcount;
+    _reviewcount = _reviewcount + 1;
     count
   }
 
@@ -71,7 +100,10 @@ object JConfBackend extends JeevesLib with Schema {
     val user =
       new ConfUser(id, Username(username), Name(name), password, role);
     transaction {
-      val u = users.insert(new ConfUserRecord(id, username, name, password))
+      val u =
+        JConfTables.users.insert(
+          new ConfUserRecord(
+            id, username, name, password, Conversions.role2Field(role)))
       user
     }
   }
@@ -79,8 +111,10 @@ object JConfBackend extends JeevesLib with Schema {
   def addPaper(name : Title, authors : List[ConfUser], tags : List[PaperTag])
       : PaperRecord = {
     val uid = getPaperUid ();
-    val paper = new PaperRecord(uid, name, authors, tags);
-    papers = paper::papers;
+    val paper = new PaperRecord(uid, name, authors);
+    // TODO: Add tags
+    JConfTables.papers = paper::JConfTables.papers;
+    tags.foreach(t => paper.addTag(t))
 
     // For each author, add this paper to their submitted papers.
     authors.foreach {
@@ -92,22 +126,19 @@ object JConfBackend extends JeevesLib with Schema {
  
   /* Reviews. */
   def assignReview (p: PaperRecord, reviewer: ConfUser): Unit = {
+    // TODO: Where do we want to have integrity policies about this manifest?
     if (!((reviewer.role == ReviewerStatus) || (reviewer.role == PCStatus)))
       return;
-    assignments.get(p.id) match {
-      case Some(reviewers) => reviewers += reviewer
-      case None =>
-        val reviewers = Set[ConfUser]();
-        reviewers += reviewer;
-        assignments += (p.id -> reviewers)
-    };
-    reviewer.addReviewPaper(p);
+    transaction {
+      JConfTables.assignments.insert(new Assignment(reviewer.id, p.id))
+    }
   }
   def isAssigned (p: PaperRecord, reviewer: ConfUser): Boolean = {
-    assignments.get(p.id) match {
-      case Some(reviewers) => reviewers.contains(reviewer)
-      case None => false
-    }
+    val c: Long = from(JConfTables.assignments)(a =>
+      where((a.paperId === p.id.~) and (a.reviewerId === reviewer.id.~))
+      compute(count)
+    )
+    c > 0
   }
   def addReview
     (p: PaperRecord, reviewer: ConfUser, rtext: String, score: Int)
@@ -122,29 +153,29 @@ object JConfBackend extends JeevesLib with Schema {
 
   /* Searching. */
   def getPaperById(id: Int): Option[PaperRecord] =
-    papers.find ((p: PaperRecord) => p.id == id)
+    JConfTables.papers.find ((p: PaperRecord) => p.id == id)
   def getPapersByIds(ids: List[Int]): List[Option[PaperRecord]] =
     ids.map(id => getPaperById(id))
  
   def searchByTitle(title: String) = 
-    papers.filter(_.title === Title(title))
+    JConfTables.papers.filter(_.title === Title(title))
   
   def searchByAuthor(author: ConfUser) = 
-    papers.filter(_.getAuthors().has(author))
+    JConfTables.papers.filter(_.getAuthors().has(author))
   
-  def searchByTag(tag: PaperTag) = papers.filter(_.getTags().has(tag))
+  def searchByTag(tag: PaperTag) = JConfTables.papers.filter(_.getTags().has(tag))
 
  
   def record2User(u: ConfUserRecord): ConfUser = {
-    ConfUser(u.id, Username(u.username), Name(u.name), u.pwd, PublicStatus)
+    ConfUser(
+        u.id, Username(u.username), Name(u.name), u.pwd
+      , Conversions.field2Role(u.role))
   }
-
   /* More mundane logistical things. */
   def getUserById(id: Int): Option[ConfUser] = {
-    // users.get(id)
     transaction {
       try {
-        val userRecord: Option[ConfUserRecord] = users.lookup(id)
+        val userRecord: Option[ConfUserRecord] = JConfTables.users.lookup(id)
         userRecord match {
           case Some(u) => Some(record2User(u))
           case None => None
@@ -156,7 +187,7 @@ object JConfBackend extends JeevesLib with Schema {
   }
   def loginUser(id: String, password: String): Option[ConfUser] = {
     transaction {
-      val userRecord = from(users)(u =>
+      val userRecord = from(JConfTables.users)(u =>
         where(u.username like id)
         select(u)).single;
       val user = record2User(userRecord)

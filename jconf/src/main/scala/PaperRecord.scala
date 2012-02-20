@@ -6,6 +6,9 @@ package cap.jeeves.jconf
  */
 
 import cap.scalasmt._
+
+import org.squeryl.PrimitiveTypeMode._
+
 import scala.collection.immutable.List;
 import scala.collection.mutable.Map;
 
@@ -20,8 +23,8 @@ object Decision extends PaperStage
 object Public extends PaperStage
 
 sealed trait PaperTag extends JeevesRecord
-case class NeedsReview (reviewer: Symbolic) extends PaperTag
-case class ReviewedBy (reviewer: Symbolic) extends PaperTag
+case class NeedsReview (reviewer: ConfUser) extends PaperTag
+case class ReviewedBy (reviewer: ConfUser) extends PaperTag
 object Accepted extends PaperTag
 object EmptyTag extends PaperTag
 
@@ -29,9 +32,7 @@ case class Title (title : String) extends JeevesRecord
 
 class PaperRecord( val id: Int = -1
                  , private var _title: Title = Title("Untitled")
-                 , private var _authors: List[ConfUser] = Nil
-                 , private var _tags: List[PaperTag] = Nil
-                 , private var _reviews: List[PaperReview] = Nil )
+                 , private var _authors: List[ConfUser] = Nil )
                extends JeevesRecord with Serializable {
   /**************/
   /* Variables. */
@@ -98,29 +99,44 @@ class PaperRecord( val id: Int = -1
     mkSensitive(level, tag, EmptyTag)
   }
 
-  def addTag (newtag: PaperTag) = _tags = newtag::_tags
-  def getTags (): List[Symbolic] = _tags.map(t => addTagPermission(t))
-  def removeTag (tag : PaperTag) : Unit =
-    _tags = _tags.filterNot(t => t.equals(tag))
+  def addTag (newtag: PaperTag) = {
+    val (tag, tagVal) = Conversions.tag2Field(newtag);
+    transaction {
+      JConfTables.tags.insert(new PaperTagRecord(id, tag, tagVal))
+    }
+  }
+  def getTags (): List[Symbolic] = {
+    transaction {
+      val tags: Iterable[PaperTagRecord] = from(JConfTables.tags)(t =>
+        where(t.paperId === id.~)
+        select(t)
+      );
+      tags.toList.map(
+        t => addTagPermission(Conversions.field2Tag(t.tagId, t.tagData)))
+    }
+  }
+  def removeTag (tag : PaperTag) : Unit = {
+    val (tagId, tagVal) = Conversions.tag2Field(tag);
+    transaction {
+      JConfTables.tags.deleteWhere(t =>
+        (t.paperId === id.~) and (t.tagId === tagId.~)
+        and (t.tagData === tagVal.~))
+    }
+  }
   def hasTag (tag : Symbolic) : Formula = (getTags ()).has(tag)
   def showTags (ctxt: ConfContext): List[PaperTag] = {
-    _tags.map(t => concretize(ctxt, t).asInstanceOf[PaperTag])
+    (getTags ()).map(t => concretize(ctxt, t).asInstanceOf[PaperTag])
   }
 
-  /* Managing reviews. */
-  private var reviewIds = 0;
-  private def getReviewId () : Int = {
-    val id = reviewIds;
-    reviewIds = reviewIds + 1;
-    id
-  }
-  
   def addReview (reviewer: ConfUser, body: String, score: Int): PaperReview = {
-    val reviewId = getReviewId();
-    val r = new PaperReview(reviewId, reviewer, body, score);
-    _reviews = r::_reviews;
-    addTag(ReviewedBy(reviewer))
-    r
+    transaction {
+      val reviewRecord: PaperReviewRecord =
+        JConfTables.reviews.insert(
+          new PaperReviewRecord(getReviewUid (), reviewer.id, body, score))
+      val r = new PaperReview(reviewRecord.id, reviewer, body, score);
+      addTag(ReviewedBy(reviewer))
+      r
+    }
   }
   def isReviewedBy(reviewer: ConfUser): Formula = {
     hasTag(ReviewedBy(reviewer))
@@ -141,7 +157,20 @@ class PaperRecord( val id: Int = -1
             , LOW);
     mkSensitive(level, r, new PaperReview())
   }
-  def getReviews (): List[Symbolic] = _reviews.map(r => addReviewPolicy(r))
+  def getReviews (): List[Symbolic] = {
+    transaction {
+      val reviews: Iterable[PaperReviewRecord] = from(JConfTables.reviews)(r =>
+        where(r.id.~ === id)
+        select(r)
+      )
+      reviews.toList.map(r =>
+        getUserById(r.reviewer) match {
+          case Some(reviewer) =>
+            addReviewPolicy(new PaperReview(r.id, reviewer, r.body, r.score))
+          case None => throw new NoSuchUserError
+        })
+    }
+  }
   def showReviews (ctxt: ConfContext): List[PaperReview] = {
     (getReviews ()).map(r => concretize(ctxt, r).asInstanceOf[PaperReview])
   }

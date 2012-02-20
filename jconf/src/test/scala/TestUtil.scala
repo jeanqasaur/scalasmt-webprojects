@@ -13,8 +13,7 @@ import scala.util.Random
 
 object TestUtil {
   def mkUser( userName : String, name: String
-            , pwd: String, userStatus : UserStatus)
-    : ConfUser = {
+            , pwd: String, userStatus : UserStatus): ConfUser = {
     addUser(userName, name, pwd, userStatus)
   }
 

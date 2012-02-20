@@ -29,8 +29,6 @@ case class ConfUser(
   , private var _reviewPapers: List[PaperRecord] = Nil
   , private var _reviews: List[PaperReview] = Nil )
   extends JeevesRecord {
-    def this() = this(-1, Username("-"), Name(""), "", PublicStatus, Nil, Nil, Nil)
-
     /*************/
     /* Policies. */
     /*************/
@@ -86,10 +84,4 @@ case class ConfUser(
     def showPassword (ctxt: ConfContext): Password = {
       concretize(ctxt, getPassword ()).asInstanceOf[Password]
     }
-
-    /*
-    override def equals(other: ConfUser): Boolean = {
-      this.id == other.id
-    }
-    */
   }
