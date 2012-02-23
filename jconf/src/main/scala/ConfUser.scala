@@ -59,8 +59,7 @@ case class ConfUser(
             where(a.authorId.~ === uid.toInt and a.paperId.~ === p.id)
             select(p))
         submittedPapers.toList.map(p =>
-          mkSensitive(
-              selfL, p.getPaperRecord(), new PaperRecord()))
+          mkSensitive(selfL, p.getPaperRecord(), defaultPaper))
       }
     }
     def showSubmittedPapers (ctxt: ConfContext): List[PaperRecord] = {

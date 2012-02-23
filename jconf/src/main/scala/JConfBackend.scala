@@ -26,6 +26,8 @@ object JConfBackend extends JeevesLib with Serializable {
 
   /* Database initialization. */
   private val TEST = true;
+  val defaultUser = new ConfUser ()
+  val defaultPaper = new PaperRecord ()
 
   Class.forName("com.mysql.jdbc.Driver");
   val dbUsername = "jeanyang";

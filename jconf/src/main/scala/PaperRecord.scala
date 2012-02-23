@@ -46,23 +46,24 @@ class PaperRecord( val uid: BigInt = -1
   /*************/
   /* Policies. */
   /*************/
-  private def isAuthor(authors: List[Symbolic]): Formula =
-    authors.hasFormula((a: Symbolic) => a~'uid === CONTEXT.viewer~'uid);
+  private val isAuthor: Formula =
+    (getAuthors ()).hasFormula((a: Symbolic) => a~'uid === CONTEXT.viewer~'uid);
   private val isInternal: Formula =
     (CONTEXT.viewer.role === ReviewerStatus) ||
     (CONTEXT.viewer.role === PCStatus)
   private val authorCanSeeReview: Formula =
     (CONTEXT.stage === Rebuttal) || (CONTEXT.stage === Decision)
-  private def isPublic (curtags : List[Symbolic]) : Formula =
-    (CONTEXT.stage === Public) && curtags.has(Accepted)
+  private def isPublic : Formula =
+    (CONTEXT.stage === Public) && (getTags ()).has(Accepted)
 
   policy ( _authorL
-         , !(isAuthor(getAuthors ())
+         , !(isAuthor
            || (isInternal && (CONTEXT.stage === Decision))
-           || isPublic(getTags ()))
+           || isPublic)
          , LOW);
   policy (titleL
-    , !(isAuthor(getAuthors ()) || isInternal || isPublic(getTags ())), LOW);
+    , !(isAuthor
+      || isInternal || isPublic), LOW);
 
   /************************/
   /* Getters and setters. */
@@ -74,8 +75,7 @@ class PaperRecord( val uid: BigInt = -1
     (concretize(ctxt, getTitle ()).asInstanceOf[Title]).title
 
   def getAuthors() : List[Symbolic] = {
-    _authors.map(author =>
-      mkSensitive(_authorL, author, new ConfUser()))
+    _authors.map(author => mkSensitive(_authorL, author, defaultUser))
   }
   def showAuthors(ctxt: ConfContext): List[ConfUser] = {
     (getAuthors ()).map(a => concretize(ctxt, a).asInstanceOf[ConfUser])
@@ -159,7 +159,7 @@ class PaperRecord( val uid: BigInt = -1
     policy( level
             , !((CONTEXT.stage === Review && (hasTag (reviewerTag))) ||
                 ((CONTEXT.stage === Decision) && isInternal) ||
-                (isAuthor(getAuthors ()) && authorCanSeeReview))
+                (isAuthor && authorCanSeeReview))
             , LOW);
     mkSensitive(level, r, new PaperReview())
   }

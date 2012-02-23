@@ -14,6 +14,7 @@ import scala.util.Random
 import TestUtil._
 
 class TestConfUser extends FunSuite {
+  /*
   test ("default user") {
     expect(new ConfUser()) { new ConfUser() }
   }
@@ -42,7 +43,6 @@ class TestConfUser extends FunSuite {
     }
   } 
 
-  /*
   test ("submitted paper visibility - author") {
     expect(true) {
       concretize(
@@ -51,7 +51,6 @@ class TestConfUser extends FunSuite {
           p~'uid === paper0.uid));
     }
   }
-  */
 
   test ("submitted paper visibility - nonauthor") {
     expect(false) {
@@ -60,14 +59,16 @@ class TestConfUser extends FunSuite {
           p~'uid === paper0.uid));
     }
   }
+  */
 
+  /*
   test ("submitted paper exists in list") {
     expect(paper0.uid) {
       concretize(getContext(author0), (author0.getSubmittedPapers ()).head~'uid);
     }
   }
+  */
 
-  /*
   test ("submitted paper title") {
     println("submitted paper title");
     expect(Title(paper0Name)) {
@@ -75,8 +76,8 @@ class TestConfUser extends FunSuite {
         getContext(author0), ((author0.getSubmittedPapers ()).head).title);
     }
   }
-  */
 
+  /*
   test ("showTitle with login user") {
     val u = loginUser("author0", "a0p");
     expect("my paper") {
@@ -88,4 +89,5 @@ class TestConfUser extends FunSuite {
       }
     }
   }
+  */
 }
