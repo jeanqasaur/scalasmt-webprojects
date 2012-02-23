@@ -7,6 +7,8 @@ package cap.jeeves.jconf
 
 import cap.scalasmt._
 
+import org.squeryl.PrimitiveTypeMode._
+
 import JConfBackend._
 
 sealed trait UserStatus extends JeevesRecord
@@ -20,14 +22,11 @@ case class Username (name: String) extends JeevesRecord
 case class Name (name: String) extends JeevesRecord
 case class Password (val pwd: String) extends JeevesRecord
 case class ConfUser(
-    val id: Int = -1
+    val uid: BigInt = -1
   , val username: Username = Username("-")
   , private var _name: Name = new Name("")
   , private var _password: String = ""
-  , val role: UserStatus = PublicStatus
-  , private var _submittedPapers: List[PaperRecord] = Nil
-  , private var _reviewPapers: List[PaperRecord] = Nil
-  , private var _reviews: List[PaperReview] = Nil )
+  , val role: UserStatus = PublicStatus )
   extends JeevesRecord {
     /*************/
     /* Policies. */
@@ -38,6 +37,7 @@ case class ConfUser(
 
     private val selfL = mkLevel ();
     policy (selfL, !(CONTEXT.viewer.username === username), LOW);
+    def isSelf(): Formula = selfL
 
     // For now, everyone can see the name.
     private val nameL = mkLevel ();
@@ -52,15 +52,26 @@ case class ConfUser(
     }
 
     // Submitted papers.
-    def addSubmittedPaper (p: PaperRecord): Unit =
-      _submittedPapers = p::_submittedPapers
-    def getSubmittedPapers (): List[Symbolic] =
-      _submittedPapers.map(p => mkSensitive(selfL, p, new PaperRecord()))
+    def getSubmittedPapers (): List[Symbolic] = {
+      transaction {
+        val submittedPapers: Iterable[PaperItemRecord] =
+          from(JConfTables.authors, JConfTables.papers)((a, p) =>
+            where(a.authorId.~ === uid.toInt and a.paperId.~ === p.id)
+            select(p))
+        println("papers --")
+        submittedPapers.toList.map(p => println(p.id))
+        println("--")
+        submittedPapers.toList.map(p =>
+          mkSensitive(
+              selfL, p.getPaperRecord(), new PaperRecord()))
+      }
+    }
     def showSubmittedPapers (ctxt: ConfContext): List[PaperRecord] = {
       (getSubmittedPapers ()).map(
         p => concretize(ctxt, p).asInstanceOf[PaperRecord])
     }
 
+    /*
     // Papers to review.
     def addReviewPaper (r: PaperRecord): Unit = _reviewPapers = r::_reviewPapers
     def getReviewPapers (): List[Symbolic] =
@@ -76,6 +87,7 @@ case class ConfUser(
     def showReviews (ctxt: ConfContext): List[PaperReview] = {
       (getReviews ()).map(r => concretize(ctxt, r).asInstanceOf[PaperReview])
     }
+    */
 
     // Password.
     def setPassword (p: String) = _password = p
@@ -83,5 +95,15 @@ case class ConfUser(
       mkSensitive(selfL, Password(_password), Password("default"))
     def showPassword (ctxt: ConfContext): Password = {
       concretize(ctxt, getPassword ()).asInstanceOf[Password]
+    }
+
+    def getConfUserRecord(): ConfUserRecord = {
+      new ConfUserRecord(
+          uid.toInt, username.name, _name.name, _password
+        , Conversions.role2Field(role))
+      // Persistence.serialize(this)
+    }
+    def debugPrint(): Unit = {
+      println("ConfUser(id=" + uid + ",username=" + username + ")")
     }
   }

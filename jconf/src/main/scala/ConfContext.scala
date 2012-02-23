@@ -10,5 +10,5 @@ import scala.collection.mutable.Map;
 
 import JConfBackend._
 
-case class ConfContext( viewer : ConfUser
-                      , stage  : PaperStage ) extends JeevesRecord
+case class ConfContext( viewer  : ConfUser
+                      , stage   : PaperStage ) extends JeevesRecord
