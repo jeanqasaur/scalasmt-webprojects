@@ -25,8 +25,8 @@ object Conversions {
 
   def tag2Field(tag: PaperTag): (Int, Int) = {
     tag match {
-      case NeedsReview(reviewer)  => (1, reviewer.id)
-      case ReviewedBy(reviewer)   => (2, reviewer.id)
+      case NeedsReview(reviewer)  => (1, reviewer.uid.toInt)
+      case ReviewedBy(reviewer)   => (2, reviewer.uid.toInt)
       case Accepted               => (3, -1)
       case EmptyTag               => (4, -1)
     }

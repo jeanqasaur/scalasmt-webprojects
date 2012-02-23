@@ -17,7 +17,7 @@ import org.squeryl.Schema
 
 import Expr._
 
-object JConfBackend extends JeevesLib {
+object JConfBackend extends JeevesLib with Serializable {
   class AccessError extends Exception
   class PermissionsError extends Exception
   class NoSuchUserError extends Exception
@@ -50,10 +50,12 @@ object JConfBackend extends JeevesLib {
       case e: Exception =>
         try {
           transaction {
-            JConfTables.users.deleteWhere(u => u.id.~ > -1)
             JConfTables.assignments.deleteWhere(a => a.reviewerId.~ > -1)
+            JConfTables.authors.deleteWhere(u => u.paperId.~ > -1)
+            JConfTables.papers.deleteWhere(p => p.id.~ > -1)
             JConfTables.reviews.deleteWhere(r => r.id.~ >= -1)
             JConfTables.tags.deleteWhere(t => t.paperId.~ > -1)
+            JConfTables.users.deleteWhere(u => u.id.~ > -1)
           }
         }
     }
@@ -81,7 +83,8 @@ object JConfBackend extends JeevesLib {
     count
   }
 
-  def getContext(user: ConfUser): ConfContext = new ConfContext(user, confStage)
+  def getContext(user: ConfUser): ConfContext =
+    new ConfContext(user, confStage)
   def show[T](ctxt: ConfContext, v: Symbolic):T = {
     concretize(ctxt, v).asInstanceOf[T]
   }
@@ -100,28 +103,22 @@ object JConfBackend extends JeevesLib {
     val user =
       new ConfUser(id, Username(username), Name(name), password, role);
     transaction {
-      val u =
-        JConfTables.users.insert(
-          new ConfUserRecord(
-            id, username, name, password, Conversions.role2Field(role)))
+      val u = JConfTables.users.insert(user.getConfUserRecord())
       user
     }
   }
 
-  def addPaper(name : Title, authors : List[ConfUser], tags : List[PaperTag])
+  def addPaper(name : String, authors : List[ConfUser], tags : List[PaperTag])
       : PaperRecord = {
     val uid = getPaperUid ();
-    val paper = new PaperRecord(uid, name, authors);
-    // TODO: Add tags
-    JConfTables.papers = paper::JConfTables.papers;
-    tags.foreach(t => paper.addTag(t))
-
-    // For each author, add this paper to their submitted papers.
-    authors.foreach {
-      author => author.addSubmittedPaper(paper)
+    transaction {
+      // TODO: Make sure this is unique.
+      val paper = new PaperRecord(uid, Title(name), authors)
+      val paperRecord =
+        JConfTables.papers.insert(paper.getPaperItemRecord())
+      tags.foreach(t => paper.addTag(t))
+      paper
     }
-
-    paper
   }
  
   /* Reviews. */
@@ -130,12 +127,14 @@ object JConfBackend extends JeevesLib {
     if (!((reviewer.role == ReviewerStatus) || (reviewer.role == PCStatus)))
       return;
     transaction {
-      JConfTables.assignments.insert(new Assignment(reviewer.id, p.id))
+      JConfTables.assignments.insert(
+        new Assignment(reviewer.uid.toInt, p.uid.toInt))
     }
   }
   def isAssigned (p: PaperRecord, reviewer: ConfUser): Boolean = {
     val c: Long = from(JConfTables.assignments)(a =>
-      where((a.paperId === p.id.~) and (a.reviewerId === reviewer.id.~))
+      where((a.paperId === p.uid.toInt.~)
+        and (a.reviewerId === reviewer.uid.toInt.~))
       compute(count)
     )
     c > 0
@@ -152,32 +151,42 @@ object JConfBackend extends JeevesLib {
   }
 
   /* Searching. */
-  def getPaperById(id: Int): Option[PaperRecord] =
-    JConfTables.papers.find ((p: PaperRecord) => p.id == id)
+  def allPapers(): List[PaperRecord] = {
+    transaction {
+      val paperRecords = from(JConfTables.papers)(p => select(p)).toList;
+      println("getting all papers");
+      paperRecords.map(r => println("all papers: " + r.id));
+      paperRecords.map(r => r.getPaperRecord())
+    }
+  }
+  def getPaperById(id: Int): Option[PaperRecord] = {
+    transaction {
+      JConfTables.papers.lookup(id) match {
+        case Some(paperRecord) =>
+          Some(paperRecord.getPaperRecord())
+        case None => None
+      }
+    }
+  }
   def getPapersByIds(ids: List[Int]): List[Option[PaperRecord]] =
     ids.map(id => getPaperById(id))
- 
+ /*
   def searchByTitle(title: String) = 
-    JConfTables.papers.filter(_.title === Title(title))
-  
+    allPapers().filter(_.title === Title(title))
+ */
   def searchByAuthor(author: ConfUser) = 
-    JConfTables.papers.filter(_.getAuthors().has(author))
+    allPapers().filter(_.getAuthors().has(author))
   
-  def searchByTag(tag: PaperTag) = JConfTables.papers.filter(_.getTags().has(tag))
-
- 
-  def record2User(u: ConfUserRecord): ConfUser = {
-    ConfUser(
-        u.id, Username(u.username), Name(u.name), u.pwd
-      , Conversions.field2Role(u.role))
+  def searchByTag(tag: PaperTag) = {
+    allPapers().filter(_.getTags().has(tag))
   }
-  /* More mundane logistical things. */
+ 
   def getUserById(id: Int): Option[ConfUser] = {
     transaction {
       try {
         val userRecord: Option[ConfUserRecord] = JConfTables.users.lookup(id)
         userRecord match {
-          case Some(u) => Some(record2User(u))
+          case Some(u) => Some(u.getConfUser())
           case None => None
         }
       } catch {
@@ -190,8 +199,8 @@ object JConfBackend extends JeevesLib {
       val userRecord = from(JConfTables.users)(u =>
         where(u.username like id)
         select(u)).single;
-      val user = record2User(userRecord)
-      val userCtxt = new ConfContext(user, Submission);
+      val user = userRecord.getConfUser()
+      val userCtxt = new ConfContext(user, confStage);
       val pwd : Password = user.showPassword(userCtxt);
       if (pwd.pwd.equals(password)) Some(user) else None
     }

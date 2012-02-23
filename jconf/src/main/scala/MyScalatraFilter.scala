@@ -12,7 +12,7 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
   val path = "/WEB-INF/views/"
   val title = "jeeves social net"
   val paperStage = Submission
-  def emptyName = Title("")
+  def emptyName = ""
 
   def mkUser( userName : String, name: String
             , pwd: String, userStatus : UserStatus): ConfUser = {
@@ -28,11 +28,11 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
     mkUser("kuat", "Kuat Yessenov", "kuat", ReviewerStatus);
 
   // Add some dummy papers.
-  val paper0Name = Title("A Language for Automatically Enforcing Privacy");
+  val paper0Name = "A Language for Automatically Enforcing Privacy";
   val paper0 = addPaper(paper0Name, List(authorJean), Nil);
   assignReview(paper0, reviewerKuat);
 
-  val paper1Name = Title("Matchmaker");
+  val paper1Name = "Matchmaker";
   val paper1 = addPaper(paper1Name, List(reviewerKuat), Nil);
   assignReview(paper1, authorJean);
 
@@ -124,7 +124,8 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
           , Map(
             "user" -> user, "ctxt" -> ctxt
           , "submittedPapers" -> user.showSubmittedPapers(ctxt)
-          , "reviewPapers" -> user.showReviewPapers(ctxt)))
+        ))
+          // TODO: , "reviewPapers" -> user.showReviewPapers(ctxt)))
       case None => redirect("login")
     }
   }

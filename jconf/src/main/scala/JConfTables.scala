@@ -1,5 +1,7 @@
 package cap.jeeves.jconf
 
+import cap.scalasmt._
+
 import org.squeryl.KeyedEntity
 import org.squeryl.adapters.MySQLAdapter
 import org.squeryl.PrimitiveTypeMode._
@@ -8,6 +10,8 @@ import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.Schema
 import org.squeryl.Session
 import org.squeryl.SessionFactory
+
+import JConfBackend._
 
 object UserStatusField extends Enumeration {
   type UserStatusField = Value
@@ -24,16 +28,43 @@ class ConfUserRecord(
   , val pwd: String
   , val role: Int
   ) extends KeyedEntity[Int] {
-
+  def getConfUser() = {
+    new ConfUser(
+      id, Username(username), Name(name), pwd, Conversions.field2Role(role))
+    // Persistence.deserialize[ConfUser](item)
+  }
 }
 
 class Assignment(val reviewerId: Int, val paperId: Int);
 
-class PaperItemRecord(
-    val id: Int
-  , val title: String
-  ) { // extends KeyedEntity[Int] {
-  def this() = this(-1, "")
+class PaperItemRecord( val id: Int, val title: String)
+  extends KeyedEntity[Int] {
+  private def getAuthors(): List[ConfUser] = {
+   transaction {
+      val authors: Iterable[PaperAuthorRecord] = from(JConfTables.authors)(a =>
+        where(a.paperId === id.~)
+        select(a)
+      )
+      authors.toList.map(a =>
+        getUserById(a.authorId) match {
+          case Some(author) => author
+          case None => throw new NoSuchUserError
+        })
+    }
+  }
+  def getPaperRecord() = {
+    new PaperRecord(id, Title(title), getAuthors())
+    // Persistence.deserialize[PaperRecord](item)
+  }
+}
+
+class PaperAuthorRecord(
+    val paperId: Int
+  , val authorId: Int ) {
+  def debugPrint():Unit = {
+    println(
+      "PaperAuthorRecord(paperId=" + paperId + ",authorId=" + authorId + ")")
+  }
 }
 
 class PaperReviewRecord(
@@ -43,13 +74,7 @@ class PaperReviewRecord(
   , val score: Int ) extends KeyedEntity[Int] {
 }
 
-class PaperTagRecord(
-    val paperId: Int
-  , val tagId: Int
-  , val tagData: Int) {
-  def this() = this(-1, -1, -1)
-  
-} 
+class PaperTagRecord(val paperId: Int, val tagId: Int, val tagData: Int)
 
 object JConfTables extends Schema {
   val users = table[ConfUserRecord]("ConfUsers")
@@ -64,7 +89,16 @@ object JConfTables extends Schema {
     , a.paperId     is(indexed)
   ))
 
-  var papers: List[PaperRecord] = Nil
+  var papers = table[PaperItemRecord]
+  on(papers)(a => declare(
+      a.id      is(indexed, unique)
+  ))
+
+  val authors = table[PaperAuthorRecord]
+  on(authors)(a => declare(
+      a.paperId   is(indexed)
+    , a.authorId  is(indexed)
+  ))
 
   // Tables having to do with reviews.
   val reviews = table[PaperReviewRecord]

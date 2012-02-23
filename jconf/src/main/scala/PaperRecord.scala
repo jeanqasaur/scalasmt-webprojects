@@ -30,22 +30,24 @@ object EmptyTag extends PaperTag
 
 case class Title (title : String) extends JeevesRecord
 
-class PaperRecord( val id: Int = -1
+class PaperRecord( val uid: BigInt = -1
                  , private var _title: Title = Title("Untitled")
                  , private var _authors: List[ConfUser] = Nil )
                extends JeevesRecord with Serializable {
+  _authors.foreach(a => transaction {
+      JConfTables.authors.insert(new PaperAuthorRecord(uid.toInt, a.uid.toInt))
+    })
   /**************/
   /* Variables. */
   /**************/
   private var _authorL = mkLevel()
   private val titleL = mkLevel();
 
-  val title: Symbolic = mkSensitive(titleL, _title, Title("No permission"))
-
   /*************/
   /* Policies. */
   /*************/
-  private val isAuthor: Formula = (getAuthors()).has(CONTEXT.viewer);
+  private def isAuthor(authors: List[Symbolic]): Formula =
+    authors.hasFormula((a: Symbolic) => a~'uid === CONTEXT.viewer~'uid);
   private val isInternal: Formula =
     (CONTEXT.viewer.role === ReviewerStatus) ||
     (CONTEXT.viewer.role === PCStatus)
@@ -55,24 +57,26 @@ class PaperRecord( val id: Int = -1
     (CONTEXT.stage === Public) && curtags.has(Accepted)
 
   policy ( _authorL
-         , !(isAuthor || (isInternal && (CONTEXT.stage === Decision)) ||
+         , !(isAuthor(getAuthors ()) || (isInternal && (CONTEXT.stage === Decision)) ||
             isPublic(getTags ()))
          , LOW);
-  policy (titleL, !(isAuthor || isInternal || isPublic(getTags ())), LOW);
+  policy (titleL, !(isAuthor(getAuthors ()) || isInternal || isPublic(getTags ())), LOW);
 
   /************************/
   /* Getters and setters. */
   /************************/
   def setTitle(name: Title) = _title = name
+  var title: Symbolic = mkSensitive(titleL, _title, Title("No permission"))
   def getTitle(): Symbolic =  mkSensitive(titleL, _title, Title("No permission"))
   def showTitle(ctxt: ConfContext): String =
     (concretize(ctxt, getTitle ()).asInstanceOf[Title]).title
 
   def getAuthors() : List[Symbolic] = {
-    _authors.map(a => mkSensitive(_authorL, a, new ConfUser()))
+    _authors.map(author =>
+      mkSensitive(_authorL, author, new ConfUser()))
   }
   def showAuthors(ctxt: ConfContext): List[ConfUser] = {
-    _authors.map(a => concretize(ctxt, a).asInstanceOf[ConfUser])
+    (getAuthors ()).map(a => concretize(ctxt, a).asInstanceOf[ConfUser])
   }
 
   /* Managing tags. */
@@ -102,13 +106,13 @@ class PaperRecord( val id: Int = -1
   def addTag (newtag: PaperTag) = {
     val (tag, tagVal) = Conversions.tag2Field(newtag);
     transaction {
-      JConfTables.tags.insert(new PaperTagRecord(id, tag, tagVal))
+      JConfTables.tags.insert(new PaperTagRecord(uid.toInt, tag, tagVal))
     }
   }
   def getTags (): List[Symbolic] = {
     transaction {
       val tags: Iterable[PaperTagRecord] = from(JConfTables.tags)(t =>
-        where(t.paperId === id.~)
+        where(t.paperId === uid.toInt.~)
         select(t)
       );
       tags.toList.map(
@@ -119,7 +123,7 @@ class PaperRecord( val id: Int = -1
     val (tagId, tagVal) = Conversions.tag2Field(tag);
     transaction {
       JConfTables.tags.deleteWhere(t =>
-        (t.paperId === id.~) and (t.tagId === tagId.~)
+        (t.paperId === uid.toInt.~) and (t.tagId === tagId.~)
         and (t.tagData === tagVal.~))
     }
   }
@@ -132,7 +136,7 @@ class PaperRecord( val id: Int = -1
     transaction {
       val reviewRecord: PaperReviewRecord =
         JConfTables.reviews.insert(
-          new PaperReviewRecord(getReviewUid (), reviewer.id, body, score))
+          new PaperReviewRecord(getReviewUid (), reviewer.uid.toInt, body, score))
       val r = new PaperReview(reviewRecord.id, reviewer, body, score);
       addTag(ReviewedBy(reviewer))
       r
@@ -153,14 +157,16 @@ class PaperRecord( val id: Int = -1
     policy( level
             , !((CONTEXT.stage === Review && (hasTag (reviewerTag))) ||
                 ((CONTEXT.stage === Decision) && isInternal) ||
-                (isAuthor && authorCanSeeReview))
+                (isAuthor(getAuthors ()) && authorCanSeeReview))
             , LOW);
     mkSensitive(level, r, new PaperReview())
   }
   def getReviews (): List[Symbolic] = {
+    Nil
+    /*
     transaction {
       val reviews: Iterable[PaperReviewRecord] = from(JConfTables.reviews)(r =>
-        where(r.id.~ === id)
+        where(r.id.~ === uid)
         select(r)
       )
       reviews.toList.map(r =>
@@ -170,8 +176,18 @@ class PaperRecord( val id: Int = -1
           case None => throw new NoSuchUserError
         })
     }
+    */
   }
   def showReviews (ctxt: ConfContext): List[PaperReview] = {
     (getReviews ()).map(r => concretize(ctxt, r).asInstanceOf[PaperReview])
+  }
+
+  def getPaperItemRecord(): PaperItemRecord = {
+    new PaperItemRecord(uid.toInt, _title.title)
+    // Persistence.serialize(this)
+  }
+  def debugPrint(): Unit = {
+    println("PaperRecord(id=" + uid + ",title=" + _title + ")")
+    _authors.foreach(a => a.debugPrint())
   }
 }
