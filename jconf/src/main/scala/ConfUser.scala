@@ -58,9 +58,6 @@ case class ConfUser(
           from(JConfTables.authors, JConfTables.papers)((a, p) =>
             where(a.authorId.~ === uid.toInt and a.paperId.~ === p.id)
             select(p))
-        println("papers --")
-        submittedPapers.toList.map(p => println(p.id))
-        println("--")
         submittedPapers.toList.map(p =>
           mkSensitive(
               selfL, p.getPaperRecord(), new PaperRecord()))

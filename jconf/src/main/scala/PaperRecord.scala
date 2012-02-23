@@ -57,10 +57,12 @@ class PaperRecord( val uid: BigInt = -1
     (CONTEXT.stage === Public) && curtags.has(Accepted)
 
   policy ( _authorL
-         , !(isAuthor(getAuthors ()) || (isInternal && (CONTEXT.stage === Decision)) ||
-            isPublic(getTags ()))
+         , !(isAuthor(getAuthors ())
+           || (isInternal && (CONTEXT.stage === Decision))
+           || isPublic(getTags ()))
          , LOW);
-  policy (titleL, !(isAuthor(getAuthors ()) || isInternal || isPublic(getTags ())), LOW);
+  policy (titleL
+    , !(isAuthor(getAuthors ()) || isInternal || isPublic(getTags ())), LOW);
 
   /************************/
   /* Getters and setters. */
