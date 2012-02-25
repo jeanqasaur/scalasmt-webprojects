@@ -61,9 +61,11 @@ class PaperRecord( val uid: BigInt = -1
            || (isInternal && (CONTEXT.stage === Decision))
            || isPublic)
          , LOW);
+  logPaperRecordPolicy();
   policy (titleL
     , !(isAuthor
       || isInternal || isPublic), LOW);
+  logPaperRecordPolicy();
 
   /************************/
   /* Getters and setters. */
@@ -87,19 +89,19 @@ class PaperRecord( val uid: BigInt = -1
     tag match {
       case NeedsReview (reviewer) =>
         val canSee : Formula = isInternal && CONTEXT.stage === Review;
-        policy (level, canSee, HIGH);
         policy (level, !canSee, LOW);
+        logPaperRecordPolicy();
       case ReviewedBy (reviewer) =>
-        policy (level, isInternal, HIGH);
-        policy (level, !isInternal, LOW)
+        policy (level, !isInternal, LOW);
+        logPaperRecordPolicy();
       // Can see the "Accepted" tag if is an internal user at the decision
       // stage or if all information is visible.
       case Accepted =>
         val stage = CONTEXT.stage;
         val canSee : Formula =
           (isInternal && (stage == Decision)) || (stage === Public);
-        policy (level, canSee, HIGH);
         policy (level, !canSee, LOW);
+        logPaperRecordPolicy();
       case EmptyTag => ()
     }
     mkSensitive(level, tag, EmptyTag)
@@ -161,6 +163,7 @@ class PaperRecord( val uid: BigInt = -1
                 ((CONTEXT.stage === Decision) && isInternal) ||
                 (isAuthor && authorCanSeeReview))
             , LOW);
+    logPaperRecordPolicy();
     mkSensitive(level, r, new PaperReview())
   }
   def getReviews (): List[Symbolic] = {

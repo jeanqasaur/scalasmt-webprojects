@@ -26,7 +26,8 @@ case class ConfUser(
   , val username: Username = Username("-")
   , private var _name: Name = new Name("")
   , private var _password: String = ""
-  , val role: UserStatus = PublicStatus )
+  , val role: UserStatus = PublicStatus
+  , private var _submittedPapers: List[BigInt] = Nil )
   extends JeevesRecord {
     /*************/
     /* Policies. */
@@ -37,11 +38,13 @@ case class ConfUser(
 
     private val selfL = mkLevel ();
     policy (selfL, !(CONTEXT.viewer.username === username), LOW);
+    logConfUserPolicy();
     def isSelf(): Formula = selfL
 
     // For now, everyone can see the name.
+    // TODO: Um, do something about making this less stupid.
     private val nameL = mkLevel ();
-    policy (nameL, false, LOW);
+//    policy (nameL, false, LOW);
 
     def setName (n: Name): Unit = {
       _name = n
@@ -52,19 +55,17 @@ case class ConfUser(
     }
 
     // Submitted papers.
-    def getSubmittedPapers (): List[Symbolic] = {
-      transaction {
-        val submittedPapers: Iterable[PaperItemRecord] =
-          from(JConfTables.authors, JConfTables.papers)((a, p) =>
-            where(a.authorId.~ === uid.toInt and a.paperId.~ === p.id)
-            select(p))
-        submittedPapers.toList.map(p =>
-          mkSensitive(selfL, p.getPaperRecord(), defaultPaper))
-      }
+    def addSubmittedPaper(p: BigInt) = {
+      _submittedPapers = p::_submittedPapers
+    }
+    def getSubmittedPapers (): List[IntExpr] = {
+      _submittedPapers.map(p => mkSensitiveInt(selfL, p, -1))
     }
     def showSubmittedPapers (ctxt: ConfContext): List[PaperRecord] = {
+      Nil
+      /* TODO
       (getSubmittedPapers ()).map(
-        p => concretize(ctxt, p).asInstanceOf[PaperRecord])
+        p => concretize(ctxt, p).asInstanceOf[PaperRecord]) */
     }
 
     /*
