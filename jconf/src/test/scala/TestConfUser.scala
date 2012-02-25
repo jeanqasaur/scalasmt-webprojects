@@ -14,9 +14,23 @@ import scala.util.Random
 import TestUtil._
 
 class TestConfUser extends FunSuite {
-  /*
   test ("default user") {
     expect(new ConfUser()) { new ConfUser() }
+  }
+  
+  test ("conversion to and from ConfUserRecord") {
+    val author0_copy = author0.getConfUserRecord().getConfUser();
+    expect(author0.uid) {
+      author0_copy.uid
+    }
+    /*
+    expect(2) {
+      paper0_copy.getAuthors().length
+    }
+    expect(paper0Name) {
+      show[Title](getAuthorCtxt0(Submission), paper0_copy.getTitle ()).title;
+    }
+    */
   }
 
   test ("self formula") {
@@ -47,28 +61,24 @@ class TestConfUser extends FunSuite {
     expect(true) {
       concretize(
         getContext(author0)
-        , (author0.getSubmittedPapers ()).hasFormula(p =>
-          p~'uid === paper0.uid));
+        , (author0.getSubmittedPapers ()).has(paper0.uid));
     }
   }
 
   test ("submitted paper visibility - nonauthor") {
     expect(false) {
       concretize(
-        getContext(author1), (author0.getSubmittedPapers ()).hasFormula(p =>
-          p~'uid === paper0.uid));
+        getContext(author1), (author0.getSubmittedPapers ()).has(paper0.uid));
     }
   }
-  */
 
-  /*
   test ("submitted paper exists in list") {
     expect(paper0.uid) {
-      concretize(getContext(author0), (author0.getSubmittedPapers ()).head~'uid);
+      concretize(getContext(author0), (author0.getSubmittedPapers ()).head);
     }
   }
-  */
 
+  /*
   test ("submitted paper title") {
     println("submitted paper title");
     expect(Title(paper0Name)) {
@@ -77,7 +87,6 @@ class TestConfUser extends FunSuite {
     }
   }
 
-  /*
   test ("showTitle with login user") {
     val u = loginUser("author0", "a0p");
     expect("my paper") {
@@ -90,4 +99,8 @@ class TestConfUser extends FunSuite {
     }
   }
   */
+
+  test ("print counts") {
+    printPolicyCount()
+  }
 }

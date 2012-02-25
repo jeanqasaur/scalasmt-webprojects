@@ -28,9 +28,20 @@ class ConfUserRecord(
   , val pwd: String
   , val role: Int
   ) extends KeyedEntity[Int] {
+  def getSubmittedPapers(): List[BigInt] = {
+    transaction {
+      val submittedPapers: Iterable[PaperItemRecord] =
+        from(JConfTables.authors, JConfTables.papers)((a, p) =>
+          where(a.authorId.~ === id and a.paperId.~ === p.id)
+          select(p))
+      submittedPapers.toList.map(p => BigInt(p.id))
+    }
+  }
+
   def getConfUser() = {
     new ConfUser(
-      id, Username(username), Name(name), pwd, Conversions.field2Role(role))
+      id, Username(username), Name(name), pwd, Conversions.field2Role(role)
+    , getSubmittedPapers() )
     // Persistence.deserialize[ConfUser](item)
   }
 }
@@ -48,7 +59,9 @@ class PaperItemRecord( val id: Int, val title: String)
       authors.toList.map(a =>
         getUserById(a.authorId) match {
           case Some(author) => author
-          case None => throw new NoSuchUserError
+          case None =>
+            println(a.authorId)
+            throw new NoSuchUserError(a.authorId)
         })
     }
   }

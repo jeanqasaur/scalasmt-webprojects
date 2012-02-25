@@ -36,16 +36,12 @@ object Conversions {
       case (1, id) =>
         JConfBackend.getUserById(id) match {
           case Some(u) => NeedsReview(u)
-          case None =>
-            println(id)
-            throw new JConfBackend.NoSuchUserError
+          case None => throw new JConfBackend.NoSuchUserError(id)
         }
       case (2, id) =>
         JConfBackend.getUserById(id) match {
           case Some(u) => ReviewedBy(u)
-          case None =>
-            println(id)
-            throw new JConfBackend.NoSuchUserError
+          case None => throw new JConfBackend.NoSuchUserError(id)
         }
       case (3, _) => Accepted
       case (4, _) => EmptyTag
