@@ -56,16 +56,20 @@ case class ConfUser(
 
     // Submitted papers.
     def addSubmittedPaper(p: BigInt) = {
+      JConfTables.writeDBAuthor(p.toInt, uid.toInt);
       _submittedPapers = p::_submittedPapers
     }
     def getSubmittedPapers (): List[IntExpr] = {
       _submittedPapers.map(p => mkSensitiveInt(selfL, p, -1))
     }
     def showSubmittedPapers (ctxt: ConfContext): List[PaperRecord] = {
-      Nil
-      /* TODO
-      (getSubmittedPapers ()).map(
-        p => concretize(ctxt, p).asInstanceOf[PaperRecord]) */
+      val paperIds: List[BigInt] =
+        (getSubmittedPapers ()).map(p => concretize(ctxt, p));
+        paperIds.map(pid =>
+          getPaperById(pid.toInt) match {
+            case Some(paper) => paper
+            case None => defaultPaper
+          })
     }
 
     /*
@@ -98,7 +102,6 @@ case class ConfUser(
       new ConfUserRecord(
           uid.toInt, username.name, _name.name, _password
         , Conversions.role2Field(role))
-      // Persistence.serialize(this)
     }
     def debugPrint(): Unit = {
       println("ConfUser(id=" + uid + ",username=" + username + ")")

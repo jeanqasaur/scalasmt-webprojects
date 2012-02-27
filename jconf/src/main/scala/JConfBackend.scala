@@ -21,17 +21,20 @@ object JConfBackend extends JeevesLib with Serializable {
   class AccessError extends Exception
   class PermissionsError extends Exception
   class NoSuchUserError(uid: Int) extends Exception
+  class NoSuchPaperError(uid: Int) extends Exception
 
   println("JConfBackend initialization");
 
   /* Database initialization. */
   private val TEST = true;
+  private val useDB = true;
 
   private val jconfUsers: Map[Int, ConfUser] = Map[Int, ConfUser]()
   private val jconfPapers: Map[Int, PaperRecord] = Map[Int, PaperRecord]()
   private val jconfReviews: Map[Int, PaperReview] = Map[Int, PaperReview]()
 
-  Class.forName("com.mysql.jdbc.Driver");
+//  Class.forName("com.mysql.jdbc.Driver");
+  /*
   val dbUsername = "jeanyang";
   val dbPassword = "scalasmt";
   val dbConnection = {
@@ -64,6 +67,7 @@ object JConfBackend extends JeevesLib with Serializable {
         }
     }
   }
+  */
 
   /* Debugging variables. */
   private var numConfUserPs = 0;
@@ -126,9 +130,7 @@ object JConfBackend extends JeevesLib with Serializable {
       new ConfUser(id, Username(username), Name(name), password, role);
 
     // Add user to persistent database.
-    val u = transaction {
-      JConfTables.users.insert(user.getConfUserRecord())
-    }
+    JConfTables.writeDB(user)
 
     // Add paper to in-memory cache.
     jconfUsers += (id -> user)
@@ -147,10 +149,7 @@ object JConfBackend extends JeevesLib with Serializable {
     authors.foreach(a => a.addSubmittedPaper(uid))
 
     // Add paper to persistent database.
-    val paperRecord =
-      transaction {
-        JConfTables.papers.insert(paper.getPaperItemRecord())
-      }
+    JConfTables.writeDB(paper);
     
     // Add paper to in-memory cache.
     jconfPapers += (uid -> paper)
@@ -162,19 +161,14 @@ object JConfBackend extends JeevesLib with Serializable {
     // TODO: Where do we want to have integrity policies about this manifest?
     if (!((reviewer.role == ReviewerStatus) || (reviewer.role == PCStatus)))
       return;
-    // TODO: Store this in memory too...
-    transaction {
-      JConfTables.assignments.insert(
-        new Assignment(reviewer.uid.toInt, p.uid.toInt))
-    }
+
+    // Write persistently.
+    JConfTables.writeAssignment(reviewer.uid.toInt, p.uid.toInt)
+
+    // TODO: Store in memory?  Load this from memory when we start up...
   }
   def isAssigned (p: PaperRecord, reviewer: ConfUser): Boolean = {
-    val c: Long = from(JConfTables.assignments)(a =>
-      where((a.paperId === p.uid.toInt.~)
-        and (a.reviewerId === reviewer.uid.toInt.~))
-      compute(count)
-    )
-    c > 0
+    JConfTables.isAssigned(reviewer.uid.toInt, p.uid.toInt)
   }
   def addReview
     (p: PaperRecord, reviewer: ConfUser, rtext: String, score: Int)
@@ -188,21 +182,16 @@ object JConfBackend extends JeevesLib with Serializable {
   }
 
   /* Searching. */
-  def allPapers(): List[PaperRecord] = {
-    transaction {
-      val paperRecords = from(JConfTables.papers)(p => select(p)).toList;
-      paperRecords.map(r => r.getPaperRecord())
-    }
-  }
-  def getPaperById(id: Int): Option[PaperRecord] = {
-    jconfPapers.get(id) match {
+  def getPaperById(uid: Int): Option[PaperRecord] = {
+    jconfPapers.get(uid) match {
       case Some(paper) => Some(paper)
       case None =>
-        transaction { JConfTables.papers.lookup(id) } match {
-            case Some(paperRecord) =>
-              Some(paperRecord.getPaperRecord())
-            case None => None
+        val p = JConfTables.getDBPaperRecord(uid)
+        p match {
+          case Some(paper) => jconfPapers += (uid -> paper)
+          case None => ()
         }
+        p
     }
   }
   def getPapersByIds(ids: List[Int]): List[Option[PaperRecord]] =
@@ -212,28 +201,22 @@ object JConfBackend extends JeevesLib with Serializable {
     allPapers().filter(_.title === Title(title))
  */
   def searchByAuthor(author: ConfUser) = 
-    allPapers().filter(_.getAuthors().has(author))
+    JConfTables.getAllDBPapers().filter(_.getAuthors().has(author))
   
   def searchByTag(tag: PaperTag) = {
-    allPapers().filter(_.getTags().has(tag))
+    JConfTables.getAllDBPapers().filter(_.getTags().has(tag))
   }
  
-  def getUserById(id: Int): Option[ConfUser] = {
-    jconfUsers.get(id) match {
+  def getUserById(uid: Int): Option[ConfUser] = {
+    jconfUsers.get(uid) match {
       case Some(user) => Some(user)
       case None =>
-        try {
-          val userRecord: Option[ConfUserRecord] =
-            transaction { JConfTables.users.lookup(id) }
-          userRecord match {
-            case Some(u) => Some(u.getConfUser())
-            case None => None
-          }
-        } catch {
-          case e: Exception =>
-            println(e);
-            None
+        val u = JConfTables.getDBConfUser(uid)
+        u match {
+          case Some(user) => jconfUsers += (uid -> user)
+          case None => ()
         }
+        u
     }
   }
   def loginUser(id: String, password: String): Option[ConfUser] = {

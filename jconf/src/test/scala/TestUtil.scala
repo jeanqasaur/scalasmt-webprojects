@@ -7,11 +7,52 @@ import JConfBackend._
 
 import org.scalatest.FunSuite
 import org.scalatest.Assertions.{expect}
+import org.squeryl.adapters.MySQLAdapter
+import org.squeryl.PrimitiveTypeMode._
+import org.squeryl.Session
+import org.squeryl.SessionFactory
+
 import scala.collection.immutable.Map
 import scala.collection.mutable.Set
 import scala.util.Random
 
 object TestUtil {
+  Class.forName("com.mysql.jdbc.Driver");
+  val dbUsername = "jeanyang";
+  val dbPassword = "scalasmt";
+  val dbConnection = "jdbc:mysql://mysql.csail.mit.edu/JYTestDB"
+
+  println("initializing session...")
+
+  SessionFactory.concreteFactory = Some(()=>
+    Session.create(
+      java.sql.DriverManager.getConnection(
+        dbConnection, dbUsername, dbPassword)
+      , new MySQLAdapter))
+    // If we are testing, initialize tables.
+    try {
+      transaction {
+        JConfTables.create;
+      }
+    } catch {
+      case e: Exception =>
+      try {
+        transaction {
+          JConfTables.assignments.deleteWhere(a => a.reviewerId.~ > -1)
+          JConfTables.authors.deleteWhere(u => u.paperId.~ > -1)
+          JConfTables.papers.deleteWhere(p => p.id.~ > -1)
+          JConfTables.reviews.deleteWhere(r => r.id.~ >= -1)
+          JConfTables.tags.deleteWhere(t => t.paperId.~ > -1)
+          JConfTables.users.deleteWhere(u => u.id.~ > -1)
+        } 
+      } 
+    } 
+
+  def withDataInDatabase(test: => Any) {
+    try { test }
+    finally { Session.cleanupResources }
+  }
+
   def mkUser( userName : String, name: String
             , pwd: String, userStatus : UserStatus): ConfUser = {
     addUser(userName, name, pwd, userStatus)
