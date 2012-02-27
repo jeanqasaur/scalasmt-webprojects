@@ -166,7 +166,7 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
     session.get("user") match {
       case Some(u) =>
         val user: ConfUser = u.asInstanceOf[ConfUser];
-        var paper: PaperRecord = new PaperRecord();
+        var paper: PaperRecord = defaultPaper;
         getPaperById(multiParams("id").head.toInt) match {
           case Some(p) =>  paper = p
           case None =>

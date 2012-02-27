@@ -71,23 +71,26 @@ case class ConfUser(
           })
     }
 
-    /*
     // Papers to review.
-    def addReviewPaper (r: PaperRecord): Unit = _reviewPapers = r::_reviewPapers
-    def getReviewPapers (): List[Symbolic] =
-      _reviewPapers.map(p => mkSensitive(selfL, p, new PaperRecord()))
+    def getReviewPapers (): List[Symbolic] = {
+      val papers: List[PaperRecord] =
+        JConfTables.getPapersByReviewer(uid.toInt);
+      papers.map(p => mkSensitive(selfL, p, defaultPaper))
+    }
     def showReviewPapers (ctxt: ConfContext): List[PaperRecord] = {
-      (getReviewPapers ()).map(p => concretize(ctxt, p).asInstanceOf[PaperRecord])
+      (getReviewPapers ()).map(p =>
+        concretize(ctxt, p).asInstanceOf[PaperRecord])
     }
 
     // Reviews submitted.
-    def addReview (r: PaperReview): Unit =_reviews = r::_reviews
-    def getReviews (): List[Symbolic] =
-      _reviews.map(r => mkSensitive(selfL, r, new PaperReview()))
+    def getReviews (): List[Symbolic] = {
+      val reviews: List[PaperReview] =
+        JConfTables.getReviewsByReviewer(uid.toInt);
+      reviews.map(r => mkSensitive(selfL, r, defaultReview))
+    }
     def showReviews (ctxt: ConfContext): List[PaperReview] = {
       (getReviews ()).map(r => concretize(ctxt, r).asInstanceOf[PaperReview])
     }
-    */
 
     // Password.
     def setPassword (p: String) = _password = p

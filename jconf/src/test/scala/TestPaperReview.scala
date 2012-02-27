@@ -14,7 +14,4 @@ import scala.util.Random
 import TestUtil._
 
 class TestPaperReview extends FunSuite {
-  test ("declassifySelf") {
-
-  }
 }
