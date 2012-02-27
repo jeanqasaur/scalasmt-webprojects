@@ -34,9 +34,8 @@ class PaperRecord( val uid: BigInt = -1
                  , private var _title: Title = Title("Untitled")
                  , private var _authors: List[ConfUser] = Nil )
                extends JeevesRecord with Serializable {
-  _authors.foreach(a => transaction {
-      JConfTables.authors.insert(new PaperAuthorRecord(uid.toInt, a.uid.toInt))
-    })
+  _authors.foreach(a => JConfTables.writeDBAuthor(uid.toInt, a.uid.toInt))
+  
   /**************/
   /* Variables. */
   /**************/

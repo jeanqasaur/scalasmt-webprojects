@@ -56,7 +56,6 @@ case class ConfUser(
 
     // Submitted papers.
     def addSubmittedPaper(p: BigInt) = {
-      JConfTables.writeDBAuthor(p.toInt, uid.toInt);
       _submittedPapers = p::_submittedPapers
     }
     def getSubmittedPapers (): List[IntExpr] = {
