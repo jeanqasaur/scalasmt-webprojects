@@ -181,13 +181,15 @@ object JConfBackend extends JeevesLib with Serializable {
   }
 
   /* Searching. */
+  def lookupCachedPaper(uid: Int): Option[PaperRecord] = { jconfPapers.get(uid) }
+  def cachePaper(paper: PaperRecord) = jconfPapers += (paper.uid.toInt -> paper)
   def getPaperById(uid: Int): Option[PaperRecord] = {
-    jconfPapers.get(uid) match {
+    lookupCachedPaper(uid) match {
       case Some(paper) => Some(paper)
       case None =>
         val p = JConfTables.getDBPaperRecord(uid)
         p match {
-          case Some(paper) => jconfPapers += (uid -> paper)
+          case Some(paper) => cachePaper(paper)
           case None => ()
         }
         p
@@ -206,13 +208,15 @@ object JConfBackend extends JeevesLib with Serializable {
     JConfTables.getAllDBPapers().filter(_.getTags().has(tag))
   }
  
+  def lookupCachedUser(uid: Int): Option[ConfUser] = { jconfUsers.get(uid) }
+  def cacheUser(user: ConfUser) = jconfUsers += (user.uid.toInt -> user)
   def getUserById(uid: Int): Option[ConfUser] = {
-    jconfUsers.get(uid) match {
+    lookupCachedUser(uid) match {
       case Some(user) => Some(user)
       case None =>
         val u = JConfTables.getDBConfUser(uid)
         u match {
-          case Some(user) => jconfUsers += (uid -> user)
+          case Some(user) => cacheUser(user)
           case None => ()
         }
         u
