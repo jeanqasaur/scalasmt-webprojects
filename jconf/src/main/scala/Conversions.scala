@@ -25,24 +25,16 @@ object Conversions {
 
   def tag2Field(tag: PaperTag): (Int, Int) = {
     tag match {
-      case NeedsReview(reviewer)  => (1, reviewer.uid.toInt)
-      case ReviewedBy(reviewer)   => (2, reviewer.uid.toInt)
+      case NeedsReview(reviewer)  => (1, reviewer.toInt)
+      case ReviewedBy(reviewer)   => (2, reviewer.toInt)
       case Accepted               => (3, -1)
       case EmptyTag               => (4, -1)
     }
   }
   def field2Tag(tag: (Int, Int)): PaperTag = {
     tag match {
-      case (1, id) =>
-        JConfBackend.getUserById(id) match {
-          case Some(u) => NeedsReview(u)
-          case None => throw new JConfBackend.NoSuchUserError(id)
-        }
-      case (2, id) =>
-        JConfBackend.getUserById(id) match {
-          case Some(u) => ReviewedBy(u)
-          case None => throw new JConfBackend.NoSuchUserError(id)
-        }
+      case (1, id) => NeedsReview(id)
+      case (2, id) => ReviewedBy(id)
       case (3, _) => Accepted
       case (4, _) => EmptyTag
       case (_, _) => throw new MalformedTagError

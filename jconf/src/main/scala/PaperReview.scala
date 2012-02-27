@@ -9,11 +9,13 @@ import cap.scalasmt._
 
 import JConfBackend._
 
-class PaperReview(val id: Int = -1
-  , private val _reviewer: ConfUser = defaultUser
+class PaperReview(val uid: BigInt = -1
+  , private val _paperId: BigInt = -1
+  , private val _reviewerId: BigInt = -1
   , private var _body: String = ""
   , private var _score: Int = -1)
   extends JeevesRecord with Serializable {
+  // TODO: Is this where we want to associate reviews with users?
 
   /*************/
   /* Policies. */
@@ -26,13 +28,14 @@ class PaperReview(val id: Int = -1
   }
   policy(_reviewerL, !_isInternalF, LOW);
   logPaperReviewPolicy();
-  def getReviewer(): Symbolic =
-    mkSensitive(_reviewerL, _reviewer, defaultUser)
+
+  def getReviewer(): IntExpr =
+    mkSensitiveInt(_reviewerL, _reviewerId, -1)
   def showReviewer(ctxt: ConfContext): ConfUser = {
     concretize(ctxt, getReviewer()).asInstanceOf[ConfUser]
   }
   def getReviewerTag(): Symbolic =
-    mkSensitive(_reviewerL, ReviewedBy(_reviewer), defaultUser)
+    mkSensitive(_reviewerL, ReviewedBy(_reviewerId), EmptyTag)
   def showReviewerTag(ctxt: ConfContext): PaperTag = {
     concretize(ctxt, getReviewerTag()).asInstanceOf[PaperTag]
   }
@@ -42,4 +45,9 @@ class PaperReview(val id: Int = -1
 
   def setScore (newscore: Int) = _score = newscore
   def getScore (): Int = _score
+
+  def getPaperReviewRecord(): PaperReviewRecord = {
+    new PaperReviewRecord(
+      uid.toInt, _paperId.toInt, _reviewerId.toInt, _body, _score)
+  }
 }

@@ -88,6 +88,7 @@ object JConfBackend extends JeevesLib with Serializable {
 
   val defaultUser = new ConfUser ()
   val defaultPaper = new PaperRecord ()
+  val defaultReview = new PaperReview ()
 
   /* Making papers. */
   private var _usercount = 1;
@@ -143,9 +144,7 @@ object JConfBackend extends JeevesLib with Serializable {
     // TODO: Make sure UID is unique...
     val uid = getPaperUid ();
 
-    val paper = new PaperRecord(uid, Title(name), authors)
-    tags.foreach(t => paper.addTag(t))
-
+    val paper = new PaperRecord(uid, Title(name), authors, tags)
     authors.foreach(a => a.addSubmittedPaper(uid))
 
     // Add paper to persistent database.

@@ -23,8 +23,8 @@ object Decision extends PaperStage
 object Public extends PaperStage
 
 sealed trait PaperTag extends JeevesRecord
-case class NeedsReview (reviewer: ConfUser) extends PaperTag
-case class ReviewedBy (reviewer: ConfUser) extends PaperTag
+case class NeedsReview (reviewer: BigInt) extends PaperTag
+case class ReviewedBy (reviewer: BigInt) extends PaperTag
 object Accepted extends PaperTag
 object EmptyTag extends PaperTag
 
@@ -32,7 +32,8 @@ case class Title (title : String) extends JeevesRecord
 
 class PaperRecord( val uid: BigInt = -1
                  , private var _title: Title = Title("Untitled")
-                 , private var _authors: List[ConfUser] = Nil )
+                 , private var _authors: List[ConfUser] = Nil
+                 , private var _tags: List[PaperTag] = Nil)
                extends JeevesRecord with Serializable {
   _authors.foreach(a => JConfTables.writeDBAuthor(uid.toInt, a.uid.toInt))
   
@@ -107,28 +108,15 @@ class PaperRecord( val uid: BigInt = -1
   }
 
   def addTag (newtag: PaperTag) = {
-    val (tag, tagVal) = Conversions.tag2Field(newtag);
-    transaction {
-      JConfTables.tags.insert(new PaperTagRecord(uid.toInt, tag, tagVal))
-    }
+    _tags = newtag::_tags
+    JConfTables.addDBTag(uid.toInt, newtag)
   }
   def getTags (): List[Symbolic] = {
-    transaction {
-      val tags: Iterable[PaperTagRecord] = from(JConfTables.tags)(t =>
-        where(t.paperId === uid.toInt.~)
-        select(t)
-      );
-      tags.toList.map(
-        t => addTagPermission(Conversions.field2Tag(t.tagId, t.tagData)))
-    }
+    _tags.map(t => addTagPermission(t))
   }
   def removeTag (tag : PaperTag) : Unit = {
-    val (tagId, tagVal) = Conversions.tag2Field(tag);
-    transaction {
-      JConfTables.tags.deleteWhere(t =>
-        (t.paperId === uid.toInt.~) and (t.tagId === tagId.~)
-        and (t.tagData === tagVal.~))
-    }
+    _tags.filterNot(_ == tag)
+    JConfTables.removeDBTag(uid.toInt, tag)
   }
   def hasTag (tag : Symbolic) : Formula = (getTags ()).has(tag)
   def showTags (ctxt: ConfContext): List[PaperTag] = {
@@ -136,20 +124,17 @@ class PaperRecord( val uid: BigInt = -1
   }
 
   def addReview (reviewer: ConfUser, body: String, score: Int): PaperReview = {
-    transaction {
-      val reviewRecord: PaperReviewRecord =
-        JConfTables.reviews.insert(
-          new PaperReviewRecord(getReviewUid (), reviewer.uid.toInt, body, score))
-      val r = new PaperReview(reviewRecord.id, reviewer, body, score);
-      addTag(ReviewedBy(reviewer))
-      r
-    }
+   val reviewUid = getReviewUid();
+   val r = new PaperReview(reviewUid, uid, reviewer.uid, body, score);
+   JConfTables.writeDB(r);
+   addTag(ReviewedBy(reviewer.uid))
+   r
   }
   def isReviewedBy(reviewer: ConfUser): Formula = {
-    hasTag(ReviewedBy(reviewer))
+    hasTag(ReviewedBy(reviewer.uid))
   }
   def needsReviewBy(ctxt: ConfContext): Formula = {
-    hasTag(NeedsReview(ctxt.viewer))
+    hasTag(NeedsReview(ctxt.viewer.uid))
   }
   def showIsReviewedBy(ctxt: ConfContext, reviewer: ConfUser): Boolean = {
     concretize(ctxt, isReviewedBy(reviewer))
@@ -166,21 +151,7 @@ class PaperRecord( val uid: BigInt = -1
     mkSensitive(level, r, new PaperReview())
   }
   def getReviews (): List[Symbolic] = {
-    Nil
-    /*
-    transaction {
-      val reviews: Iterable[PaperReviewRecord] = from(JConfTables.reviews)(r =>
-        where(r.id.~ === uid)
-        select(r)
-      )
-      reviews.toList.map(r =>
-        getUserById(r.reviewer) match {
-          case Some(reviewer) =>
-            addReviewPolicy(new PaperReview(r.id, reviewer, r.body, r.score))
-          case None => throw new NoSuchUserError
-        })
-    }
-    */
+    JConfTables.getReviewsByPaper(uid.toInt).map(r => addReviewPolicy(r))
   }
   def showReviews (ctxt: ConfContext): List[PaperReview] = {
     (getReviews ()).map(r => concretize(ctxt, r).asInstanceOf[PaperReview])
@@ -188,7 +159,6 @@ class PaperRecord( val uid: BigInt = -1
 
   def getPaperItemRecord(): PaperItemRecord = {
     new PaperItemRecord(uid.toInt, _title.title)
-    // Persistence.serialize(this)
   }
   def debugPrint(): Unit = {
     println("PaperRecord(id=" + uid + ",title=" + _title + ")")

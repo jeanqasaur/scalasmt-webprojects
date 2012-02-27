@@ -64,9 +64,17 @@ class PaperItemRecord( val id: Int, val title: String)
         })
     }
   }
+  def getTags(): List[PaperTag] = {
+    transaction {
+      val tags: Iterable[PaperTagRecord] = from(JConfTables.tags)(t =>
+        where(t.paperId === id.~)
+        select(t)
+      );
+      tags.toList.map(t => Conversions.field2Tag(t.tagId, t.tagData))
+    }
+  }
   def getPaperRecord() = {
-    new PaperRecord(id, Title(title), getAuthors())
-    // Persistence.deserialize[PaperRecord](item)
+    new PaperRecord(id, Title(title), getAuthors (), getTags ())
   }
 }
 
@@ -81,9 +89,13 @@ class PaperAuthorRecord(
 
 class PaperReviewRecord(
     val id: Int = -1
-  , val reviewer: Int
+  , val paperId: Int
+  , val reviewerId: Int
   , val body: String
   , val score: Int ) extends KeyedEntity[Int] {
+  def getPaperReview(): PaperReview = {
+    new PaperReview(id, paperId, reviewerId, body, score)
+  }
 }
 
 class PaperTagRecord(val paperId: Int, val tagId: Int, val tagData: Int)
@@ -115,6 +127,7 @@ object JConfTables extends Schema {
     }
   }
 
+  /* Review assignments. */
   val assignments = table[Assignment]
   on(assignments)(a => declare(
       a.reviewerId  is(indexed)
@@ -153,11 +166,23 @@ object JConfTables extends Schema {
     }
   }
   def getAllDBPapers(): List[PaperRecord] = {
-    val paperRecords =
-      transaction { from(JConfTables.papers)(p => select(p)).toList }
-    paperRecords.map(r => r.getPaperRecord())
+    transaction {
+      val paperRecords =
+        from(papers)(p => select(p)).toList
+      paperRecords.map(r => r.getPaperRecord())
+    }
+  }
+  def getPapersByReviewer(userId: Int): List[PaperRecord] = {
+    transaction {
+      val paperRecords: Iterable[PaperItemRecord] =
+        from(papers, assignments)( (p, a) =>
+          where ((userId.~ === a.reviewerId) and (p.id === a.paperId))
+          select(p) )
+      paperRecords.toList.map(p => p.getPaperRecord())
+    }
   }
 
+  /* Authors. */
   val authors = table[PaperAuthorRecord]
   on(authors)(a => declare(
       a.paperId   is(indexed)
@@ -167,15 +192,51 @@ object JConfTables extends Schema {
     transaction{ authors.insert(new PaperAuthorRecord(paperId, authorId)) } 
   }
 
-  // Tables having to do with reviews.
+  /* Reviews. */
   val reviews = table[PaperReviewRecord]
   on(reviews)(r => declare(
       r.id      is(indexed, unique)
   ))
+  def writeDB(review: PaperReview) {
+    transaction{ reviews.insert(review.getPaperReviewRecord()) }
+  }
+
+  def getReviewsByPaper(paperId: Int): List[PaperReview] = {
+    transaction {
+      val rs: Iterable[PaperReviewRecord] =
+        from(reviews)(r =>
+          where(r.paperId === paperId.~)
+          select(r));
+      rs.toList.map(r => r.getPaperReview())
+    }
+  }
+  def getReviewsByReviewer(reviewerId: Int): List[PaperReview] = {
+    transaction {
+      val rs: Iterable[PaperReviewRecord] =
+        from(reviews)(r =>
+          where(r.reviewerId === reviewerId.~)
+          select(r));
+      rs.toList.map(r => r.getPaperReview())
+    }
+  }
 
   val tags = table[PaperTagRecord]
   on(tags)(t => declare(
       t.paperId is(indexed)
     , t.tagId   is(indexed)
   ))
+  def addDBTag(paperId: Int, newtag: PaperTag): Unit = {
+    val (tag, tagVal) = Conversions.tag2Field(newtag)
+    transaction {
+      tags.insert(new PaperTagRecord(paperId, tag, tagVal))
+    }
+  }
+  def removeDBTag(paperId: Int, tag: PaperTag): Unit = {
+    val (tagId, tagVal) = Conversions.tag2Field(tag);
+    transaction {
+      JConfTables.tags.deleteWhere(t =>
+        (t.paperId === paperId.~) and (t.tagId === tagId.~)
+        and (t.tagData === tagVal.~))
+    }
+  }
 }
