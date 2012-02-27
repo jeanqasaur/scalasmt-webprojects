@@ -39,9 +39,16 @@ class ConfUserRecord(
   }
 
   def getConfUser() = {
-    new ConfUser(
-      id, Username(username), Name(name), pwd, Conversions.field2Role(role)
-    , getSubmittedPapers() )
+    lookupCachedUser(id) match {
+      case Some(u) => u
+      case None =>
+        val u =
+          new ConfUser(
+              id, Username(username), Name(name), pwd
+            , Conversions.field2Role(role), getSubmittedPapers() );
+        cacheUser(u);
+        u
+    }
   }
 }
 
@@ -74,7 +81,13 @@ class PaperItemRecord( val id: Int, val title: String)
     }
   }
   def getPaperRecord() = {
-    new PaperRecord(id, Title(title), getAuthors (), getTags ())
+    lookupCachedPaper(id) match {
+      case Some(p) => p
+      case None =>
+        val p = new PaperRecord(id, Title(title), getAuthors (), getTags ())
+        cachePaper(p);
+        p
+    }
   }
 }
 
