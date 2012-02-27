@@ -30,11 +30,11 @@ class ConfUserRecord(
   ) extends KeyedEntity[Int] {
   def getSubmittedPapers(): List[BigInt] = {
     transaction {
-      val submittedPapers: Iterable[PaperItemRecord] =
-        from(JConfTables.authors, JConfTables.papers)((a, p) =>
-          where(a.authorId.~ === id and a.paperId.~ === p.id)
-          select(p))
-      submittedPapers.toList.map(p => BigInt(p.id))
+      val submittedPapers: Iterable[Int] =
+        from(JConfTables.authors)(a =>
+          where(a.authorId.~ === id)
+          select(a.paperId))
+      submittedPapers.toList.map(pid => BigInt(pid))
     }
   }
 
@@ -42,7 +42,6 @@ class ConfUserRecord(
     new ConfUser(
       id, Username(username), Name(name), pwd, Conversions.field2Role(role)
     , getSubmittedPapers() )
-    // Persistence.deserialize[ConfUser](item)
   }
 }
 
@@ -90,28 +89,83 @@ class PaperReviewRecord(
 class PaperTagRecord(val paperId: Int, val tagId: Int, val tagData: Int)
 
 object JConfTables extends Schema {
+  /* Users. */
   val users = table[ConfUserRecord]("ConfUsers")
   on(users)(u => declare(
       u.id        is(indexed, unique)
     , u.username  is(unique)
   ))
+  def writeDB(user: ConfUser): Unit = {
+    transaction {
+      users.insert(user.getConfUserRecord())
+    }
+  }
+  def getDBConfUser(uid: Int): Option[ConfUser] = {
+    try {
+      val userRecord: Option[ConfUserRecord] =
+        transaction { JConfTables.users.lookup(uid) }
+      userRecord match {
+        case Some(u) => Some(u.getConfUser())
+        case None => None
+      }
+    } catch {
+      case e: Exception =>
+      println(e);
+      None
+    }
+  }
 
   val assignments = table[Assignment]
   on(assignments)(a => declare(
       a.reviewerId  is(indexed)
     , a.paperId     is(indexed)
   ))
+  def writeAssignment(reviewerId: Int, paperId: Int): Unit = {
+    transaction {
+      JConfTables.assignments.insert(new Assignment(reviewerId, paperId))
+    }
+  }
+  def isAssigned(reviewerId: Int, paperId: Int): Boolean = {
+    val c: Long =
+      transaction {
+        from(JConfTables.assignments)(a =>
+        where((a.paperId === paperId.~)
+          and (a.reviewerId === reviewerId.~))
+        compute(count) )
+      }
+    c > 0
+  }
 
+  /* Papers. */
   var papers = table[PaperItemRecord]
   on(papers)(a => declare(
       a.id      is(indexed, unique)
   ))
+  def writeDB(paper: PaperRecord): Unit = {
+    transaction {
+      papers.insert(paper.getPaperItemRecord())
+    }
+  }
+  def getDBPaperRecord(uid: Int): Option[PaperRecord] = {
+    transaction { papers.lookup(uid) } match {
+      case Some(paperRecord) => Some(paperRecord.getPaperRecord())
+      case None => None
+    }
+  }
+  def getAllDBPapers(): List[PaperRecord] = {
+    val paperRecords =
+      transaction { from(JConfTables.papers)(p => select(p)).toList }
+    paperRecords.map(r => r.getPaperRecord())
+  }
 
   val authors = table[PaperAuthorRecord]
   on(authors)(a => declare(
       a.paperId   is(indexed)
     , a.authorId  is(indexed)
   ))
+  def writeDBAuthor(paperId: Int, authorId: Int): Unit = {
+    transaction{ authors.insert(new PaperAuthorRecord(paperId, authorId)) } 
+  }
 
   // Tables having to do with reviews.
   val reviews = table[PaperReviewRecord]
