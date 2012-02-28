@@ -3,11 +3,42 @@ import cap.jeeves.jconf._
 import JConfBackend._
 
 import org.scalatra._
+import org.squeryl.adapters.MySQLAdapter
+import org.squeryl.PrimitiveTypeMode._
+import org.squeryl.Session
+import org.squeryl.SessionFactory
 import java.net.URL
 import scalate.ScalateSupport
 
 class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib {
   System.setProperty("smt.home", "/opt/z3/bin/z3")
+
+  Class.forName("com.mysql.jdbc.Driver");
+  
+  val dbUsername = "jeanyang";
+  val dbPassword = "scalasmt";
+  val dbConnection = "jdbc:mysql://mysql.csail.mit.edu/JeevesConfDB"
+  SessionFactory.concreteFactory = Some(()=>
+     Session.create(
+       java.sql.DriverManager.getConnection(dbConnection, dbUsername, dbPassword)
+       , new MySQLAdapter))
+  
+  try {
+    transaction { JConfTables.create; }
+  } catch {
+    case e: Exception =>
+      try {
+        transaction {
+          JConfTables.assignments.deleteWhere(a => a.reviewerId.~ > -1)
+          JConfTables.authors.deleteWhere(u => u.paperId.~ > -1)
+          JConfTables.papers.deleteWhere(p => p.id.~ > -1)
+          JConfTables.reviews.deleteWhere(r => r.id.~ >= -1)
+          JConfTables.tags.deleteWhere(t => t.paperId.~ > -1)
+          JConfTables.users.deleteWhere(u => u.id.~ > -1)
+        }
+      }
+  }
+
 
   val path = "/WEB-INF/views/"
   val title = "jeeves social net"
@@ -101,8 +132,7 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
             case Some(path) => path
             case None => System.getProperty("user.home") + "/opt/z3/bin/z3"
           }
-        renderPage("login_screen.ssp"
-          , Map("x" -> tmp) )
+        renderPage("login_screen.ssp")
     }
   }
 
@@ -124,8 +154,8 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
           , Map(
             "user" -> user, "ctxt" -> ctxt
           , "submittedPapers" -> user.showSubmittedPapers(ctxt)
-        ))
-          // TODO: , "reviewPapers" -> user.showReviewPapers(ctxt)))
+          , "reviewPapers" -> user.showReviewPapers(ctxt)
+          , "reviews" -> user.showReviews(ctxt)))
       case None => redirect("login")
     }
   }

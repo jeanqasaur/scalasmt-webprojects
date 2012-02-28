@@ -22,11 +22,11 @@ case class Username (name: String) extends JeevesRecord
 case class Name (name: String) extends JeevesRecord
 case class Password (val pwd: String) extends JeevesRecord
 case class ConfUser(
-    val uid: BigInt = -1
-  , val username: Username = Username("-")
-  , private var _name: Name = new Name("")
-  , private var _password: String = ""
-  , val role: UserStatus = PublicStatus
+    val uid: BigInt
+  , val username: Username
+  , private var _name: Name
+  , private var _password: String
+  , val role: UserStatus
   , private var _submittedPapers: List[BigInt] = Nil )
   extends JeevesRecord {
     /*************/
@@ -101,9 +101,7 @@ case class ConfUser(
     }
 
     def getConfUserRecord(): ConfUserRecord = {
-      new ConfUserRecord(
-          uid.toInt, username.name, _name.name, _password
-        , Conversions.role2Field(role))
+      transaction { JConfTables.users.get(uid.toInt) }
     }
     def debugPrint(): Unit = {
       println("ConfUser(id=" + uid + ",username=" + username + ")")

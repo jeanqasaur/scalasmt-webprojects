@@ -14,12 +14,6 @@ import scala.util.Random
 import TestUtil._
 
 class TestConfUser extends FunSuite {
-  test ("default user") {
-    withDataInDatabase {
-      expect(new ConfUser()) { new ConfUser() }
-    }
-  }
- 
   test ("submitted papers in list") {
     withDataInDatabase {
       expect(true) {

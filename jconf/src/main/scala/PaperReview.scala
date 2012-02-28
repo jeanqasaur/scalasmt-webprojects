@@ -6,10 +6,11 @@ package cap.jeeves.jconf
  */
 
 import cap.scalasmt._
+import org.squeryl.PrimitiveTypeMode._
 
 import JConfBackend._
 
-class PaperReview(val uid: BigInt = -1
+class PaperReview(val uid: BigInt
   , private val _paperId: BigInt = -1
   , private val _reviewerId: BigInt = -1
   , private var _body: String = ""
@@ -47,7 +48,10 @@ class PaperReview(val uid: BigInt = -1
   def getScore (): Int = _score
 
   def getPaperReviewRecord(): PaperReviewRecord = {
+    transaction { JConfTables.reviews.get(uid.toInt) }
+    /*
     new PaperReviewRecord(
       uid.toInt, _paperId.toInt, _reviewerId.toInt, _body, _score)
+    */
   }
 }

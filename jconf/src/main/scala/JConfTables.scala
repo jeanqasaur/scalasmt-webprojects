@@ -22,12 +22,14 @@ object UserStatusField extends Enumeration {
 }
 
 class ConfUserRecord(
-    val id: Int
-  , val username: String
+    val username: String
   , val name: String
   , val pwd: String
   , val role: Int
   ) extends KeyedEntity[Int] {
+  def this() = this("", "", "", -1)
+  val id = 0;
+
   def getSubmittedPapers(): List[BigInt] = {
     transaction {
       val submittedPapers: Iterable[Int] =
@@ -54,8 +56,10 @@ class ConfUserRecord(
 
 class Assignment(val reviewerId: Int, val paperId: Int);
 
-class PaperItemRecord( val id: Int, val title: String)
-  extends KeyedEntity[Int] {
+class PaperItemRecord( val title: String) extends KeyedEntity[Int] {
+  def this() = this("")
+  val id: Int = 0
+
   private def getAuthors(): List[ConfUser] = {
    transaction {
       val authors: Iterable[PaperAuthorRecord] = from(JConfTables.authors)(a =>
@@ -101,11 +105,13 @@ class PaperAuthorRecord(
 }
 
 class PaperReviewRecord(
-    val id: Int = -1
-  , val paperId: Int
+    val paperId: Int
   , val reviewerId: Int
   , val body: String
   , val score: Int ) extends KeyedEntity[Int] {
+  def this() = this(-1, -1, "", -1)
+  val id: Int = 0;
+
   def getPaperReview(): PaperReview = {
     new PaperReview(id, paperId, reviewerId, body, score)
   }
@@ -117,14 +123,9 @@ object JConfTables extends Schema {
   /* Users. */
   val users = table[ConfUserRecord]("ConfUsers")
   on(users)(u => declare(
-      u.id        is(indexed, unique)
+      u.id        is(autoIncremented)
     , u.username  is(unique)
   ))
-  def writeDB(user: ConfUser): Unit = {
-    transaction {
-      users.insert(user.getConfUserRecord())
-    }
-  }
   def getDBConfUser(uid: Int): Option[ConfUser] = {
     try {
       val userRecord: Option[ConfUserRecord] =
@@ -165,13 +166,8 @@ object JConfTables extends Schema {
   /* Papers. */
   var papers = table[PaperItemRecord]
   on(papers)(a => declare(
-      a.id      is(indexed, unique)
+      a.id      is(autoIncremented)
   ))
-  def writeDB(paper: PaperRecord): Unit = {
-    transaction {
-      papers.insert(paper.getPaperItemRecord())
-    }
-  }
   def getDBPaperRecord(uid: Int): Option[PaperRecord] = {
     transaction { papers.lookup(uid) } match {
       case Some(paperRecord) => Some(paperRecord.getPaperRecord())
@@ -208,11 +204,8 @@ object JConfTables extends Schema {
   /* Reviews. */
   val reviews = table[PaperReviewRecord]
   on(reviews)(r => declare(
-      r.id      is(indexed, unique)
+      r.id      is(autoIncremented)
   ))
-  def writeDB(review: PaperReview) {
-    transaction{ reviews.insert(review.getPaperReviewRecord()) }
-  }
 
   def getReviewsByPaper(paperId: Int): List[PaperReview] = {
     transaction {
