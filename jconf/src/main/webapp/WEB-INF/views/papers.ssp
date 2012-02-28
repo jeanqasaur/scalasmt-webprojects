@@ -44,7 +44,7 @@
           </tr>
         #for (p <- reviewPapers)
           <tr>
-          <td><a href="/paper?id=<%= p.id %>"><%= p.id %></a></td>
+          <td><a href="/paper?id=<%= p.uid %>"><%= p.uid %></a></td>
           <td><b><%= p.showTitle(ctxt) %></b><br></td>
           <td>
               #if (p.showIsReviewedBy(ctxt, user))

@@ -3,12 +3,9 @@ package cap.jeeves.jconf
 import cap.scalasmt._
 import cap.jeeves._
 
-import org.squeryl.adapters.MySQLAdapter
 import org.squeryl.PrimitiveTypeMode._
 // import org.squeryl.customtypes.CustomTypesMode._
 // import org.squeryl.customtypes._
-import org.squeryl.Session
-import org.squeryl.SessionFactory
 
 import scala.collection.mutable.Map
 import scala.collection.mutable.Set
@@ -33,42 +30,6 @@ object JConfBackend extends JeevesLib with Serializable {
   private val jconfPapers: Map[Int, PaperRecord] = Map[Int, PaperRecord]()
   private val jconfReviews: Map[Int, PaperReview] = Map[Int, PaperReview]()
 
-//  Class.forName("com.mysql.jdbc.Driver");
-  /*
-  val dbUsername = "jeanyang";
-  val dbPassword = "scalasmt";
-  val dbConnection = {
-    if (TEST)
-      "jdbc:mysql://mysql.csail.mit.edu/JYTestDB"
-    else
-      "jdbc:mysql://mysql.csail.mit.edu/JeevesConfDB"
-  }
-  SessionFactory.concreteFactory = Some(()=>
-     Session.create(
-       java.sql.DriverManager.getConnection(dbConnection, dbUsername, dbPassword)
-       , new MySQLAdapter))
-  // If we are testing, initialize tables.
-  if (TEST) {
-    try {
-      transaction {
-        JConfTables.create;
-      }
-    } catch {
-      case e: Exception =>
-        try {
-          transaction {
-            JConfTables.assignments.deleteWhere(a => a.reviewerId.~ > -1)
-            JConfTables.authors.deleteWhere(u => u.paperId.~ > -1)
-            JConfTables.papers.deleteWhere(p => p.id.~ > -1)
-            JConfTables.reviews.deleteWhere(r => r.id.~ >= -1)
-            JConfTables.tags.deleteWhere(t => t.paperId.~ > -1)
-            JConfTables.users.deleteWhere(u => u.id.~ > -1)
-          }
-        }
-    }
-  }
-  */
-
   /* Debugging variables. */
   private var numConfUserPs = 0;
   def logConfUserPolicy() = numConfUserPs = numConfUserPs + 1
@@ -86,28 +47,52 @@ object JConfBackend extends JeevesLib with Serializable {
 
   private var confStage = Submission
 
-  val defaultUser = new ConfUser ()
-  val defaultPaper = new PaperRecord ()
-  val defaultReview = new PaperReview ()
+  val defaultUser = {
+    val defaultUsername = "defaultUser";
+    val defaultName = "Default User";
+    val defaultPwd = "";
+    val defaultStatus = PublicStatus;
+    new ConfUser (
+      getUserUid(
+        defaultUsername, defaultName, defaultPwd
+        , Conversions.role2Field(defaultStatus))
+      , Username(defaultUsername), Name(defaultName), defaultPwd, defaultStatus)
+  }
+  val defaultPaper = {
+    val defaultTitle = Title("---");
+    new PaperRecord (getPaperUid(defaultTitle), defaultTitle)
+  }
+  val defaultReview = new PaperReview (getReviewUid())
 
   /* Making papers. */
   private var _usercount = 1;
-  private def getUserUid (): Int = {
-    val count = _usercount;
-    _usercount = _usercount + 1;
-    count
+  private def getUserUid (
+    username: String, name: String, password: String, role: Int): Int = {
+    val userRecord: ConfUserRecord =
+      new ConfUserRecord(username, name, password, role);
+    transaction {
+      JConfTables.users.insert(userRecord);
+      userRecord.id
+    }
   }
   private var _papercount = 1;
-  private def getPaperUid () : Int = {
-    val count = _papercount;
-    _papercount = _papercount + 1;
-    count
+  private def getPaperUid (title: Title) : Int = {
+    val paperRecord: PaperItemRecord = new PaperItemRecord(title.title)
+    transaction {
+      JConfTables.papers.insert(paperRecord);
+      paperRecord.id
+    }
   }
   private var _reviewcount = 1;
-  def getReviewUid (): Int = {
-    val count = _reviewcount;
-    _reviewcount = _reviewcount + 1;
-    count
+  def getReviewUid (
+    paperId: Int = -1, reviewerId: Int = -1, body: String = ""
+    , score: Int = -1): Int = {
+    val reviewRecord: PaperReviewRecord =
+      new PaperReviewRecord(paperId, reviewerId, body, score);
+    transaction {
+      JConfTables.reviews.insert(reviewRecord);
+      reviewRecord.id
+    }
   }
 
   def getContext(user: ConfUser): ConfContext =
@@ -126,12 +111,10 @@ object JConfBackend extends JeevesLib with Serializable {
 
   def addUser(username: String
     , name: String, password: String, role: UserStatus): ConfUser = {
-    val id = getUserUid ();
+    val id =
+      getUserUid (username, name, password, Conversions.role2Field(role));
     val user =
       new ConfUser(id, Username(username), Name(name), password, role);
-
-    // Add user to persistent database.
-    JConfTables.writeDB(user)
 
     // Add paper to in-memory cache.
     jconfUsers += (id -> user)
@@ -142,14 +125,11 @@ object JConfBackend extends JeevesLib with Serializable {
   def addPaper(name : String, authors : List[ConfUser], tags : List[PaperTag])
       : PaperRecord = {
     // TODO: Make sure UID is unique...
-    val uid = getPaperUid ();
+    val uid = getPaperUid (Title(name));
 
     val paper = new PaperRecord(uid, Title(name), authors, tags)
     authors.foreach(a => a.addSubmittedPaper(uid))
 
-    // Add paper to persistent database.
-    JConfTables.writeDB(paper);
-    
     // Add paper to in-memory cache.
     jconfPapers += (uid -> paper)
     paper
@@ -197,10 +177,10 @@ object JConfBackend extends JeevesLib with Serializable {
   }
   def getPapersByIds(ids: List[Int]): List[Option[PaperRecord]] =
     ids.map(id => getPaperById(id))
- /*
+  
   def searchByTitle(title: String) = 
-    allPapers().filter(_.title === Title(title))
- */
+    JConfTables.getAllDBPapers().filter(_.title === Title(title))
+  
   def searchByAuthor(author: ConfUser) = 
     JConfTables.getAllDBPapers().filter(_.getAuthors().has(author))
   

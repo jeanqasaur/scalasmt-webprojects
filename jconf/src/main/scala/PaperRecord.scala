@@ -30,11 +30,12 @@ object EmptyTag extends PaperTag
 
 case class Title (title : String) extends JeevesRecord
 
-class PaperRecord( val uid: BigInt = -1
-                 , private var _title: Title = Title("Untitled")
+class PaperRecord(         val uid: BigInt
+                 , private var _title: Title
                  , private var _authors: List[ConfUser] = Nil
                  , private var _tags: List[PaperTag] = Nil)
                extends JeevesRecord with Serializable {
+  // We record the authors as well.
   _authors.foreach(a => JConfTables.writeDBAuthor(uid.toInt, a.uid.toInt))
   
   /**************/
@@ -124,9 +125,8 @@ class PaperRecord( val uid: BigInt = -1
   }
 
   def addReview (reviewer: ConfUser, body: String, score: Int): PaperReview = {
-   val reviewUid = getReviewUid();
+   val reviewUid = getReviewUid(uid.toInt, reviewer.uid.toInt, body, score);
    val r = new PaperReview(reviewUid, uid, reviewer.uid, body, score);
-   JConfTables.writeDB(r);
    addTag(ReviewedBy(reviewer.uid))
    r
   }
@@ -148,7 +148,7 @@ class PaperRecord( val uid: BigInt = -1
                 (isAuthor && authorCanSeeReview))
             , LOW);
     logPaperRecordPolicy();
-    mkSensitive(level, r, new PaperReview())
+    mkSensitive(level, r, defaultReview)
   }
   def getReviews (): List[Symbolic] = {
     JConfTables.getReviewsByPaper(uid.toInt).map(r => addReviewPolicy(r))
@@ -157,9 +157,9 @@ class PaperRecord( val uid: BigInt = -1
     (getReviews ()).map(r => concretize(ctxt, r).asInstanceOf[PaperReview])
   }
 
-  def getPaperItemRecord(): PaperItemRecord = {
-    new PaperItemRecord(uid.toInt, _title.title)
-  }
+  def getPaperItemRecord(): PaperItemRecord =
+    transaction { JConfTables.papers.get(uid.toInt) }
+  
   def debugPrint(): Unit = {
     println("PaperRecord(id=" + uid + ",title=" + _title + ")")
     _authors.foreach(a => a.debugPrint())
