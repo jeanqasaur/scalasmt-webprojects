@@ -22,19 +22,25 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
   val paperStage = Submission
   def emptyName = ""
 
+  def ifLoggedIn(displayPage: ConfUser => Any) {
+    session.get("user") match {
+      case Some(u) =>
+        val user = u.asInstanceOf[ConfUser];
+        displayPage(user)
+      case None => redirect("login")
+    }
+  }
+
   def renderPage(page: String, args: Map[String, Any] = Map()) {
     contentType = "text/html"
     templateEngine.layout(path + page, args)
   }
 
   get("/") {
-    session.get("user") match {
-      case Some(u) =>
-        val user = u.asInstanceOf[ConfUser];
-        renderPage("index.ssp"
+    ifLoggedIn{ (user: ConfUser) =>
+      renderPage("index.ssp"
           , Map("name" -> user.showName(getContext(user))
                , "papers" -> searchByAuthor(user)))
-      case None => redirect("login")
     }
   }
 
@@ -77,103 +83,77 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
       case None =>
         val tmp =
           Option(System.getProperty("smt.home")) match {
-            case Some(path) => path
+            case Some(p) => p
             case None => System.getProperty("user.home") + "/opt/z3/bin/z3"
           }
         renderPage("login_screen.ssp")
     }
   }
 
-  get("/signup") {
-    contentType = "text/html"
-    templateEngine.layout(path + "signup.ssp")
-  }
-
-  post("/signup_confirm") {
-    renderPage("signup_confirm.ssp")
-  }
+  get("/signup") { renderPage("signup.ssp") }
+  post("/signup_confirm") { renderPage("signup_confirm.ssp") }
 
   get("/papers") {
-    session.get("user") match {
-      case Some(u) =>
-        val user = u.asInstanceOf[ConfUser];
-        val ctxt = getContext(user);
-        renderPage("papers.ssp"
+    ifLoggedIn { (user: ConfUser) =>
+      val ctxt = getContext(user);
+      renderPage("papers.ssp"
           , Map(
             "user" -> user, "ctxt" -> ctxt
           , "submittedPapers" -> user.showSubmittedPapers(ctxt)
           , "reviewPapers" -> user.showReviewPapers(ctxt)
           , "reviews" -> user.showReviews(ctxt)))
-      case None => redirect("login")
     }
   }
 
   post("/profile") {
-    session.get("user") match {
-      case Some(u) =>
-        val user = u.asInstanceOf[ConfUser];
-        // TODO: Need to update other fields as well.
-        user.setName(Name(params("name")));
-        session("user") = user;
-        renderPage("profile.ssp"
-          , Map("user" -> user, "ctxt" -> getContext(user)))
-      case None => redirect("login")
+    ifLoggedIn { (user: ConfUser) =>
+      // TODO: Need to update other fields as well.
+      user.setName(Name(params("name")));
+      session("user") = user;
+      renderPage("profile.ssp"
+        , Map("user" -> user, "ctxt" -> getContext(user)))
     }
   }
   get("/profile") {
-    session.get("user") match {
-      case Some(u) =>
-        val curUser: ConfUser = u.asInstanceOf[ConfUser];
-        var user: ConfUser = null;
-        if (!(params.exists(_ == "id"))) {
-          user = curUser;
-        } else {
-          getUserById(params("id").toInt) match {
-            case Some(idUser) => user = idUser
-            case None => ()
-          }
+    ifLoggedIn { (user: ConfUser) =>
+      var curUser: ConfUser = null;
+      if (!(params.exists(_ == "id"))) {
+        curUser = user;
+      } else {
+        getUserById(params("id").toInt) match {
+          case Some(idUser) => curUser = idUser
+          case None => ()
         }
-        renderPage("profile.ssp"
-          , Map("user" -> user, "ctxt" -> getContext(curUser)))
-      case None => redirect("login")
+      }
+      renderPage("profile.ssp"
+          , Map("user" -> curUser, "ctxt" -> getContext(user)))
     }
   }
 
   // TODO: Edit review?
   get("/paper") {
-    session.get("user") match {
-      case Some(u) =>
-        val user: ConfUser = u.asInstanceOf[ConfUser];
-        var paper: PaperRecord = defaultPaper;
-        getPaperById(multiParams("id").head.toInt) match {
-          case Some(p) =>  paper = p
-          case None =>
-            println ("No paper found.");
-            ()
-        }
-        renderPage("paper.ssp"
-          , Map("paper" -> paper, "ctxt" -> getContext(user)))
-      case None => redirect("login")
+    ifLoggedIn { (user: ConfUser) =>
+      var paper: PaperRecord = defaultPaper;
+      getPaperById(multiParams("id").head.toInt) match {
+        case Some(p) =>  paper = p
+        case None => ()
+      }
+      renderPage("paper.ssp"
+        , Map("paper" -> paper, "ctxt" -> getContext(user)))
     }
   }
 
   get("/review") {
-    session.get("user") match {
-      case Some(u) =>
-        val user: ConfUser = u.asInstanceOf[ConfUser];
-        renderPage("review.ssp"
-          , Map("ctxt" -> getContext(user)))
-      case None => redirect("login")
+    ifLoggedIn { (user: ConfUser) =>
+      renderPage("review.ssp"
+        , Map("ctxt" -> getContext(user)))
     }
   }
 
   get("/edit_profile") {
-    session.get("user") match {
-      case Some(u) =>
-        val user = u.asInstanceOf[ConfUser];
-        renderPage("edit_profile.ssp"
-          , Map("user" -> user, "ctxt" -> getContext(user)))
-      case None => redirect("login")
+    ifLoggedIn { (user: ConfUser) =>
+      renderPage("edit_profile.ssp"
+        , Map("user" -> user, "ctxt" -> getContext(user)))
     }
   }
 
