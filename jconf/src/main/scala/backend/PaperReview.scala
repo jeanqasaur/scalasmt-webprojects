@@ -1,10 +1,9 @@
-package cap.jeeves.jconf
+package cap.jeeves.jconf.backend
 
 /*
  * User records for jconf case study.
  * @author jeanyang
  */
-
 import cap.scalasmt._
 import org.squeryl.PrimitiveTypeMode._
 

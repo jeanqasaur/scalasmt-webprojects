@@ -1,6 +1,4 @@
-package cap.jeeves.jconf
-
-import cap.scalasmt._
+package cap.jeeves.jconf.backend
 
 import org.squeryl.KeyedEntity
 import org.squeryl.adapters.MySQLAdapter

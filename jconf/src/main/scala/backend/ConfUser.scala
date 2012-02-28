@@ -1,4 +1,4 @@
-package cap.jeeves.jconf
+package cap.jeeves.jconf.backend
 
 /*
  * User records for jconf case study.

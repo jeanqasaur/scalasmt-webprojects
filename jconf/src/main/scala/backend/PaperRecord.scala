@@ -1,4 +1,4 @@
-package cap.jeeves.jconf
+package cap.jeeves.jconf.backend
 
 /*
  * User records for jconf case study.
@@ -10,9 +10,7 @@ import cap.scalasmt._
 import org.squeryl.PrimitiveTypeMode._
 
 import scala.collection.immutable.List;
-import scala.collection.mutable.Map;
 
-import Expr._
 import JConfBackend._
 
 sealed trait PaperStage extends JeevesRecord

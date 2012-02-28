@@ -1,6 +1,4 @@
-package cap.jeeves.jconf
-
-import cap.scalasmt._
+package cap.jeeves.jconf.backend
 
 object Conversions {
   class MalformedTagError extends Exception
