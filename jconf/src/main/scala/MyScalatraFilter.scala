@@ -1,5 +1,7 @@
+package cap.jeeves.jconf
+
 import cap.jeeves._
-import cap.jeeves.jconf._
+import cap.jeeves.jconf.backend._
 import JConfBackend._
 
 import org.scalatra._
@@ -102,8 +104,8 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
     }
   }
 
+  /* Adds a new user to the database. */
   post("/create_user") {
-    /* If we are adding a new user. */
     val role: UserStatus =
       params("role") match {
         case "Author" => AuthorStatus

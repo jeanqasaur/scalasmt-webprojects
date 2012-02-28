@@ -1,4 +1,4 @@
-package cap.jeeves.jconf
+package cap.jeeves.jconf.backend
 
 import cap.scalasmt._
 import cap.jeeves._
