@@ -1,7 +1,6 @@
-package cap.jeeves.jconf
-
 import cap.jeeves._
 import cap.jeeves.jconf.backend._
+import cap.jeeves.jconf.frontend._
 import JConfBackend._
 
 import org.scalatra._
@@ -15,66 +14,13 @@ import scalate.ScalateSupport
 class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib {
   System.setProperty("smt.home", "/opt/z3/bin/z3")
 
-  Class.forName("com.mysql.jdbc.Driver");
-  
-  val dbUsername = "jeanyang";
-  val dbPassword = "scalasmt";
-  val dbConnection = "jdbc:mysql://mysql.csail.mit.edu/JeevesConfDB"
-  SessionFactory.concreteFactory = Some(()=>
-     Session.create(
-       java.sql.DriverManager.getConnection(dbConnection, dbUsername, dbPassword)
-       , new MySQLAdapter))
-  
-  try {
-    transaction { JConfTables.create; }
-  } catch {
-    case e: Exception =>
-      try {
-        transaction {
-          JConfTables.assignments.deleteWhere(a => a.reviewerId.~ > -1)
-          JConfTables.authors.deleteWhere(u => u.paperId.~ > -1)
-          JConfTables.papers.deleteWhere(p => p.id.~ > -1)
-          JConfTables.reviews.deleteWhere(r => r.id.~ >= -1)
-          JConfTables.tags.deleteWhere(t => t.paperId.~ > -1)
-          JConfTables.users.deleteWhere(u => u.id.~ > -1)
-        }
-      }
-  }
-
+  Init.initDB ()
+  Init.initDummyUsers ()
 
   val path = "/WEB-INF/views/"
   val title = "jeeves social net"
   val paperStage = Submission
   def emptyName = ""
-
-  def mkUser( userName : String, name: String
-            , pwd: String, userStatus : UserStatus): ConfUser = {
-    addUser(userName, name, pwd, userStatus)
-  }
-
-  // Add some dummy users.
-  val pcArmando =
-    mkUser("armando", "Armando Solar-Lezama", "armando", PCStatus);
-  val authorJean =
-    mkUser("jeanyang", "Jean Yang", "jean", ReviewerStatus);
-  val reviewerKuat =
-    mkUser("kuat", "Kuat Yessenov", "kuat", ReviewerStatus);
-
-  // Add some dummy papers.
-  val paper0Name = "A Language for Automatically Enforcing Privacy";
-  val paper0 = addPaper(paper0Name, List(authorJean), Nil);
-  assignReview(paper0, reviewerKuat);
-
-  val paper1Name = "Matchmaker";
-  val paper1 = addPaper(paper1Name, List(reviewerKuat), Nil);
-  assignReview(paper1, authorJean);
-
-  def checkLoggedIn() {
-    session.get("user") match {
-      case Some(user) => ()
-      case None => redirect("login")
-    }
-  }
 
   def renderPage(page: String, args: Map[String, Any] = Map()) {
     contentType = "text/html"
