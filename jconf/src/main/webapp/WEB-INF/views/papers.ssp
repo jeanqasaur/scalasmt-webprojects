@@ -1,8 +1,8 @@
 <%@ val title: String = "jconf . csail" %>
-<%@ val user: cap.jeeves.jconf.ConfUser %>
-<%@ val ctxt: cap.jeeves.jconf.ConfContext %>
-<%@ val submittedPapers: List[cap.jeeves.jconf.PaperRecord] %>
-<%@ val reviewPapers: List[cap.jeeves.jconf.PaperRecord] %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
+<%@ val submittedPapers: List[cap.jeeves.jconf.backend.PaperRecord] %>
+<%@ val reviewPapers: List[cap.jeeves.jconf.backend.PaperRecord] %>
 <html>
   <head>
     <title>${title}</title>
@@ -34,7 +34,7 @@
       #end
     </ul>
 
-    #if (user.role == cap.jeeves.jconf.ReviewerStatus)
+    #if (user.role == cap.jeeves.jconf.backend.ReviewerStatus)
       <h2>To Review.</h2>
       <table>
           <tr>
