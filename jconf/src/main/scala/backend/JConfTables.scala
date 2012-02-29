@@ -43,8 +43,7 @@ class ConfUserRecord(
       case Some(u) => u
       case None =>
         val u =
-          new ConfUser(
-              id, Username(username), Name(name), pwd
+          new ConfUser(id, username, name, pwd
             , Conversions.field2Role(role), getSubmittedPapers() );
         cacheUser(u);
         u
@@ -86,7 +85,7 @@ class PaperItemRecord( val title: String) extends KeyedEntity[Int] {
     lookupCachedPaper(id) match {
       case Some(p) => p
       case None =>
-        val p = new PaperRecord(id, Title(title), getAuthors (), getTags ())
+        val p = new PaperRecord(id, title, getAuthors (), getTags ())
         cachePaper(p);
         p
     }
@@ -124,6 +123,9 @@ object JConfTables extends Schema {
       u.id        is(autoIncremented)
     , u.username  is(unique)
   ))
+  def writeDBUser(userRecord: ConfUserRecord): Unit = {
+    transaction { users.insert(userRecord) }
+  }
   def getDBConfUser(uid: Int): Option[ConfUser] = {
     try {
       val userRecord: Option[ConfUserRecord] =
@@ -136,6 +138,18 @@ object JConfTables extends Schema {
       case e: Exception =>
       println(e);
       None
+    }
+  }
+  def getDBConfUserByUsername(username: String): Option[ConfUser] = {
+    try {
+      transaction {
+        val userRecord = from(JConfTables.users)(u =>
+        where(u.username like username)
+        select(u)).single;
+        Some(userRecord.getConfUser())
+      }
+    } catch {
+      case e: Exception => None
     }
   }
 
@@ -166,6 +180,9 @@ object JConfTables extends Schema {
   on(papers)(a => declare(
       a.id      is(autoIncremented)
   ))
+  def writeDBPaper(paperRecord: PaperItemRecord) = {
+    transaction { papers.insert(paperRecord) }
+  }
   def getDBPaperRecord(uid: Int): Option[PaperRecord] = {
     transaction { papers.lookup(uid) } match {
       case Some(paperRecord) => Some(paperRecord.getPaperRecord())
@@ -204,7 +221,9 @@ object JConfTables extends Schema {
   on(reviews)(r => declare(
       r.id      is(autoIncremented)
   ))
-
+  def writeDBReview(reviewRecord: PaperReviewRecord) = {
+    transaction { reviews.insert(reviewRecord) }
+  }
   def getReviewsByPaper(paperId: Int): List[PaperReview] = {
     transaction {
       val rs: Iterable[PaperReviewRecord] =
