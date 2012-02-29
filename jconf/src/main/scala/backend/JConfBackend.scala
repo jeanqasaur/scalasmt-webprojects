@@ -3,14 +3,8 @@ package cap.jeeves.jconf.backend
 import cap.scalasmt._
 import cap.jeeves._
 
-import org.squeryl.PrimitiveTypeMode._
-// import org.squeryl.customtypes.CustomTypesMode._
-// import org.squeryl.customtypes._
-
 import scala.collection.mutable.Map
 import scala.collection.mutable.Set
-
-import org.squeryl.Schema
 
 import Expr._
 
@@ -56,10 +50,10 @@ object JConfBackend extends JeevesLib with Serializable {
       getUserUid(
         defaultUsername, defaultName, defaultPwd
         , Conversions.role2Field(defaultStatus))
-      , Username(defaultUsername), Name(defaultName), defaultPwd, defaultStatus)
+      , defaultUsername, defaultName, defaultPwd, defaultStatus)
   }
   val defaultPaper = {
-    val defaultTitle = Title("---");
+    val defaultTitle = "---";
     new PaperRecord (getPaperUid(defaultTitle), defaultTitle)
   }
   val defaultReview = new PaperReview (getReviewUid())
@@ -70,18 +64,14 @@ object JConfBackend extends JeevesLib with Serializable {
     username: String, name: String, password: String, role: Int): Int = {
     val userRecord: ConfUserRecord =
       new ConfUserRecord(username, name, password, role);
-    transaction {
-      JConfTables.users.insert(userRecord);
-      userRecord.id
-    }
+    JConfTables.writeDBUser(userRecord);
+    userRecord.id
   }
   private var _papercount = 1;
-  private def getPaperUid (title: Title) : Int = {
-    val paperRecord: PaperItemRecord = new PaperItemRecord(title.title)
-    transaction {
-      JConfTables.papers.insert(paperRecord);
-      paperRecord.id
-    }
+  private def getPaperUid (title: String) : Int = {
+    val paperRecord: PaperItemRecord = new PaperItemRecord(title)
+    JConfTables.writeDBPaper(paperRecord)
+    paperRecord.id
   }
   private var _reviewcount = 1;
   def getReviewUid (
@@ -89,10 +79,8 @@ object JConfBackend extends JeevesLib with Serializable {
     , score: Int = -1): Int = {
     val reviewRecord: PaperReviewRecord =
       new PaperReviewRecord(paperId, reviewerId, body, score);
-    transaction {
-      JConfTables.reviews.insert(reviewRecord);
-      reviewRecord.id
-    }
+    JConfTables.writeDBReview(reviewRecord)
+    reviewRecord.id
   }
 
   def getContext(user: ConfUser): ConfContext =
@@ -105,16 +93,11 @@ object JConfBackend extends JeevesLib with Serializable {
     concretize(ctxt, v).asInstanceOf[T]
   }
 
-  def showList[T](user: ConfContext, vs: List[Symbolic]):List[T] = {
-    vs.map(x => show[T](user, x))
-  }
-
   def addUser(username: String
     , name: String, password: String, role: UserStatus): ConfUser = {
     val id =
       getUserUid (username, name, password, Conversions.role2Field(role));
-    val user =
-      new ConfUser(id, Username(username), Name(name), password, role);
+    val user = new ConfUser(id, username, name, password, role);
 
     // Add paper to in-memory cache.
     jconfUsers += (id -> user)
@@ -125,9 +108,9 @@ object JConfBackend extends JeevesLib with Serializable {
   def addPaper(name : String, authors : List[ConfUser], tags : List[PaperTag])
       : PaperRecord = {
     // TODO: Make sure UID is unique...
-    val uid = getPaperUid (Title(name));
+    val uid = getPaperUid (name);
 
-    val paper = new PaperRecord(uid, Title(name), authors, tags)
+    val paper = new PaperRecord(uid, name, authors, tags)
     authors.foreach(a => a.addSubmittedPaper(uid))
 
     // Add paper to in-memory cache.
@@ -179,7 +162,7 @@ object JConfBackend extends JeevesLib with Serializable {
     ids.map(id => getPaperById(id))
   
   def searchByTitle(title: String) = 
-    JConfTables.getAllDBPapers().filter(_.title === Title(title))
+    JConfTables.getAllDBPapers().filter(_.title === StringVal(title))
   
   def searchByAuthor(author: ConfUser) = 
     JConfTables.getAllDBPapers().filter(_.getAuthors().has(author))
@@ -202,15 +185,14 @@ object JConfBackend extends JeevesLib with Serializable {
         u
     }
   }
-  def loginUser(id: String, password: String): Option[ConfUser] = {
-    transaction {
-      val userRecord = from(JConfTables.users)(u =>
-        where(u.username like id)
-        select(u)).single;
-      val user = userRecord.getConfUser()
-      val userCtxt = new ConfContext(user, confStage);
-      val pwd : Password = user.showPassword(userCtxt);
-      if (pwd.pwd.equals(password)) Some(user) else None
+  def loginUser(uname: String, password: String): Option[ConfUser] = {
+    JConfTables.getDBConfUserByUsername(uname) match {
+      case Some(user) =>
+        cacheUser(user);
+        val userCtxt = new ConfContext(user, confStage);
+        val pwd : String = user.showPassword(userCtxt);
+        if (pwd.equals(password)) Some(user) else None
+      case None => None
     }
   }
 }

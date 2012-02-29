@@ -18,8 +18,8 @@ class TestPaperRecord extends FunSuite {
 
   test ("title policy") {
     withDataInDatabase {
-      expect(Title(paper0Name)) {
-        show[Title](getAuthorCtxt0(Submission), paper0.getTitle ())
+      expect(StringVal(paper0Name)) {
+        show[StringVal](getAuthorCtxt0(Submission), paper0.title)
       }
     }
   }
@@ -34,7 +34,8 @@ class TestPaperRecord extends FunSuite {
         paper0_copy.getAuthors().length
       }
       expect(paper0Name) {
-        show[Title](getAuthorCtxt0(Submission), paper0_copy.getTitle ()).title;
+        show[StringVal](
+          getAuthorCtxt0(Submission), paper0_copy.title).v;
       }
     }
   }
@@ -98,16 +99,16 @@ class TestPaperRecord extends FunSuite {
 
   test ("title visibility - author can see title") {
     withDataInDatabase {
-      expect(Title(paper0Name)) {
-        concretize(getAuthorCtxt0 (Submission), paper0.getTitle ())
+      expect(StringVal(paper0Name)) {
+        concretize(getAuthorCtxt0 (Submission), paper0.title)
       }
     }
   }
 
   test ("title visibility - nonauthor cannot see title") {
     withDataInDatabase {
-      expect(Title("No permission")) {
-        concretize(getAuthorCtxt2 (Submission), paper0.getTitle ())
+      expect(StringVal("No permission")) {
+        concretize(getAuthorCtxt2 (Submission), paper0.title)
       }
     }
   }

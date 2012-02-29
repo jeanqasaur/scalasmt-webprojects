@@ -18,15 +18,12 @@ case object ReviewerStatus extends UserStatus
 case object PCStatus extends UserStatus
 
 /* Conference User */
-case class Username (name: String) extends JeevesRecord
-case class Name (name: String) extends JeevesRecord
-case class Password (val pwd: String) extends JeevesRecord
 case class ConfUser(
-    val uid: BigInt
-  , val username: Username
-  , private var _name: Name
+            val uid: BigInt
+  ,         val username: String
+  , private var _name: String
   , private var _password: String
-  , val role: UserStatus
+  ,         val role: UserStatus
   , private var _submittedPapers: List[BigInt] = Nil )
   extends JeevesRecord {
     /*************/
@@ -37,21 +34,20 @@ case class ConfUser(
     private val isPC: Formula = CONTEXT.viewer.status === PCStatus
 
     private val selfL = mkLevel ();
-    policy (selfL, !(CONTEXT.viewer.username === username), LOW);
+    policy (selfL, !(CONTEXT.viewer~'uid === uid), LOW);
     logConfUserPolicy();
     def isSelf(): Formula = selfL
 
-    // For now, everyone can see the name.
-    // TODO: Um, do something about making this less stupid.
     private val nameL = mkLevel ();
-//    policy (nameL, false, LOW);
 
-    def setName (n: Name): Unit = {
-      _name = n
+    def setName (n: String): Unit = {
+      _name = n;
+      name = mkSensitive(nameL, StringVal(_name), StringVal("--"))
     }
-    def getName (): Symbolic = mkSensitive(nameL, _name, Name("--"))
+    var name: Symbolic =
+      mkSensitive(nameL, StringVal(_name), StringVal("--"))
     def showName (ctxt: ConfContext): String = {
-      concretize(ctxt, getName ()).asInstanceOf[Name].name
+      concretize(ctxt, name).asInstanceOf[StringVal].v
     }
 
     // Submitted papers.
@@ -93,11 +89,14 @@ case class ConfUser(
     }
 
     // Password.
-    def setPassword (p: String) = _password = p
-    def getPassword (): Symbolic =
-      mkSensitive(selfL, Password(_password), Password("default"))
-    def showPassword (ctxt: ConfContext): Password = {
-      concretize(ctxt, getPassword ()).asInstanceOf[Password]
+    def setPassword (p: String) = {
+      _password = p
+      password = mkSensitive(selfL, StringVal(_password), StringVal("default"))
+    }
+    var password =
+      mkSensitive(selfL, StringVal(_password), StringVal("default"))
+    def showPassword (ctxt: ConfContext): String = {
+      concretize(ctxt, password).asInstanceOf[StringVal].v
     }
 
     def getConfUserRecord(): ConfUserRecord = {

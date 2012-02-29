@@ -108,7 +108,7 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
   post("/profile") {
     ifLoggedIn { (user: ConfUser) =>
       // TODO: Need to update other fields as well.
-      user.setName(Name(params("name")));
+      user.setName(params("name"));
       session("user") = user;
       renderPage("profile.ssp"
         , Map("user" -> user, "ctxt" -> getContext(user)))

@@ -26,10 +26,8 @@ case class ReviewedBy (reviewer: BigInt) extends PaperTag
 object Accepted extends PaperTag
 object EmptyTag extends PaperTag
 
-case class Title (title : String) extends JeevesRecord
-
 class PaperRecord(         val uid: BigInt
-                 , private var _title: Title
+                 , private var _title: String
                  , private var _authors: List[ConfUser] = Nil
                  , private var _tags: List[PaperTag] = Nil)
                extends JeevesRecord with Serializable {
@@ -69,11 +67,14 @@ class PaperRecord(         val uid: BigInt
   /************************/
   /* Getters and setters. */
   /************************/
-  def setTitle(name: Title) = _title = name
-  var title: Symbolic = mkSensitive(titleL, _title, Title("No permission"))
-  def getTitle(): Symbolic =  mkSensitive(titleL, _title, Title("No permission"))
+  def setTitle(name: String) = {
+    _title = name
+    title = mkSensitive(titleL, StringVal(_title), StringVal("No permission"))
+  }
+  var title: Symbolic =
+    mkSensitive(titleL, StringVal(_title), StringVal("No permission"))
   def showTitle(ctxt: ConfContext): String =
-    (concretize(ctxt, getTitle ()).asInstanceOf[Title]).title
+    (concretize(ctxt, title).asInstanceOf[StringVal]).v
 
   def getAuthors() : List[Symbolic] = {
     _authors.map(author => mkSensitive(_authorL, author, defaultUser))

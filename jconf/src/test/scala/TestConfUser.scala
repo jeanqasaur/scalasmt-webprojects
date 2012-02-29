@@ -28,7 +28,7 @@ class TestConfUser extends FunSuite {
       expect(true) {
         concretize(
           getContext(author0)
-          , author0.getName() === author0_copy.getName());
+          , author0.name === author0_copy.name);
       }
       expect(true) {
         concretize(
@@ -53,7 +53,7 @@ class TestConfUser extends FunSuite {
       expect(true) {
         concretize(
           getContext(author0)
-          , author0.getName() === author0_copy.getName());
+          , author0.name === author0_copy.name);
       }
       expect(true) {
         concretize(
@@ -80,23 +80,23 @@ class TestConfUser extends FunSuite {
   
   test ("username visibility") {
     withDataInDatabase {
-      expect(Username("author0")) {
-        show[Username](getContext(author0), author0.username)
+      expect("author0") {
+        show[ConfUser](getContext(author0), author0).username
       }
-      expect(Username("author0")) {
-        show[Username](getContext(author1), author0.username)
+      expect("author0") {
+        show[ConfUser](getContext(author1), author0).username
       }
     }
   }
   
   test ("password visibility") {
     withDataInDatabase {
-      expect(Password("a0p")) {
-        show[Password](getContext(author0), author0.getPassword ())
+      expect(StringVal("a0p")) {
+        show[StringVal](getContext(author0), author0.password)
       }
 
-      expect(Password("default")) {
-        show[Password](getContext(author1), author0.getPassword ())
+      expect(StringVal("default")) {
+        show[StringVal](getContext(author1), author0.password)
       }
     }
   } 
