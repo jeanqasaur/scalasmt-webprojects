@@ -10,6 +10,8 @@ import org.squeryl.Session
 import org.squeryl.SessionFactory
 
 object Init {
+  private val clearEverything = true
+
   def initDB(): Unit = {
     Class.forName("com.mysql.jdbc.Driver");
 
@@ -27,38 +29,41 @@ object Init {
       } catch {
         case e: Exception =>
         try {
-          // TODO: Stop taking all users out of the DB at some point...
-          transaction {
-            JConfTables.assignments.deleteWhere(a => a.reviewerId.~ > -1)
-            JConfTables.authors.deleteWhere(u => u.paperId.~ > -1)
-            JConfTables.papers.deleteWhere(p => p.id.~ > -1)
-            JConfTables.reviews.deleteWhere(r => r.id.~ >= -1)
-            JConfTables.tags.deleteWhere(t => t.paperId.~ > -1)
-            JConfTables.users.deleteWhere(u => u.id.~ > -1)
+          if (clearEverything) {
+            transaction {
+              JConfTables.assignments.deleteWhere(a => a.reviewerId.~ > -1)
+              JConfTables.authors.deleteWhere(u => u.paperId.~ > -1)
+              JConfTables.papers.deleteWhere(p => p.id.~ > -1)
+              JConfTables.reviews.deleteWhere(r => r.id.~ >= -1)
+              JConfTables.tags.deleteWhere(t => t.paperId.~ > -1)
+              JConfTables.users.deleteWhere(u => u.id.~ > -1)
+            }
           }
         }
       }
    }
   
   def initDummyUsers (): Unit = {
-     // Add some dummy users.
-     val pcArmando =
-       JConfBackend.addUser(
+    if (clearEverything) {
+      // Add some dummy users.
+      val pcArmando =
+        JConfBackend.addUser(
         "armando", "Armando Solar-Lezama", "armando", PCStatus);
-     val authorJean =
-       JConfBackend.addUser(
+      val authorJean =
+        JConfBackend.addUser(
         "jeanyang", "Jean Yang", "jean", ReviewerStatus);
-     val reviewerKuat =
-       JConfBackend.addUser(
-       "kuat", "Kuat Yessenov", "kuat", ReviewerStatus);
+      val reviewerKuat =
+        JConfBackend.addUser(
+        "kuat", "Kuat Yessenov", "kuat", ReviewerStatus);
 
-     // Add some dummy papers.
-     val paper0Name = "A Language for Automatically Enforcing Privacy";
-     val paper0 = JConfBackend.addPaper(paper0Name, List(authorJean), Nil);
-     JConfBackend.assignReview(paper0, reviewerKuat);
+      // Add some dummy papers.
+      val paper0Name = "A Language for Automatically Enforcing Privacy";
+      val paper0 = JConfBackend.addPaper(paper0Name, List(authorJean), Nil);
+      JConfBackend.assignReview(paper0, reviewerKuat);
 
-     val paper1Name = "Matchmaker";
-     val paper1 = JConfBackend.addPaper(paper1Name, List(reviewerKuat), Nil);
-     JConfBackend.assignReview(paper1, authorJean);
+      val paper1Name = "Matchmaker";
+      val paper1 = JConfBackend.addPaper(paper1Name, List(reviewerKuat), Nil);
+      JConfBackend.assignReview(paper1, authorJean);
+    }
    }
  }

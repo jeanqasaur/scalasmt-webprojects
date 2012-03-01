@@ -20,7 +20,7 @@ object UserStatusField extends Enumeration {
 }
 
 class ConfUserRecord(
-    val username: String
+    val email: String
   , val name: String
   , val pwd: String
   , val role: Int
@@ -43,7 +43,7 @@ class ConfUserRecord(
       case Some(u) => u
       case None =>
         val u =
-          new ConfUser(id, username, name, pwd
+          new ConfUser(id, email, name, pwd
             , Conversions.field2Role(role), getSubmittedPapers() );
         cacheUser(u);
         u
@@ -105,12 +105,17 @@ class PaperReviewRecord(
     val paperId: Int
   , val reviewerId: Int
   , val body: String
-  , val score: Int ) extends KeyedEntity[Int] {
-  def this() = this(-1, -1, "", -1)
+  , val problemScore: Int
+  , val backgroundScore: Int
+  , val approachScore: Int
+  , val resultScore: Int )
+extends KeyedEntity[Int] {
+  def this() = this(-1, -1, "", 3, 3, 3, 3)
   val id: Int = 0;
 
   def getPaperReview(): PaperReview = {
-    new PaperReview(id, paperId, reviewerId, body, score)
+    new PaperReview(id, paperId, reviewerId, body
+      , problemScore, backgroundScore, approachScore, resultScore )
   }
 }
 
@@ -121,7 +126,7 @@ object JConfTables extends Schema {
   val users = table[ConfUserRecord]("ConfUsers")
   on(users)(u => declare(
       u.id        is(autoIncremented)
-    , u.username  is(unique)
+    , u.email     is(unique)
   ))
   def writeDBUser(userRecord: ConfUserRecord): Unit = {
     transaction { users.insert(userRecord) }
@@ -140,16 +145,21 @@ object JConfTables extends Schema {
       None
     }
   }
-  def getDBConfUserByUsername(username: String): Option[ConfUser] = {
+  def getDBConfUserByEmail(email: String): Option[ConfUser] = {
     try {
       transaction {
         val userRecord = from(JConfTables.users)(u =>
-        where(u.username like username)
+        where(u.email like email)
         select(u)).single;
         Some(userRecord.getConfUser())
       }
     } catch {
       case e: Exception => None
+    }
+  }
+  def updateDBUser(user: ConfUser): Unit = {
+    transaction {
+      users.update(user.getConfUserRecord())
     }
   }
 
@@ -219,10 +229,27 @@ object JConfTables extends Schema {
   /* Reviews. */
   val reviews = table[PaperReviewRecord]
   on(reviews)(r => declare(
-      r.id      is(autoIncremented)
+      r.id          is(autoIncremented)
+    , r.paperId     is(indexed)
+    , r.reviewerId  is(indexed)
   ))
   def writeDBReview(reviewRecord: PaperReviewRecord) = {
     transaction { reviews.insert(reviewRecord) }
+  }
+  def updateDBReview(review: PaperReview) = {
+    transaction { reviews.update(review.getPaperReviewRecord()) }
+  }
+  def getReviewByPaperReviewer(paperId: Int, reviewerId: Int)
+    : Option[PaperReview] = {
+    try {
+      transaction {
+        Some(from(reviews)(r =>
+          where((r.paperId === paperId.~) and (r.reviewerId === reviewerId.~))
+          select(r)).single.getPaperReview())
+      }
+    } catch {
+      case e: Exception => None
+    }
   }
   def getReviewsByPaper(paperId: Int): List[PaperReview] = {
     transaction {

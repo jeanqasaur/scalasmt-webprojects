@@ -18,7 +18,7 @@
       <small><a href="edit_profile">Edit Profile</a></small><br>
       <table>
         <tr>
-          <td><b>Username</b></td><td><%= user.username.name %></td>
+          <td><b>Username</b></td><td><%= user.email %></td>
         </tr>
         <tr>
           <td><b>Name</b></td><td><%= user.showName (ctxt) %></td>

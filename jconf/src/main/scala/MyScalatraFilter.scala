@@ -11,7 +11,10 @@ import org.squeryl.SessionFactory
 import java.net.URL
 import scalate.ScalateSupport
 
-class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib {
+class MyScalatraFilter
+extends ScalatraFilter with ScalateSupport with JeevesLib {
+  class JConfInternalError extends Exception
+
   System.setProperty("smt.home", "/opt/z3/bin/z3")
 
   Init.initDB ()
@@ -31,9 +34,30 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
     }
   }
 
-  def renderPage(page: String, args: Map[String, Any] = Map()) {
+  def renderPage(page: String, args: Map[String, Any] = Map()): Unit = {
     contentType = "text/html"
     templateEngine.layout(path + page, args)
+  }
+  def renderPageWithUser(
+    page: String, user: ConfUser, args: Map[String, Any] = Map()): Unit = {
+    var newArgs = args;
+    newArgs += ("user" -> user)
+    newArgs += ("ctxt" -> getContext(user));
+    renderPage(page, newArgs)
+  }
+
+  def loginRedirect(msg: String) = {
+    renderPage("login_screen.ssp", Map("errorMsg" -> msg))
+  }
+
+  def renderRadioButtons(fieldName: String, fieldValue: Int): String = {
+    println("Rendering radio buttons");
+    val rendered: String =
+      templateEngine.layout(path + "snippets/radio_button.ssp"
+        , Map("fieldName" -> fieldName, "fieldValue" -> fieldValue))
+    println(rendered);
+    println("Done printing rendered");
+    rendered
   }
 
   get("/") {
@@ -45,53 +69,47 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
   }
 
   post("/login_user") {
-    println(params("username"));
-    loginUser(params("username"), params("password")) match {
-      case Some(user) =>
-        session("user") = user
-        renderPage("index.ssp"
-          , Map( "name" -> user.showName(getContext(user))
-          , "papers" -> searchByAuthor(user)))
-      case None => redirect("login")
-    }
-  }
+    // If we are logging in...
+    if (params.exists((param: (String, String)) => param._1 == "signup")) {
+      JConfTables.getDBConfUserByEmail(params("username")) match {
+        // User already exists in database.  Redirect to the login page.
+        case Some(user) =>
+          loginRedirect("Username already exists in database.")
+        case None =>
+          // Everyone is author status by default.
+          println(params("username") + " does not already exist...");
+          // TODO: Change this?
+          val role: UserStatus = AuthorStatus
 
-  /* Adds a new user to the database. */
-  post("/create_user") {
-    val role: UserStatus =
-      params("role") match {
-        case "Author" => AuthorStatus
-        case "Reviewer" => ReviewerStatus
-        case "PC" => PCStatus
+          // Make a new user and add them to the database.
+          val u =
+            addUser(params("username")
+            , ""
+            , JConfUtil.generatePassword()
+            , role);
+        session("user") = u;
+        redirect("edit_profile")
       }
-
-    // Make a new user and add them to the database.
-    val u =
-      addUser(params("username"), params("yourname"), params("password"), role);
-    session("user") = u;
-
-    renderPage("index.ssp"
-      , Map("user" -> u, "name" -> u.showName(getContext(u))
-      , "role" -> params("role")
-      , "papers" -> searchByAuthor(u) )
-       )
+    } else {
+      // Assuming otherwise we are logging in...
+      loginUser(params("username"), params("password")) match {
+        case Some(user) =>
+          session("user") = user
+          renderPage("index.ssp"
+            , Map( "name" -> user.showName(getContext(user))
+            , "papers" -> searchByAuthor(user)))
+        case None =>
+          loginRedirect("Incorrect username or password.")
+     }
+   }
   }
 
   get("/login") {
     session.get("user") match {
       case Some(user) => redirect("*")
-      case None =>
-        val tmp =
-          Option(System.getProperty("smt.home")) match {
-            case Some(p) => p
-            case None => System.getProperty("user.home") + "/opt/z3/bin/z3"
-          }
-        renderPage("login_screen.ssp")
+      case None => renderPage("login_screen.ssp")
     }
   }
-
-  get("/signup") { renderPage("signup.ssp") }
-  post("/signup_confirm") { renderPage("signup_confirm.ssp") }
 
   get("/papers") {
     ifLoggedIn { (user: ConfUser) =>
@@ -105,24 +123,25 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
     }
   }
 
+  // Update and display profile.
   post("/profile") {
     ifLoggedIn { (user: ConfUser) =>
       // TODO: Need to update other fields as well.
-      user.setName(params("name"));
+      JConfUtil.updateUserProfile(user, params);
       session("user") = user;
-      renderPage("profile.ssp"
-        , Map("user" -> user, "ctxt" -> getContext(user)))
+      renderPageWithUser("profile.ssp", user)
     }
   }
   get("/profile") {
     ifLoggedIn { (user: ConfUser) =>
-      var curUser: ConfUser = null;
-      if (!(params.exists(_ == "id"))) {
-        curUser = user;
-      } else {
-        getUserById(params("id").toInt) match {
-          case Some(idUser) => curUser = idUser
-          case None => ()
+      var curUser: ConfUser = {
+        if (!(params.exists(_ == "id"))) {
+          user;
+        } else {
+          getUserById(params("id").toInt) match {
+            case Some(idUser) => idUser
+            case None => null
+          }
         }
       }
       renderPage("profile.ssp"
@@ -138,30 +157,82 @@ class MyScalatraFilter extends ScalatraFilter with ScalateSupport with JeevesLib
         case Some(p) =>  paper = p
         case None => ()
       }
-      renderPage("paper.ssp"
-        , Map("paper" -> paper, "ctxt" -> getContext(user)))
+      renderPageWithUser("paper.ssp", user, Map("paper" -> paper))
     }
   }
 
+  def getReviewInfo(paperId: Int, reviewerId: Int)
+    : (PaperRecord, ConfUser, PaperReview) = {
+    val paper: PaperRecord =
+      getPaperById(paperId) match {
+        case Some(p) => p
+        case None =>
+          throw new JConfInternalError
+      }
+
+    val reviewer: ConfUser =
+      getUserById(reviewerId) match {
+        case Some(idUser) => idUser
+        case None => throw new JConfInternalError
+      }
+
+    val review: PaperReview =
+      JConfTables.getReviewByPaperReviewer(paperId, reviewerId) match {
+        case Some(review) => review
+        case None => throw new JConfInternalError
+      }
+    (paper, reviewer, review)
+  }
+  post("/review") {
+    ifLoggedIn { (user: ConfUser) =>
+      val paperId = params("paperId").toInt;
+      val reviewerId = params("reviewerId").toInt;
+      val (paper, reviewer, review) = getReviewInfo(paperId, reviewerId)
+      JConfUtil.updatePaperReview(review, params)
+
+      renderPageWithUser("review.ssp", user,
+        Map("paper" -> paper, "reviewer" -> reviewer, "review" -> review))
+    }
+  }
   get("/review") {
     ifLoggedIn { (user: ConfUser) =>
-      renderPage("review.ssp"
-        , Map("ctxt" -> getContext(user)))
+      val paperId = params("paperId").toInt;
+      val reviewerId = params("reviewerId").toInt;
+      val (paper, reviewer, review) = getReviewInfo(paperId, reviewerId)
+      renderPageWithUser("review.ssp", user,
+        Map("paper" -> paper, "reviewer" -> reviewer, "review" -> review))
     }
   }
 
   get("/edit_profile") {
     ifLoggedIn { (user: ConfUser) =>
-      renderPage("edit_profile.ssp"
-        , Map("user" -> user, "ctxt" -> getContext(user)))
+      renderPageWithUser("edit_profile.ssp", user)
+    }
+  }
+  get("/edit_review") {
+    ifLoggedIn { (user: ConfUser) =>
+      val paperId = params("paperId").toInt;
+
+      JConfTables.getDBPaperRecord(paperId) match {
+        case Some(paper) =>
+          val curReview = {
+            JConfTables.getReviewByPaperReviewer(paperId, user.uid.toInt) match {
+              case Some(review) => review
+              case None => paper.addReview(user)
+            }
+          }
+          val ctxt = getContext(user);
+          renderPageWithUser("edit_review.ssp", user
+            , Map("paper" -> paper
+              , "review" -> curReview
+              , "reviewer" -> user
+                ))
+        case None => redirect("/")
+      }
     }
   }
 
-  get("/logout") {
-    // Unbind user.
-    session.invalidate
-    redirect("login")
-  }
+  get("/logout") { session.invalidate; redirect("login") }
 
   notFound {
     // If no route matches, then try to render a Scaml template

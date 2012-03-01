@@ -1,6 +1,6 @@
 <%@ val title: String = "jconf . csail" %>
-<%@ val user: cap.jeeves.jconf.ConfUser %>
-<%@ val ctxt: cap.jeeves.jconf.ConfContext %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
 <html>
   <head>
     <title>${title}</title>
@@ -15,7 +15,7 @@
     <form action="profile" method="post">
     <table>
       <tr>
-        <td><b>Username</b></td><td><%= user.username.name %></td></td>
+        <td><b>Username</b></td><td><%= user.email %></td></td>
       </tr>
       <tr>
         <td><b>Name</b></td>
@@ -26,13 +26,13 @@
       <tr>
         <td><b>Role</b></td>
         <td>#match (user.role)
-            #case(cap.jeeves.jconf.PublicStatus)
+            #case(cap.jeeves.jconf.backend.PublicStatus)
               Public viewer
-            #case(cap.jeeves.jconf.AuthorStatus)
+            #case(cap.jeeves.jconf.backend.AuthorStatus)
               Author
-            #case(cap.jeeves.jconf.ReviewerStatus)
+            #case(cap.jeeves.jconf.backend.ReviewerStatus)
               Reviewer
-            #case(cap.jeeves.jconf.PCStatus)
+            #case(cap.jeeves.jconf.backend.PCStatus)
               PC member
             #otherwise
               <i>Internal error.</i>
