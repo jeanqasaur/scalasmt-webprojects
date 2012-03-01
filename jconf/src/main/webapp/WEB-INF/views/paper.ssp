@@ -1,6 +1,6 @@
 <%@ val title: String = "jconf . csail" %>
-<%@ val paper: cap.jeeves.jconf.PaperRecord %>
-<%@ val ctxt: cap.jeeves.jconf.ConfContext %>
+<%@ val paper: cap.jeeves.jconf.backend.PaperRecord %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
 <html>
   <head>
     <title>${title}</title>
@@ -39,11 +39,11 @@
           }#
           #for (tag <- tags)
             #match (tag)
-            #case(cap.jeeves.jconf.NeedsReview(reviewer))
+            #case(cap.jeeves.jconf.backend.NeedsReview(reviewer.uid))
               Needs Review<br>
-            #case(cap.jeeves.jconf.ReviewedBy(reviewer))
+            #case(cap.jeeves.jconf.backend.ReviewedBy(reviewer.uid))
               Reviewed by<br>
-            #case(cap.jeeves.jconf.Accepted)
+            #case(cap.jeeves.jconf.backend.Accepted)
               Accepted<br>
             #otherwise
               <i>Internal error.</i>

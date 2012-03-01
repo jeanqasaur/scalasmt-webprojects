@@ -13,10 +13,11 @@ class PaperReview(val uid: BigInt
   , private val _paperId: BigInt = -1
   , private val _reviewerId: BigInt = -1
   , private var _body: String = ""
-  , private var _score: Int = -1)
+  , private var _problemScore: Int = 3
+  , private var _backgroundScore: Int = 3
+  , private var _approachScore: Int = 3
+  , private var _resultScore: Int = 3)
   extends JeevesRecord with Serializable {
-  // TODO: Is this where we want to associate reviews with users?
-
   /*************/
   /* Policies. */
   /*************/
@@ -42,15 +43,26 @@ class PaperReview(val uid: BigInt
 
   def setBody (newbody: String) = _body = newbody
   def getBody (): String = _body
+  def showBody(ctxt: ConfContext): String = _body
 
-  def setScore (newscore: Int) = _score = newscore
-  def getScore (): Int = _score
+  /* Score. */
+  def setProblemScore (newscore: Int) = _problemScore = newscore
+  def getProblemScore (): Int = _problemScore
+  def showProblemScore (ctxt: ConfContext): Int = _problemScore
+
+  def setBackgroundScore (newscore: Int) = _backgroundScore = newscore
+  def getBackgroundScore (): Int = _backgroundScore
+  def showBackgroundScore (ctxt: ConfContext): Int = _backgroundScore
+
+  def setApproachScore (newscore: Int) = _approachScore = newscore
+  def getApproachScore (): Int = _approachScore
+  def showApproachScore (ctxt: ConfContext): Int = _approachScore
+
+  def setResultScore (newscore: Int) = _resultScore = newscore
+  def getResultScore (): Int = _resultScore
+  def showResultScore (ctxt: ConfContext): Int = _resultScore
 
   def getPaperReviewRecord(): PaperReviewRecord = {
     transaction { JConfTables.reviews.get(uid.toInt) }
-    /*
-    new PaperReviewRecord(
-      uid.toInt, _paperId.toInt, _reviewerId.toInt, _body, _score)
-    */
   }
 }

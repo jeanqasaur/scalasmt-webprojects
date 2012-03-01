@@ -20,7 +20,7 @@ case object PCStatus extends UserStatus
 /* Conference User */
 case class ConfUser(
             val uid: BigInt
-  ,         val username: String
+  ,         val email: String
   , private var _name: String
   , private var _password: String
   ,         val role: UserStatus
@@ -38,8 +38,9 @@ case class ConfUser(
     logConfUserPolicy();
     def isSelf(): Formula = selfL
 
+    /* If you can see this user, you can see their name. */
     private val nameL = mkLevel ();
-
+    // No policies on name--should always be high...
     def setName (n: String): Unit = {
       _name = n;
       name = mkSensitive(nameL, StringVal(_name), StringVal("--"))
@@ -103,6 +104,6 @@ case class ConfUser(
       transaction { JConfTables.users.get(uid.toInt) }
     }
     def debugPrint(): Unit = {
-      println("ConfUser(id=" + uid + ",username=" + username + ")")
+      println("ConfUser(id=" + uid + ",email=" + email + ")")
     }
   }

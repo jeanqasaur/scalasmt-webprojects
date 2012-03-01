@@ -123,9 +123,16 @@ class PaperRecord(         val uid: BigInt
     (getTags ()).map(t => concretize(ctxt, t).asInstanceOf[PaperTag])
   }
 
-  def addReview (reviewer: ConfUser, body: String, score: Int): PaperReview = {
-   val reviewUid = getReviewUid(uid.toInt, reviewer.uid.toInt, body, score);
-   val r = new PaperReview(reviewUid, uid, reviewer.uid, body, score);
+  def addReview (reviewer: ConfUser, body: String = ""
+    , problemScore: Int = 3, backgroundScore: Int = 3
+    , approachScore: Int = 3, resultScore: Int =3)
+  : PaperReview = {
+   val reviewUid =
+     getReviewUid(uid.toInt, reviewer.uid.toInt, body
+     , problemScore, backgroundScore, approachScore, resultScore);
+   val r =
+     new PaperReview(reviewUid, uid, reviewer.uid, body
+     , problemScore, backgroundScore, approachScore, resultScore);
    addTag(ReviewedBy(reviewer.uid))
    r
   }

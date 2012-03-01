@@ -1,1 +1,1 @@
-java -Xmx4096M -Xss15M -XX:+CMSClassUnloadingEnabled -jar `dirname $0`/sbt-launcher.jar "$@"
+java -Xmx4096M -Xss20M -XX:+CMSClassUnloadingEnabled -jar `dirname $0`/sbt-launcher.jar "$@"

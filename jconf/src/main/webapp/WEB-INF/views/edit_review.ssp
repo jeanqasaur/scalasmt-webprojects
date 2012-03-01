@@ -1,0 +1,78 @@
+<%@ val title: String = "jconf . csail" %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
+<%@ val paper: cap.jeeves.jconf.backend.PaperRecord %>
+<%@ val review: cap.jeeves.jconf.backend.PaperReview %>
+<%@ val reviewer: cap.jeeves.jconf.backend.ConfUser %>
+<html>
+  <head>
+    <title>${title}</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  </head>
+<body>
+  <div id="wrapper">
+    ${include("header.ssp")}
+
+    <div id="content">
+    <h1>Edit Review.</h1>
+    <form action="/review" method="post">
+    <input type="hidden" name="paperId" value="<%= paper.uid %>">
+    <input type="hidden" name="reviewerId" value="<%= reviewer.uid %>">
+    <table>
+      <tr>
+        <td><b>Paper</b></td>
+        <td><%= paper.showTitle(ctxt) %></td>
+      </tr>
+      <tr>
+        <td><b>Reviewer</b></td>
+        <td><%= reviewer.showName(ctxt) %> ( <%= reviewer.email %> )</td>
+      </tr>
+      <tr>
+        <td><b>Problem and motivation</b></td>
+        <td>
+          #do(layout("snippets/radio_buttons.ssp",
+              Map("fieldName" -> "problemScore"
+                , "fieldValue" -> review.showProblemScore(ctxt)))) #end
+        </td>
+      </tr>
+      <tr>
+        <td><b>Background and Related Work</b></td>
+        <td>
+          #do(layout("snippets/radio_buttons.ssp",
+              Map("fieldName" -> "backgroundScore"
+                , "fieldValue" -> review.showBackgroundScore(ctxt)))) #end
+        </td>
+      </tr>
+      <tr>
+        <td><b>Approach and Uniqueness</b></td>
+        <td>
+          #do(layout("snippets/radio_buttons.ssp",
+              Map("fieldName" -> "approachScore"
+                , "fieldValue" -> review.showApproachScore(ctxt)))) #end
+        </td>
+      </tr>
+      <tr>
+        <td><b>Results and Contributions</b></td>
+        <td>
+          #do(layout("snippets/radio_buttons.ssp",
+              Map("fieldName" -> "resultScore"
+                , "fieldValue" -> review.showResultScore(ctxt)))) #end
+        </td>
+      </tr>
+      <tr>
+        <td><b>Comments</b></td>
+        <td>
+          <textarea rows="15" cols="40" name="body">
+            <%= review.showBody(ctxt) %>
+          </textarea>
+        </td>
+      </tr>
+      <tr><td><input type="submit" value="Submit" /></td></tr>
+    </table>
+    </form>
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>
