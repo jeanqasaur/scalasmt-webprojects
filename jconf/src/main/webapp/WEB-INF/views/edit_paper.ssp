@@ -1,0 +1,41 @@
+<%@ val title: String = "jconf . csail" %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
+<%@ val paper: cap.jeeves.jconf.backend.PaperRecord %>
+<html>
+  <head>
+    <title>${title}</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  </head>
+<body>
+  <div id="wrapper">
+    ${include("header.ssp")}
+
+    <div id="content">
+    <h1>Edit Review.</h1>
+    <form action="paper?id=<%= paper.uid %>" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="paperId" value="<%= paper.uid %>">
+    <table>
+      <tr>
+        <td><b>Paper Title</b></td>
+        <td>
+          <input type="text" name="title" value="<%= paper.showTitle(ctxt) %>">
+        </td>
+      </tr>
+      <tr>
+        <td><b>Author</b></td>
+        <td><%= user.showName(ctxt) %></td>
+      </tr>
+      <tr>
+        <td><b>File</b></td>
+        <td><input type="file" name="thefile" /></td>
+      </tr>
+      <tr><td><input type="submit" value="Submit" /></td></tr>
+    </table>
+    </form>
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>

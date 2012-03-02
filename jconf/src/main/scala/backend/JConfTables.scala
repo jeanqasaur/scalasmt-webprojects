@@ -53,8 +53,9 @@ class ConfUserRecord(
 
 class Assignment(val reviewerId: Int, val paperId: Int);
 
-class PaperItemRecord( val title: String) extends KeyedEntity[Int] {
-  def this() = this("")
+class PaperItemRecord( val title: String, val file: String )
+extends KeyedEntity[Int] {
+  def this() = this("", "")
   val id: Int = 0
 
   private def getAuthors(): List[ConfUser] = {
@@ -85,7 +86,7 @@ class PaperItemRecord( val title: String) extends KeyedEntity[Int] {
     lookupCachedPaper(id) match {
       case Some(p) => p
       case None =>
-        val p = new PaperRecord(id, title, getAuthors (), getTags ())
+        val p = new PaperRecord(id, title, getAuthors (), file, getTags ())
         cachePaper(p);
         p
     }

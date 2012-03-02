@@ -58,11 +58,11 @@ object Init {
 
       // Add some dummy papers.
       val paper0Name = "A Language for Automatically Enforcing Privacy";
-      val paper0 = JConfBackend.addPaper(paper0Name, List(authorJean), Nil);
+      val paper0 = JConfBackend.addPaper(paper0Name, List(authorJean));
       JConfBackend.assignReview(paper0, reviewerKuat);
 
       val paper1Name = "Matchmaker";
-      val paper1 = JConfBackend.addPaper(paper1Name, List(reviewerKuat), Nil);
+      val paper1 = JConfBackend.addPaper(paper1Name, List(reviewerKuat));
       JConfBackend.assignReview(paper1, authorJean);
     }
    }

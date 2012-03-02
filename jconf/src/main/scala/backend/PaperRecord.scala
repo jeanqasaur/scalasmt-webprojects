@@ -29,7 +29,8 @@ object EmptyTag extends PaperTag
 class PaperRecord(         val uid: BigInt
                  , private var _title: String
                  , private var _authors: List[ConfUser] = Nil
-                 , private var _tags: List[PaperTag] = Nil)
+                 , private var _file: String = ""
+                 , private var _tags: List[PaperTag] = Nil )
                extends JeevesRecord with Serializable {
   // We record the authors as well.
   _authors.foreach(a => JConfTables.writeDBAuthor(uid.toInt, a.uid.toInt))
@@ -76,12 +77,18 @@ class PaperRecord(         val uid: BigInt
   def showTitle(ctxt: ConfContext): String =
     (concretize(ctxt, title).asInstanceOf[StringVal]).v
 
+  def addAuthor(author: ConfUser): Unit = {
+    _authors = author::_authors
+  }
   def getAuthors() : List[Symbolic] = {
     _authors.map(author => mkSensitive(_authorL, author, defaultUser))
   }
   def showAuthors(ctxt: ConfContext): List[ConfUser] = {
     (getAuthors ()).map(a => concretize(ctxt, a).asInstanceOf[ConfUser])
   }
+
+  def getFile(): String = _file
+  def setFile(file: String): Unit = _file = file
 
   /* Managing tags. */
   private def addTagPermission (tag : PaperTag) : Symbolic = {
@@ -139,8 +146,8 @@ class PaperRecord(         val uid: BigInt
   def isReviewedBy(reviewer: ConfUser): Formula = {
     hasTag(ReviewedBy(reviewer.uid))
   }
-  def needsReviewBy(ctxt: ConfContext): Formula = {
-    hasTag(NeedsReview(ctxt.viewer.uid))
+  def showNeedsReviewBy(ctxt: ConfContext): Boolean = {
+    concretize(ctxt, hasTag(NeedsReview(ctxt.viewer.uid)))
   }
   def showIsReviewedBy(ctxt: ConfContext, reviewer: ConfUser): Boolean = {
     concretize(ctxt, isReviewedBy(reviewer))
@@ -161,6 +168,10 @@ class PaperRecord(         val uid: BigInt
   }
   def showReviews (ctxt: ConfContext): List[PaperReview] = {
     (getReviews ()).map(r => concretize(ctxt, r).asInstanceOf[PaperReview])
+  }
+
+  def showIsAuthor (ctxt: ConfContext): Boolean = {
+    concretize(ctxt, isAuthor)
   }
 
   def getPaperItemRecord(): PaperItemRecord =
