@@ -9,6 +9,9 @@ class JConf(info: ProjectInfo) extends DefaultWebProject(info) {
   val posgresDriver = "postgresql" % "postgresql" % "8.4-701.jdbc4"
   val msSqlDriver = "net.sourceforge.jtds" % "jtds" % "1.2.4"
   val derbyDriver = "org.apache.derby" % "derby" % "10.7.1.1"
+  val scalatraVersion = "2.0.0.RC1"
+//  val scalatraFileUpload =
+//    "org.scalatra" %% "scalatra-fileupload" % scalatraVersion
 
   override def compileOptions =
     CompileOption("-Xexperimental") ::
@@ -24,5 +27,6 @@ class JConf(info: ProjectInfo) extends DefaultWebProject(info) {
   , "org.scalatra" %% "scalatra-auth" % "2.0.0.RC1"
   , "org.squeryl" %% "squeryl" % "0.9.5-RC1"
   , "postgresql" % "postgresql" % "8.4-701.jdbc4"
+  , "org.scalatra" %% "scalatra-fileupload" % scalatraVersion
   ) ++ super.libraryDependencies
 }

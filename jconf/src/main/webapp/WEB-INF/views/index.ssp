@@ -1,4 +1,9 @@
 <%@ val name: String %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
+<%@ val submittedPapers: List[cap.jeeves.jconf.backend.PaperRecord] %>
+<%@ val reviewPapers: List[cap.jeeves.jconf.backend.PaperRecord] %>
+<%@ val reviews: List[cap.jeeves.jconf.backend.PaperReview] %>
 <html>
   <head>
     <title>jconf . csail</title>
@@ -11,6 +16,57 @@
     <div id="content">
     <h1>Welcome to jconf.</h1>
     <p>Hello, <%= name %>.</p>
+
+    <h1>Papers.</h1>
+
+    <p><a href="new_paper">Start new paper</a></p>
+
+    <h2>Submitted.</h2>
+    <ul>
+      #for (p <- submittedPapers)
+        <li><b><%= p.showTitle(ctxt) %></b><br>
+            #{
+              val authors = p.showAuthors(ctxt)
+            }#
+            #for (author <- authors)
+              <%= author.showName(ctxt) %><br>
+            #end
+            #{
+              val reviews = p.showReviews(ctxt)
+            }#
+            #for (review <- reviews)
+              Review</br>
+            #end
+        </li>
+      #end
+    </ul>
+
+    #if (user.role == cap.jeeves.jconf.backend.ReviewerStatus)
+      <h2>To Review.</h2>
+      <table>
+          <tr>
+            <td><b>#</b></td>
+            <td><b>Title</b></td>
+            <td><b>Review Status</b></td>
+          </tr>
+        #for (p <- reviewPapers)
+          <tr>
+          <td><a href="/paper?id=<%= p.uid %>"><%= p.uid %></a></td>
+          <td><b><%= p.showTitle(ctxt) %></b><br></td>
+          <td>
+              #if (p.showIsReviewedBy(ctxt, user))
+                <a href="/review?paperId=<%= p.uid%>?reviewerId=<%= user.uid %>">See Review</a>
+                <a href="/edit_review?paperId=<%= p.uid%>">Edit Review</a>
+              #else
+                <a href="/edit_review?paperId=<%= p.uid%>">Submit Review</a>
+              #end
+          </td>
+          </tr>
+        #end
+      </ul>
+      </table>
+    #end
+
     </div>
 
     ${include("footer.ssp")}

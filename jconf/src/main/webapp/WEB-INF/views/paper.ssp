@@ -1,4 +1,5 @@
 <%@ val title: String = "jconf . csail" %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
 <%@ val paper: cap.jeeves.jconf.backend.PaperRecord %>
 <%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
 <html>
@@ -15,6 +16,9 @@
       <p><i>The paper you have requested is not available.</i></p>
     #else
       <h1>Paper Details.</h1>
+      #if (paper.showIsAuthor(ctxt))
+        <a href="edit_paper?id=<%= paper.uid %>"></a>
+      #end
       <table>
         <tr>
           <td><b>Title</b></td>
@@ -39,10 +43,10 @@
           }#
           #for (tag <- tags)
             #match (tag)
-            #case(cap.jeeves.jconf.backend.NeedsReview(reviewer.uid))
+            #case(cap.jeeves.jconf.backend.NeedsReview(user.uid))
               Needs Review<br>
-            #case(cap.jeeves.jconf.backend.ReviewedBy(reviewer.uid))
-              Reviewed by<br>
+            #case(cap.jeeves.jconf.backend.ReviewedBy(user.uid))
+              Reviewed<br>
             #case(cap.jeeves.jconf.backend.Accepted)
               Accepted<br>
             #otherwise
@@ -58,10 +62,10 @@
             val reviews = paper.showReviews(ctxt)
           }#
           #for (review <- reviews)
-            <a href="review?paperid=<%= paper.id %>?reviewid=<%= review.id %>">review.showReviewer(ctxt).showName(ctxt)</a><br>
+            <a href="review?paperId=<%= paper.uid %>?reviewId=<%= review.uid %>">review.showReviewer(ctxt).showName(ctxt)</a><br>
           #end
-          #if (paper.needsReviewBy(ctxt))
-            <a href="/review">Review Paper</a>
+          #if (paper.showNeedsReviewBy(ctxt))
+            <a href="review">Review Paper</a>
           #end
           </td>
         </tr>

@@ -59,7 +59,7 @@ object JConfBackend extends JeevesLib with Serializable {
   }
   val defaultPaper = {
     val defaultTitle = "---";
-    new PaperRecord (getPaperUid(defaultTitle), defaultTitle)
+    new PaperRecord (getPaperUid(defaultTitle, ""), defaultTitle)
   }
   val defaultReview = new PaperReview (uid = getReviewUid())
 
@@ -73,8 +73,8 @@ object JConfBackend extends JeevesLib with Serializable {
     userRecord.id
   }
   private var _papercount = 1;
-  private def getPaperUid (title: String) : Int = {
-    val paperRecord: PaperItemRecord = new PaperItemRecord(title)
+  private def getPaperUid (title: String, file: String) : Int = {
+    val paperRecord: PaperItemRecord = new PaperItemRecord(title, file)
     JConfTables.writeDBPaper(paperRecord)
     paperRecord.id
   }
@@ -112,12 +112,13 @@ object JConfBackend extends JeevesLib with Serializable {
     user
   }
 
-  def addPaper(name : String, authors : List[ConfUser], tags : List[PaperTag])
+  def addPaper(name : String, authors : List[ConfUser]
+    , file: String = "", tags : List[PaperTag] = Nil)
       : PaperRecord = {
     // TODO: Make sure UID is unique...
-    val uid = getPaperUid (name);
+    val uid = getPaperUid (name, file);
 
-    val paper = new PaperRecord(uid, name, authors, tags)
+    val paper = new PaperRecord(uid, name, authors, file, tags)
     authors.foreach(a => a.addSubmittedPaper(uid))
 
     // Add paper to in-memory cache.

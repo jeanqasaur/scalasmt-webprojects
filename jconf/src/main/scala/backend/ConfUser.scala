@@ -99,6 +99,10 @@ case class ConfUser(
     def showPassword (ctxt: ConfContext): String = {
       concretize(ctxt, password).asInstanceOf[StringVal].v
     }
+    def emailPassword(): Unit = {
+
+    }
+
 
     def getConfUserRecord(): ConfUserRecord = {
       transaction { JConfTables.users.get(uid.toInt) }
