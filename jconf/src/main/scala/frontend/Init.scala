@@ -10,7 +10,8 @@ import org.squeryl.Session
 import org.squeryl.SessionFactory
 
 object Init {
-  private val clearEverything = true
+//  private val clearEverything = true
+  private val clearEverything = false
 
   def initDB(): Unit = {
     Class.forName("com.mysql.jdbc.Driver");

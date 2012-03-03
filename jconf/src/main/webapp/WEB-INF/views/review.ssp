@@ -14,10 +14,10 @@
     ${include("header.ssp")}
 
     <div id="content">
-    <h1>PaperReview.</h1>
+    <h1>Paper Review.</h1>
       #if (reviewer.uid == user.uid)
         <small>
-          <a href="/edit_review?paperId=<%= paper.uid %>">Edit Review</a><br>
+          <a href="edit_review?paperId=<%= paper.uid %>">Edit Review</a><br>
         </small>
       #end
       <table>
@@ -42,7 +42,8 @@
           <td><%= review.showApproachScore(ctxt) %></td>
         </tr>
         <tr>
-
+          <td><b>Comments</b></td>
+          <td><%= review.showBody(ctxt) %></td>
         </tr>
       </table>
     </div>

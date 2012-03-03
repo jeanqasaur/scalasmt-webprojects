@@ -16,7 +16,7 @@
     #if (errorMsg != null)
       <p><i><%= errorMsg %></i></p>
     #end
-    11:02 2.28.12<br>
+    4:55 3.3.12<br>
     <form action="login_user" method="post">
     <input type="hidden" name="ac" value="log">
     E-mail: <input type="text" name="username" /><br />

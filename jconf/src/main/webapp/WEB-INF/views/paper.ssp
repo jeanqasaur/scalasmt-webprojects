@@ -17,7 +17,7 @@
     #else
       <h1>Paper Details.</h1>
       #if (paper.showIsAuthor(ctxt))
-        <a href="edit_paper?id=<%= paper.uid %>"></a>
+        <a href="edit_paper?id=<%= paper.uid %>">Edit paper</a>
       #end
       <table>
         <tr>
@@ -34,6 +34,10 @@
             <%= author.showName(ctxt) %><br>
           #end
           </td>
+        </tr>
+        <tr>
+          <td><b>Uploaded Paper</b></td>
+          <td><%= paper.showFile(ctxt) %></td>
         </tr>
         <tr>
           <td><b>Tags</b></td>
