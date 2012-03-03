@@ -54,7 +54,7 @@ with JeevesLib {
     renderPage("login_screen.ssp", Map("errorMsg" -> msg))
   }
 
-  get("/") { redirect("/index") }
+  get("/") { redirect("index") }
 
   get("/index") {
     ifLoggedIn{ (user: ConfUser) =>
@@ -99,7 +99,7 @@ with JeevesLib {
       loginUser(params("username"), params("password")) match {
         case Some(user) =>
           session("user") = user
-          redirect("/")
+          redirect("index")
         case None =>
           loginRedirect("Incorrect username or password.")
      }
@@ -108,7 +108,7 @@ with JeevesLib {
 
   get("/login") {
     session.get("user") match {
-      case Some(user) => redirect("/")
+      case Some(user) => redirect("index")
       case None => renderPage("login_screen.ssp")
     }
   }
@@ -160,7 +160,7 @@ with JeevesLib {
         }
       }
       // Write file to disk...
-      if (uploadedFile != null) {
+      if (uploadedFile.getSize > 0) {
         uploadedFile.write(new File("papers/" + filename))
       }
 
@@ -247,7 +247,8 @@ with JeevesLib {
 
   get("/new_paper") {
     ifLoggedIn { (user: ConfUser) =>
-      val paper: PaperRecord = JConfBackend.addPaper("Untitled", List(user))
+      val paper: PaperRecord =
+        JConfBackend.addPaper("Untitled", List(user))
       renderPageWithUser("edit_paper.ssp", user, Map("paper" -> paper))
     }
   }

@@ -112,6 +112,7 @@ object JConfBackend extends JeevesLib with Serializable {
     user
   }
 
+  /* This function should only be called for brand-new papers. */
   def addPaper(name : String, authors : List[ConfUser]
     , file: String = "", tags : List[PaperTag] = Nil)
       : PaperRecord = {
@@ -120,6 +121,7 @@ object JConfBackend extends JeevesLib with Serializable {
 
     val paper = new PaperRecord(uid, name, authors, file, tags)
     authors.foreach(a => a.addSubmittedPaper(uid))
+    authors.foreach(a => JConfTables.writeDBAuthor(uid.toInt, a.uid.toInt))
 
     // Add paper to in-memory cache.
     jconfPapers += (uid -> paper)

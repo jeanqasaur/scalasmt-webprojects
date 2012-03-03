@@ -100,7 +100,12 @@ case class ConfUser(
       concretize(ctxt, password).asInstanceOf[StringVal].v
     }
     def emailPassword(): Unit = {
-
+      JConfMail.sendMail(
+          "jeanyang@csail.mit.edu"
+        , "Jean Yang"
+        , email
+        , "Welcome to JConf"
+        , "Your password is " + _password + "." )
     }
 
 

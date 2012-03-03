@@ -21,9 +21,9 @@ object UserStatusField extends Enumeration {
 
 class ConfUserRecord(
     val email: String
-  , val name: String
-  , val pwd: String
-  , val role: Int
+  , var name: String
+  , var pwd: String
+  , var role: Int
   ) extends KeyedEntity[Int] {
   def this() = this("", "", "", -1)
   val id = 0;
@@ -53,7 +53,7 @@ class ConfUserRecord(
 
 class Assignment(val reviewerId: Int, val paperId: Int);
 
-class PaperItemRecord( val title: String, val file: String )
+class PaperItemRecord( var title: String, var file: String )
 extends KeyedEntity[Int] {
   def this() = this("", "")
   val id: Int = 0
@@ -105,11 +105,11 @@ class PaperAuthorRecord(
 class PaperReviewRecord(
     val paperId: Int
   , val reviewerId: Int
-  , val body: String
-  , val problemScore: Int
-  , val backgroundScore: Int
-  , val approachScore: Int
-  , val resultScore: Int )
+  , var body: String
+  , var problemScore: Int
+  , var backgroundScore: Int
+  , var approachScore: Int
+  , var resultScore: Int )
 extends KeyedEntity[Int] {
   def this() = this(-1, -1, "", 3, 3, 3, 3)
   val id: Int = 0;
@@ -158,10 +158,10 @@ object JConfTables extends Schema {
       case e: Exception => None
     }
   }
-  def updateDBUser(user: ConfUser): Unit = {
-    transaction {
-      users.update(user.getConfUserRecord())
-    }
+  def updateDBUser(user: ConfUser, name: String): Unit = {
+    val userRecord: ConfUserRecord = user.getConfUserRecord();
+    userRecord.name = name
+    transaction { users.update(userRecord) }
   }
 
   /* Review assignments. */
@@ -194,6 +194,12 @@ object JConfTables extends Schema {
   def writeDBPaper(paperRecord: PaperItemRecord) = {
     transaction { papers.insert(paperRecord) }
   }
+  def updateDBPaper(paper: PaperRecord, title: String, file: String) = {
+    val paperRecord: PaperItemRecord = paper.getPaperItemRecord()
+    paperRecord.title = title
+    paperRecord.file = file
+    transaction { papers.update(paperRecord) }
+  }
   def getDBPaperRecord(uid: Int): Option[PaperRecord] = {
     transaction { papers.lookup(uid) } match {
       case Some(paperRecord) => Some(paperRecord.getPaperRecord())
@@ -224,6 +230,7 @@ object JConfTables extends Schema {
     , a.authorId  is(indexed)
   ))
   def writeDBAuthor(paperId: Int, authorId: Int): Unit = {
+    println("writeDBAuthor: " + paperId + ", " + authorId);
     transaction{ authors.insert(new PaperAuthorRecord(paperId, authorId)) } 
   }
 
@@ -237,8 +244,17 @@ object JConfTables extends Schema {
   def writeDBReview(reviewRecord: PaperReviewRecord) = {
     transaction { reviews.insert(reviewRecord) }
   }
-  def updateDBReview(review: PaperReview) = {
-    transaction { reviews.update(review.getPaperReviewRecord()) }
+  def updateDBReview(review: PaperReview
+    , problemScore: Int, backgroundScore: Int
+    , approachScore: Int, resultScore: Int
+    , body: String) = {
+    val reviewRecord = review.getPaperReviewRecord();
+    reviewRecord.problemScore = problemScore
+    reviewRecord.backgroundScore = backgroundScore
+    reviewRecord.approachScore = approachScore
+    reviewRecord.resultScore = resultScore
+    reviewRecord.body = body
+    transaction { reviews.update(reviewRecord) }
   }
   def getReviewByPaperReviewer(paperId: Int, reviewerId: Int)
     : Option[PaperReview] = {

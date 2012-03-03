@@ -24,7 +24,7 @@
     <h2>Submitted.</h2>
     <ul>
       #for (p <- submittedPapers)
-        <li><b><%= p.showTitle(ctxt) %></b><br>
+        <li><b><a href="paper?id=<%= p.uid %>"><%= p.showTitle(ctxt) %></a></b><br>
             #{
               val authors = p.showAuthors(ctxt)
             }#
@@ -51,14 +51,14 @@
           </tr>
         #for (p <- reviewPapers)
           <tr>
-          <td><a href="/paper?id=<%= p.uid %>"><%= p.uid %></a></td>
+          <td><a href="paper?id=<%= p.uid %>"><%= p.uid %></a></td>
           <td><b><%= p.showTitle(ctxt) %></b><br></td>
           <td>
               #if (p.showIsReviewedBy(ctxt, user))
-                <a href="/review?paperId=<%= p.uid%>?reviewerId=<%= user.uid %>">See Review</a>
-                <a href="/edit_review?paperId=<%= p.uid%>">Edit Review</a>
+                <a href="review?paperId=<%= p.uid%>?reviewerId=<%= user.uid %>">See Review</a>
+                <a href="edit_review?paperId=<%= p.uid%>">Edit Review</a>
               #else
-                <a href="/edit_review?paperId=<%= p.uid%>">Submit Review</a>
+                <a href="edit_review?paperId=<%= p.uid%>">Submit Review</a>
               #end
           </td>
           </tr>

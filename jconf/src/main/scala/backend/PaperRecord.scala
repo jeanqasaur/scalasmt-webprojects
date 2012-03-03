@@ -32,9 +32,6 @@ class PaperRecord(         val uid: BigInt
                  , private var _file: String = ""
                  , private var _tags: List[PaperTag] = Nil )
                extends JeevesRecord with Serializable {
-  // We record the authors as well.
-  _authors.foreach(a => JConfTables.writeDBAuthor(uid.toInt, a.uid.toInt))
-  
   /**************/
   /* Variables. */
   /**************/
@@ -89,6 +86,7 @@ class PaperRecord(         val uid: BigInt
 
   def getFile(): String = _file
   def setFile(file: String): Unit = _file = file
+  def showFile(ctxt: ConfContext): String = _file
 
   /* Managing tags. */
   private def addTagPermission (tag : PaperTag) : Symbolic = {
@@ -171,6 +169,10 @@ class PaperRecord(         val uid: BigInt
   }
 
   def showIsAuthor (ctxt: ConfContext): Boolean = {
+    println("showIsAuthor")
+    _authors.foreach(a => println(a.uid))
+    println("...")
+    println(concretize(ctxt, isAuthor))
     concretize(ctxt, isAuthor)
   }
 
