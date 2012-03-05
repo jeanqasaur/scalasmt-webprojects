@@ -24,7 +24,8 @@
     <h2>Submitted.</h2>
     <ul>
       #for (p <- submittedPapers)
-        <li><b><a href="paper?id=<%= p.uid %>"><%= p.showTitle(ctxt) %></a></b><br>
+        <li>
+          <b><a href="paper?id=<%= p.uid %>"><%= p.uid %>: <%= p.showTitle(ctxt) %></a></b><br>
             #{
               val authors = p.showAuthors(ctxt)
             }#

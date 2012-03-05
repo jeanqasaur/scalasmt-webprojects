@@ -1,0 +1,29 @@
+<%@ val title: String = "jconf . csail" %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>${title}</title>
+  <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="wrapper">
+  ${include("header.ssp")}
+
+  <div id="content">
+    <p>Welcome to the JConf system!  Please enter your password, which should have been setn to your e-mail.</p>
+
+    <p><i>If you did not receive your password, please e-mail jeanyang [at] mit [dot] edu.</i></p>
+
+    <form action="login_user" method="post">
+    <input type="hidden" name="ac" value="log">
+    E-mail: <input type="text" name="username" value="<%= user.email %>"/><br />
+    Password: <input type="password" name="password" /><br />
+    <input type="submit" name="validate" class="button" value="Validate Account" />
+    </form>
+  </div>
+  <div id="footer">
+    <p>&copy; 2011 Jean Yang.</p>
+  </div>
+</div>
+</body>
+</html>

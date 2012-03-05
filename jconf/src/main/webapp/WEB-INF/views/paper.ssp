@@ -37,7 +37,9 @@
         </tr>
         <tr>
           <td><b>Uploaded Paper</b></td>
-          <td><%= paper.showFile(ctxt) %></td>
+          <td>
+            <a href="pdf?id=<%= paper.uid %>&filename=<%= paper.showFile(ctxt) %>"><%= paper.showFile(ctxt) %></a>
+          </td>
         </tr>
         <tr>
           <td><b>Tags</b></td>

@@ -51,12 +51,15 @@ object JConfBackend extends JeevesLib with Serializable {
         case None => {
           val defaultName = "Default User";
           val defaultPwd = "";
+          val defaultGrad = false;
+          val defaultAcm = -1
           val defaultStatus = PublicStatus;
           new ConfUser (
             getUserUid(
-              defaultEmail, defaultName, defaultPwd
+              defaultEmail, defaultName, defaultPwd, defaultGrad, defaultAcm
               , Conversions.role2Field(defaultStatus))
-            , defaultEmail, defaultName, defaultPwd, defaultStatus)
+            , defaultEmail, defaultName, defaultPwd, defaultGrad, defaultAcm
+            , defaultStatus)
         }
       }
     }
@@ -79,9 +82,10 @@ object JConfBackend extends JeevesLib with Serializable {
   /* Making papers. */
   private var _usercount = 1;
   private def getUserUid (
-    email: String, name: String, password: String, role: Int): Int = {
+    email: String, name: String, password: String, isGrad: Boolean
+    , acmNum: Int, role: Int): Int = {
     val userRecord: ConfUserRecord =
-      new ConfUserRecord(email, name, password, role);
+      new ConfUserRecord(email, name, password, isGrad, acmNum, role);
     JConfTables.writeDBUser(userRecord);
     userRecord.id
   }
@@ -114,10 +118,12 @@ object JConfBackend extends JeevesLib with Serializable {
   }
 
   def addUser(email: String
-    , name: String, password: String, role: UserStatus): ConfUser = {
+    , name: String, password: String, isGrad: Boolean, acmNum: Int
+    , role: UserStatus): ConfUser = {
     val id =
-      getUserUid (email, name, password, Conversions.role2Field(role));
-    val user = new ConfUser(id, email, name, password, role);
+      getUserUid (email, name, password, isGrad, acmNum
+      , Conversions.role2Field(role));
+    val user = new ConfUser(id, email, name, password, isGrad, acmNum, role);
 
     // Add paper to in-memory cache.
     jconfUsers += (id -> user)

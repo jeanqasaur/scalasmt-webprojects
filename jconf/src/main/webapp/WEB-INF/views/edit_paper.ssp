@@ -31,7 +31,7 @@
         <td>
           <input type="file" name="thefile" />
           #if (paper.showFile(ctxt) != "")
-            <br>paper.showFile(ctxt)<br>
+            <br><%= paper.showFile(ctxt) %><br>
           #end
         </td>
       </tr>

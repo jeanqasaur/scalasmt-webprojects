@@ -23,9 +23,11 @@ class ConfUserRecord(
     val email: String
   , var name: String
   , var pwd: String
+  , var isGrad: Boolean
+  , var acmNum: Int
   , var role: Int
   ) extends KeyedEntity[Int] {
-  def this() = this("", "", "", -1)
+  def this() = this("", "", "", false, -1, -1)
   val id = 0;
 
   def getSubmittedPapers(): List[BigInt] = {
@@ -43,7 +45,7 @@ class ConfUserRecord(
       case Some(u) => u
       case None =>
         val u =
-          new ConfUser(id, email, name, pwd
+          new ConfUser(id, email, name, pwd, isGrad, acmNum
             , Conversions.field2Role(role), getSubmittedPapers() );
         cacheUser(u);
         u

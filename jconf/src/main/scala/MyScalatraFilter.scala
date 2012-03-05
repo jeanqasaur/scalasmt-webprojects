@@ -3,6 +3,7 @@ import cap.jeeves.jconf.backend._
 import cap.jeeves.jconf.frontend._
 import JConfBackend._
 
+import org.apache.commons.io.FileUtils
 import org.scalatra._
 import org.scalatra.fileupload.FileUploadSupport
 import org.squeryl.adapters.MySQLAdapter
@@ -11,8 +12,6 @@ import org.squeryl.Session
 import org.squeryl.SessionFactory
 import java.net.URL
 import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
 import scalate.ScalateSupport
 
 class MyScalatraFilter
@@ -20,9 +19,12 @@ extends ScalatraFilter with ScalateSupport with FileUploadSupport
 with JeevesLib {
   class JConfInternalError extends Exception
 
+  val date = new java.util.Date()
+  println("Initializing MyScalaFilter... " + date.getTime().toString())
   System.setProperty("smt.home", "/opt/z3/bin/z3")
 
   Init.initDB ()
+  Init.initDirectory ()
   Init.initDummyUsers ()
 
   val path = "/WEB-INF/views/"
@@ -71,7 +73,7 @@ with JeevesLib {
   }
 
   post("/login_user") {
-    val username = params("username").toLowerCase
+    val username = JConfUtil.cleanUsername(params("username"))
     if (JConfUtil.isWellFormed(username)) {
       val isSigningUp: Boolean =
         params.exists((param: (String, String)) => param._1 == "signup")
@@ -92,22 +94,27 @@ with JeevesLib {
               addUser(params("username")
               , ""
               , JConfUtil.generatePassword()
+              // TODO!!~
+              , false
+              , -1
               , role);
 
             // E-mail the user about the password.
             u.emailPassword();
-
-            session("user") = u;
-            redirect("edit_profile")
+            redirect("validate_profile?id="+ u.uid)
           }
         } else {
           // Assuming otherwise we are logging in...
           loginUser(params("username"), params("password")) match {
             case Some(user) =>
-            session("user") = user
-            redirect("index")
+              session("user") = user
+              val isValidating: Boolean =
+                params.exists((param: (String, String)) =>
+                  param._1 == "validate")
+              if (isValidating) { redirect("edit_profile") }
+              else { redirect("index") }
             case None =>
-            loginRedirect("Incorrect username or password.")
+              loginRedirect("Incorrect username or password.")
           }
         }
       } else {
@@ -119,6 +126,13 @@ with JeevesLib {
     session.get("user") match {
       case Some(user) => redirect("index")
       case None => renderPage("login_screen.ssp")
+    }
+  }
+
+  get("/validate_profile") {
+    JConfBackend.getUserById(params("id").toInt) match {
+      case Some(user) => renderPageWithUser("validate_profile.ssp", user)
+      case None => throw new JConfInternalError
     }
   }
 
@@ -171,8 +185,12 @@ with JeevesLib {
       }
       // Write file to disk...
       if (uploadedFile.getSize > 0) {
-        uploadedFile.write(
-          new File(JConfUtil.getFileLocation(paperId, filename)))
+        val backupFile: File =
+          new File(JConfUtil.getFileLocation(paperId, filename))
+        val tomcatFile =
+          new File(JConfUtil.getFileStorageLocation(paperId, filename))
+        uploadedFile.write(backupFile)
+        FileUtils.copyFile(backupFile, tomcatFile)
       }
 
       JConfUtil.updatePaperRecord(paper, filename, params)
@@ -186,18 +204,12 @@ with JeevesLib {
     }
   }
 
-  get("/pdf/:id/:filename") {
+  get("/pdf") {
     ifLoggedIn { (user: ConfUser) =>
       val paperId = params("id").toInt
-      val fileLocation = JConfUtil.getFileLocation(paperId, params("filename"))
-      val bytes: Array[Byte] =
-        org.apache.commons.io.FileUtils.readFileToByteArray(
-          new File(fileLocation))
-      println("read file to byte array")
-      org.apache.commons.io.FileUtils.writeByteArrayToFile(
-        new File("/scratch/jconf/papers/test.pdf"), bytes);
-      contentType = "application/pdf"
-      bytes
+      val fileLocation =
+        JConfUtil.getFileDisplayLocation(paperId, params("filename"))
+      redirect(fileLocation)
     }
   }
 
@@ -218,7 +230,6 @@ with JeevesLib {
       }
 
     val review: PaperReview = {
-      println("Getting review by paper " + paperId + " and reviewer " + reviewerId);
       JConfTables.getReviewByPaperReviewer(paperId, reviewerId) match {
         case Some(review) => review
         case None => throw new JConfInternalError
