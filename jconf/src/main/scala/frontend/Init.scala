@@ -10,8 +10,7 @@ import org.squeryl.Session
 import org.squeryl.SessionFactory
 
 object Init {
-//  private val clearEverything = true
-  private val clearEverything = false
+  private var clearEverything = false;
 
   def initDB(): Unit = {
     Class.forName("com.mysql.jdbc.Driver");
@@ -42,6 +41,17 @@ object Init {
           }
         }
       }
+
+      clearEverything = {
+        transaction {
+          val c: Long =
+          transaction {
+            from(JConfTables.authors)(a =>
+            compute(count) )
+          }
+          c == 0
+       }
+     }
    }
   
   def initDummyUsers (): Unit = {
@@ -49,13 +59,13 @@ object Init {
       // Add some dummy users.
       val pcArmando =
         JConfBackend.addUser(
-        "armando", "Armando Solar-Lezama", "armando", PCStatus);
+        "asolar@mit.edu", "Armando Solar-Lezama", "armando", PCStatus);
       val authorJean =
         JConfBackend.addUser(
-        "jeanyang", "Jean Yang", "jean", ReviewerStatus);
+        "jeanyang@mit.edu", "Jean Yang", "jean", ReviewerStatus);
       val reviewerKuat =
         JConfBackend.addUser(
-        "kuat", "Kuat Yessenov", "kuat", ReviewerStatus);
+        "kuat@mit.edu", "Kuat Yessenov", "kuat", ReviewerStatus);
 
       // Add some dummy papers.
       val paper0Name = "A Language for Automatically Enforcing Privacy";
