@@ -66,7 +66,8 @@
             val reviews = paper.showReviews(ctxt)
           }#
           #for (review <- reviews)
-            <a href="review?paperId=<%= paper.uid %>?reviewId=<%= review.uid %>">review.showReviewer(ctxt).showName(ctxt)</a><br>
+            <%= review.uid %>:
+            <a href="review?paperId=<%= paper.uid %>?reviewId=<%= review.uid %>"><%= review.showReviewer(ctxt).showName(ctxt) %></a><br>
           #end
           #if (paper.showNeedsReviewBy(ctxt))
             <a href="review">Review Paper</a>

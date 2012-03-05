@@ -33,7 +33,14 @@ class PaperReview(val uid: BigInt
   def getReviewer(): IntExpr =
     mkSensitiveInt(_reviewerL, _reviewerId, -1)
   def showReviewer(ctxt: ConfContext): ConfUser = {
-    concretize(ctxt, getReviewer()).asInstanceOf[ConfUser]
+    println(_reviewerId);
+    val reviewerId: BigInt = concretize(ctxt, getReviewer()).asInstanceOf[BigInt]
+    JConfBackend.getUserById(reviewerId.toInt) match {
+      case Some(u) => u
+      case None => 
+        println("Cannot find reviewer " + reviewerId.toInt)
+        JConfBackend.defaultUser
+    }
   }
   def getReviewerTag(): Symbolic =
     mkSensitive(_reviewerL, ReviewedBy(_reviewerId), EmptyTag)

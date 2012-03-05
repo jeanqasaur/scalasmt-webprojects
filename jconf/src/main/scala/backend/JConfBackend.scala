@@ -42,26 +42,39 @@ object JConfBackend extends JeevesLib with Serializable {
   private var confStage = Submission
 
   val defaultUser = {
-    val defaultEmail = "defaultUser";
-    JConfTables.getDBConfUserByEmail(defaultEmail) match {
-      case Some(user) => user
-      case None => {
-        val defaultName = "Default User";
-        val defaultPwd = "";
-        val defaultStatus = PublicStatus;
-        new ConfUser (
-          getUserUid(
-            defaultEmail, defaultName, defaultPwd
-            , Conversions.role2Field(defaultStatus))
-          , defaultEmail, defaultName, defaultPwd, defaultStatus)
+    getUserById(-1) match {
+      case Some(u) => u
+      case None =>
+      val defaultEmail = "defaultUser";
+      JConfTables.getDBConfUserByEmail(defaultEmail) match {
+        case Some(user) => user
+        case None => {
+          val defaultName = "Default User";
+          val defaultPwd = "";
+          val defaultStatus = PublicStatus;
+          new ConfUser (
+            getUserUid(
+              defaultEmail, defaultName, defaultPwd
+              , Conversions.role2Field(defaultStatus))
+            , defaultEmail, defaultName, defaultPwd, defaultStatus)
+        }
       }
     }
   }
   val defaultPaper = {
-    val defaultTitle = "---";
-    new PaperRecord (getPaperUid(defaultTitle, ""), defaultTitle)
+    getPaperById(-1) match {
+      case Some(p) => p
+      case None =>
+        val defaultTitle = "---";
+        new PaperRecord (getPaperUid(defaultTitle, ""), defaultTitle)
+    }
   }
-  val defaultReview = new PaperReview (uid = getReviewUid())
+  val defaultReview = {
+    JConfTables.getReviewByPaperReviewer(-1, -1) match {
+      case Some(r) => r
+      case None => new PaperReview (uid = getReviewUid())
+    }
+  }
 
   /* Making papers. */
   private var _usercount = 1;

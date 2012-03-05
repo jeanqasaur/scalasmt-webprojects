@@ -21,7 +21,7 @@
     <table>
       <tr>
         <td><b>Paper</b></td>
-        <td><%= paper.showTitle(ctxt) %></td>
+        <td><%= paper.showTitle(ctxt) %> ( <%= paper.uid %> ) </td>
       </tr>
       <tr>
         <td><b>Reviewer</b></td>

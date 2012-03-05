@@ -132,11 +132,13 @@ class PaperRecord(         val uid: BigInt
     , problemScore: Int = 3, backgroundScore: Int = 3
     , approachScore: Int = 3, resultScore: Int =3)
   : PaperReview = {
+   println("Adding review for paper " + uid + " from reviewer " + reviewer.uid)
    val reviewUid =
      getReviewUid(uid.toInt, reviewer.uid.toInt, body
      , problemScore, backgroundScore, approachScore, resultScore);
    val r =
-     new PaperReview(reviewUid, uid, reviewer.uid, body
+     new PaperReview(reviewUid
+     , uid, reviewer.uid, body
      , problemScore, backgroundScore, approachScore, resultScore);
    addTag(ReviewedBy(reviewer.uid))
    r
@@ -154,7 +156,7 @@ class PaperRecord(         val uid: BigInt
     val reviewerTag = r.getReviewerTag ();
     val level = mkLevel();
     policy( level
-            , !((CONTEXT.stage === Review && (hasTag (reviewerTag))) ||
+            , !((hasTag (reviewerTag)) ||
                 ((CONTEXT.stage === Decision) && isInternal) ||
                 (isAuthor && authorCanSeeReview))
             , LOW);
