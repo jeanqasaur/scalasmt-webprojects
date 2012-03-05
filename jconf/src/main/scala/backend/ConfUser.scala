@@ -23,6 +23,8 @@ case class ConfUser(
   ,         val email: String
   , private var _name: String
   , private var _password: String
+  , private var _isGrad: Boolean
+  , private var _acmNum: Int = -1
   ,         val role: UserStatus
   , private var _submittedPapers: List[BigInt] = Nil )
   extends JeevesRecord {

@@ -4,6 +4,8 @@ package cap.jeeves.jconf.frontend
 import cap.jeeves.jconf.backend._
 //import JConfBackend._
 
+import java.io.File
+import org.apache.commons.io.FileUtils
 import org.squeryl.adapters.MySQLAdapter
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.Session
@@ -54,18 +56,34 @@ object Init {
      }
    }
   
+  def initDirectory (): Unit = {
+    val path: String = new java.io.File("").getAbsolutePath();
+    println(path);
+    val paperPath = path + "/webapps/jconf/papers"
+    println("trying to make dir " + paperPath)
+    val madeDir: Boolean = (new java.io.File(paperPath)).mkdir()
+    if (!madeDir) {
+      println("Failed to create directory.")
+    }
+
+    // Copy files.
+    FileUtils.copyDirectory(
+      new File(path + "/papers")
+    , new File(paperPath) )
+  }
+
   def initDummyUsers (): Unit = {
     if (clearEverything) {
       // Add some dummy users.
       val pcArmando =
         JConfBackend.addUser(
-        "asolar@mit.edu", "Armando Solar-Lezama", "armando", PCStatus);
+        "asolar@mit.edu", "Armando Solar-Lezama", "armando", true, -1, PCStatus);
       val authorJean =
         JConfBackend.addUser(
-        "jeanyang@mit.edu", "Jean Yang", "jean", ReviewerStatus);
+        "jeanyang@mit.edu", "Jean Yang", "jean", true, -1, ReviewerStatus);
       val reviewerKuat =
         JConfBackend.addUser(
-        "kuat@mit.edu", "Kuat Yessenov", "kuat", ReviewerStatus);
+        "kuat@mit.edu", "Kuat Yessenov", "kuat", true, -1, ReviewerStatus);
 
       // Add some dummy papers.
       val paper0Name = "A Language for Automatically Enforcing Privacy";
