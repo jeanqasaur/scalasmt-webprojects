@@ -17,6 +17,7 @@ import scalate.ScalateSupport
 class MyScalatraFilter
 extends ScalatraFilter with ScalateSupport with FileUploadSupport
 with JeevesLib {
+  class IllegalAccessError extends Exception
   class JConfInternalError extends Exception
 
   val date = new java.util.Date()
@@ -37,7 +38,12 @@ with JeevesLib {
       case Some(u) =>
         // TODO: Insert try/catch block here that redirects to index.
         val user = u.asInstanceOf[ConfUser];
-        displayPage(user)
+        try {
+          displayPage(user)
+        } catch {
+          case ia: IllegalAccessError => redirect("index?illegalAccess=yes")
+          case ie: JConfInternalError => redirect("index?internalError=yes")
+        }
       case None => redirect("login")
     }
   }
@@ -58,14 +64,27 @@ with JeevesLib {
     renderPage("login_screen.ssp", Map("errorMsg" -> msg))
   }
 
+  def hasParam (params: Map[String, String], p: String) = {
+    params.exists((param: (String, String)) => param._1 == p)
+  }
+
   get("/") { redirect("index") }
 
   get("/index") {
     ifLoggedIn{ (user: ConfUser) =>
       val ctxt = getContext(user);
 
+      var errorMsg = "";
+      if (hasParam(params, "illegalAccess")) {
+        errorMsg = "You do not have permission to access that page."       
+      };
+      if (hasParam(params, "internalError")) {
+        errorMsg = "An internal error has occurred."
+      };
+
       renderPageWithUser("index.ssp", user
-          , Map("name" -> user.showName(getContext(user))
+        , Map( "errorMsg" -> errorMsg
+               , "name" -> user.showName(getContext(user))
                , "submittedPapers" -> user.showSubmittedPapers(ctxt)
                , "reviewPapers" -> user.showReviewPapers(ctxt)
                , "reviews" -> user.showReviews(ctxt)))
@@ -93,7 +112,7 @@ with JeevesLib {
             val u =
               addUser(params("username")
               , ""
-              , JConfUtil.generatePassword()
+              , RandomGenerator.generatePassword()
               // TODO!!~
               , false
               , -1
@@ -163,16 +182,18 @@ with JeevesLib {
   }
 
   /* Updating and displaying papers. */
-  def getPaper(paperId: Int): PaperRecord = {
+  def getPaper(paperId: Int, paperKey: String): PaperRecord = {
     getPaperById(paperId) match {
-      case Some(p) =>  p
+      case Some(p) =>
+        if (paperKey == p.key) { p } else throw new IllegalAccessError
       case None => throw new JConfInternalError
     }
   }
   post("/paper") {
     ifLoggedIn { (user: ConfUser) =>
       val paperId: Int = params("id").toInt
-      val paper: PaperRecord = getPaper(paperId)
+      val paperKey: String = params("key")
+      val paper: PaperRecord = getPaper(paperId, paperKey)
 
       // Write paper to place on disk.
       val uploadedFile = fileParams("thefile")
@@ -185,12 +206,13 @@ with JeevesLib {
       }
       // Write file to disk...
       if (uploadedFile.getSize > 0) {
-        val backupFile: File =
-          new File(JConfUtil.getFileLocation(paperId, filename))
-        val tomcatFile =
-          new File(JConfUtil.getFileStorageLocation(paperId, filename))
-        uploadedFile.write(backupFile)
-        FileUtils.copyFile(backupFile, tomcatFile)
+        val (backupLoc, tomcatLoc) = paper.showFileLocations(getContext(user))
+        if (!(backupLoc.isEmpty() || tomcatLoc.isEmpty())) {
+          val backupFile = new File(backupLoc)
+          val tomcatFile = new File(tomcatLoc)
+          uploadedFile.write(backupFile)
+         FileUtils.copyFile(backupFile, tomcatFile)
+        }
       }
 
       JConfUtil.updatePaperRecord(paper, filename, params)
@@ -199,49 +221,45 @@ with JeevesLib {
   }
   get("/paper") {
     ifLoggedIn { (user: ConfUser) =>
-      var paper: PaperRecord = getPaper(params("id").toInt)
+      var paper: PaperRecord = getPaper(params("id").toInt, params("key"))
       renderPageWithUser("paper.ssp", user, Map("paper" -> paper))
     }
   }
 
-  get("/pdf") {
+  get("/uploadedPaper") {
     ifLoggedIn { (user: ConfUser) =>
-      val paperId = params("id").toInt
-      val fileLocation =
-        JConfUtil.getFileDisplayLocation(paperId, params("filename"))
-      redirect(fileLocation)
+      val paperRecord: PaperRecord =
+        getPaper(params("id").toInt, params("key"))
+      redirect(paperRecord.showFileDisplayLocation(getContext(user)))
     }
   }
 
   /* Updating and displaying reviews. */
-  def getReviewInfo(paperId: Int, reviewerId: Int)
+  def getReviewInfo(reviewId: Int, reviewKey: String, ctxt: ConfContext)
     : (PaperRecord, ConfUser, PaperReview) = {
+    val review: PaperReview = {
+      JConfTables.getDBPaperReview(reviewId) match {
+        case Some(r) =>
+          if (r.key == reviewKey) { r } else { throw new IllegalAccessError }
+        case None => throw new JConfInternalError
+      }
+    }
+
     val paper: PaperRecord =
-      getPaperById(paperId) match {
+      getPaperById(review.paperId.toInt) match {
         case Some(p) => p
         case None =>
           throw new JConfInternalError
       }
 
-    val reviewer: ConfUser =
-      getUserById(reviewerId) match {
-        case Some(idUser) => idUser
-        case None => throw new JConfInternalError
-      }
-
-    val review: PaperReview = {
-      JConfTables.getReviewByPaperReviewer(paperId, reviewerId) match {
-        case Some(review) => review
-        case None => throw new JConfInternalError
-      }
-    }
+    val reviewer: ConfUser = review.showReviewer(ctxt)
+    
     (paper, reviewer, review)
   }
   post("/review") {
     ifLoggedIn { (user: ConfUser) =>
-      val paperId = params("paperId").toInt;
-      val reviewerId = params("reviewerId").toInt;
-      val (paper, reviewer, review) = getReviewInfo(paperId, reviewerId)
+      val (paper, reviewer, review) =
+        getReviewInfo(params("id").toInt, params("key"), getContext(user))
       JConfUtil.updatePaperReview(review, params)
 
       renderPageWithUser("review.ssp", user,
@@ -250,9 +268,8 @@ with JeevesLib {
   }
   get("/review") {
     ifLoggedIn { (user: ConfUser) =>
-      val paperId = params("paperId").toInt;
-      val reviewerId = params("reviewerId").toInt;
-      val (paper, reviewer, review) = getReviewInfo(paperId, reviewerId)
+      val (paper, reviewer, review) =
+        getReviewInfo(params("id").toInt, params("key"), getContext(user))
       renderPageWithUser("review.ssp", user,
         Map("paper" -> paper, "reviewer" -> reviewer, "review" -> review))
     }
@@ -266,21 +283,14 @@ with JeevesLib {
   
   get("/edit_review") {
     ifLoggedIn { (user: ConfUser) =>
-      val paperId = params("paperId").toInt;
-
-      val paper: PaperRecord = getPaper(paperId)
-      val curReview = {
-        JConfTables.getReviewByPaperReviewer(paperId, user.uid.toInt) match {
-          case Some(review) => review
-          case None => paper.addReview(user)
-        } 
-      }
+      val (paper, reviewer, review) =
+        getReviewInfo(params("id").toInt, params("key"), getContext(user))
       
       renderPageWithUser("edit_review.ssp", user
-        , Map("paper" -> paper
-          , "review" -> curReview
-          , "reviewer" -> user
-                ))
+        , Map(
+            "paper" -> paper
+          , "review" -> review
+          , "reviewer" -> reviewer ))
     }
   }
 

@@ -81,10 +81,10 @@ class TestConfUser extends FunSuite {
   test ("username visibility") {
     withDataInDatabase {
       expect("author0") {
-        show[ConfUser](getContext(author0), author0).username
+        show[ConfUser](getContext(author0), author0).email
       }
       expect("author0") {
-        show[ConfUser](getContext(author1), author0).username
+        show[ConfUser](getContext(author1), author0).email
       }
     }
   }

@@ -13,13 +13,13 @@
 
     <div id="content">
     <h1>Edit Review.</h1>
-    <form action="paper?id=<%= paper.uid %>" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="paperId" value="<%= paper.uid %>">
+    <form action="<%= paper.showPostLink(ctxt) %>" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="paperId" value="<%= paper.uid %>" />
     <table>
       <tr>
         <td><b>Paper Title</b></td>
         <td>
-          <input type="text" name="title" value="<%= paper.showTitle(ctxt) %>">
+          <input type="text" name="title" value="<%= paper.showTitle(ctxt) %>" maxlength=100 />
         </td>
       </tr>
       <tr>

@@ -15,10 +15,11 @@
 
     <div id="content">
     <h1>Paper Review.</h1>
-      #if (reviewer.uid == user.uid)
-        <small>
-          <a href="edit_review?paperId=<%= paper.uid %>">Edit Review</a><br>
-        </small>
+      #{
+        val reviewEditLink = review.showEditReviewLink(ctxt)
+      }#
+      #if (!reviewEditLink.isEmpty())
+        <p><small><a href="<%= reviewEditLink %>">Edit Review</a></small></p>
       #end
       <table>
         <tr>
@@ -40,6 +41,10 @@
         <tr>
           <td><b>Approach and Uniqueness</b></td>
           <td><%= review.showApproachScore(ctxt) %></td>
+        </tr>
+        <tr>
+          <td><b>Results and Contributions</b></td>
+          <td><%= review.showResultScore(ctxt) %></td>
         </tr>
         <tr>
           <td><b>Comments</b></td>

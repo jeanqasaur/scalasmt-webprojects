@@ -16,14 +16,20 @@
 
     <form action="login_user" method="post">
     <input type="hidden" name="ac" value="log">
-    E-mail: <input type="text" name="username" value="<%= user.email %>"/><br />
-    Password: <input type="password" name="password" /><br />
+    <table>
+      <tr>
+        <td><b>E-mail</b></td>
+        <td><input type="text" name="username" value="<%= user.email %>" size=15 maxlength=50 /></td>
+      </tr>
+      <tr>
+        <td><b>Password</b></td>
+        <td><input type="password" name="password" size=15 maxlength=20 /></td>
+      </tr>
+    </table>
     <input type="submit" name="validate" class="button" value="Validate Account" />
     </form>
   </div>
-  <div id="footer">
-    <p>&copy; 2011 Jean Yang.</p>
-  </div>
+  ${include("footer.ssp")}
 </div>
 </body>
 </html>

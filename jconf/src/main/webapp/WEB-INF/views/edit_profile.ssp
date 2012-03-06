@@ -24,6 +24,33 @@
         </td>
       </tr>
       <tr>
+        <td><b>Student status</b></td>
+        <td>
+          <input type="radio" name="isGrad" value="no"
+            #if (!user.showIsGrad(ctxt))
+              checked
+            #end
+            /> Undergrad
+          <input type="radio" name="isGrad" value="yes"
+            #if (user.showIsGrad(ctxt))
+              checked
+            #end
+            /> Grad
+        </td>
+      </tr>
+      #{
+        val acmNum: Int = user.showAcmNum(ctxt)
+      }#
+      <tr>
+        <td><b>ACM number</b></td>
+        <td><input type="text" name="acmNum" maxlength=20
+          #if (acmNum > 0)
+            value="<%= user.showAcmNum(ctxt) %>"
+          #end
+          />
+        </td>
+      </tr>
+      <tr>
         <td><b>Role</b></td>
         <td>#match (user.role)
             #case(cap.jeeves.jconf.backend.PublicStatus)
@@ -39,7 +66,9 @@
             #end
         </td>
       </tr>
-      <tr><td><input type="submit" value="Submit" /></td></tr>
+      #if (user.showIsSelf(ctxt))
+        <tr><td><input type="submit" value="Submit" /></td></tr>
+      #end
     </table>
     </form>
     </div>
