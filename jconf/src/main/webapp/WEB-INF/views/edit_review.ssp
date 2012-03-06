@@ -15,9 +15,7 @@
 
     <div id="content">
     <h1>Edit Review.</h1>
-    <form action="review" method="post">
-    <input type="hidden" name="paperId" value="<%= paper.uid %>">
-    <input type="hidden" name="reviewerId" value="<%= reviewer.uid %>">
+    <form action="<%= review.showPostReviewLink(ctxt) %>" method="post">
     <table>
       <tr>
         <td><b>Paper</b></td>
@@ -62,12 +60,16 @@
       <tr>
         <td><b>Comments</b></td>
         <td>
-          <textarea rows="15" cols="40" name="body">
+          <textarea rows="15" cols="40" name="body" maxlength=3000>
             <%= review.showBody(ctxt) %>
           </textarea>
         </td>
       </tr>
-      <tr><td><input type="submit" value="Submit" /></td></tr>
+      #if (paper.showNeedsReviewBy(ctxt))
+        <tr>
+          <td><input type="submit" value="Submit" /></td>
+        </tr>
+      #end
     </table>
     </form>
     </div>

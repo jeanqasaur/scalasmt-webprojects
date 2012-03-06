@@ -20,14 +20,15 @@ object UserStatusField extends Enumeration {
 }
 
 class ConfUserRecord(
-    val email: String
+    val secretId: String
+  , val email: String
   , var name: String
   , var pwd: String
   , var isGrad: Boolean
   , var acmNum: Int
   , var role: Int
   ) extends KeyedEntity[Int] {
-  def this() = this("", "", "", false, -1, -1)
+  def this() = this("", "", "", "", false, -1, -1)
   val id = 0;
 
   def getSubmittedPapers(): List[BigInt] = {
@@ -45,7 +46,7 @@ class ConfUserRecord(
       case Some(u) => u
       case None =>
         val u =
-          new ConfUser(id, email, name, pwd, isGrad, acmNum
+          new ConfUser(id, secretId, email, name, pwd, isGrad, acmNum
             , Conversions.field2Role(role), getSubmittedPapers() );
         cacheUser(u);
         u
@@ -55,9 +56,10 @@ class ConfUserRecord(
 
 class Assignment(val reviewerId: Int, val paperId: Int);
 
-class PaperItemRecord( var title: String, var file: String )
+class PaperItemRecord(
+  val secretId: String, var title: String, var file: String )
 extends KeyedEntity[Int] {
-  def this() = this("", "")
+  def this() = this("", "", "")
   val id: Int = 0
 
   private def getAuthors(): List[ConfUser] = {
@@ -88,7 +90,8 @@ extends KeyedEntity[Int] {
     lookupCachedPaper(id) match {
       case Some(p) => p
       case None =>
-        val p = new PaperRecord(id, title, getAuthors (), file, getTags ())
+        val p =
+          new PaperRecord(id, secretId, title, getAuthors (), file, getTags ())
         cachePaper(p);
         p
     }
@@ -105,7 +108,8 @@ class PaperAuthorRecord(
 }
 
 class PaperReviewRecord(
-    val paperId: Int
+    val secretId: String
+  , val paperId: Int
   , val reviewerId: Int
   , var body: String
   , var problemScore: Int
@@ -113,11 +117,11 @@ class PaperReviewRecord(
   , var approachScore: Int
   , var resultScore: Int )
 extends KeyedEntity[Int] {
-  def this() = this(-1, -1, "", 3, 3, 3, 3)
+  def this() = this("", -1, -1, "", 3, 3, 3, 3)
   val id: Int = 0;
 
   def getPaperReview(): PaperReview = {
-    new PaperReview(id, paperId, reviewerId, body
+    new PaperReview(id, secretId, paperId, reviewerId, body
       , problemScore, backgroundScore, approachScore, resultScore )
   }
 }
@@ -160,9 +164,12 @@ object JConfTables extends Schema {
       case e: Exception => None
     }
   }
-  def updateDBUser(user: ConfUser, name: String): Unit = {
+  def updateDBUser(user: ConfUser, name: String, isGrad: Boolean, acmNum: Int)
+    : Unit = {
     val userRecord: ConfUserRecord = user.getConfUserRecord();
     userRecord.name = name
+    userRecord.isGrad = isGrad
+    userRecord.acmNum = acmNum
     transaction { users.update(userRecord) }
   }
 
@@ -242,6 +249,7 @@ object JConfTables extends Schema {
       r.id          is(autoIncremented)
     , r.paperId     is(indexed)
     , r.reviewerId  is(indexed)
+    , r.body        is(dbType("varchar(3000)"))
   ))
   def writeDBReview(reviewRecord: PaperReviewRecord) = {
     transaction { reviews.insert(reviewRecord) }
@@ -257,6 +265,19 @@ object JConfTables extends Schema {
     reviewRecord.resultScore = resultScore
     reviewRecord.body = body
     transaction { reviews.update(reviewRecord) }
+  }
+
+  def getDBPaperReview(uid: Int): Option[PaperReview] = {
+    try {
+      val reviewRecord: Option[PaperReviewRecord] =
+        transaction { JConfTables.reviews.lookup(uid) }
+      reviewRecord match {
+        case Some(u) => Some(u.getPaperReview())
+        case None => None
+      }
+    } catch {
+      case e: Exception => println(e); None
+    }
   }
   def getReviewByPaperReviewer(paperId: Int, reviewerId: Int)
     : Option[PaperReview] = {

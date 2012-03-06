@@ -43,7 +43,9 @@ object JConfBackend extends JeevesLib with Serializable {
 
   val defaultUser = {
     getUserById(-1) match {
+      // If the default user exists already...
       case Some(u) => u
+      // Otherwise create a new one.
       case None =>
       val defaultEmail = "defaultUser";
       JConfTables.getDBConfUserByEmail(defaultEmail) match {
@@ -54,12 +56,13 @@ object JConfBackend extends JeevesLib with Serializable {
           val defaultGrad = false;
           val defaultAcm = -1
           val defaultStatus = PublicStatus;
-          new ConfUser (
+          val (id, secretId) =
             getUserUid(
               defaultEmail, defaultName, defaultPwd, defaultGrad, defaultAcm
-              , Conversions.role2Field(defaultStatus))
+            , Conversions.role2Field(defaultStatus))
+          new ConfUser ( id, secretId
             , defaultEmail, defaultName, defaultPwd, defaultGrad, defaultAcm
-            , defaultStatus)
+            , defaultStatus )
         }
       }
     }
@@ -69,13 +72,16 @@ object JConfBackend extends JeevesLib with Serializable {
       case Some(p) => p
       case None =>
         val defaultTitle = "---";
-        new PaperRecord (getPaperUid(defaultTitle, ""), defaultTitle)
+        val (id, secretId) = getPaperUid(defaultTitle, "")
+        new PaperRecord (id, secretId, defaultTitle)
     }
   }
   val defaultReview = {
     JConfTables.getReviewByPaperReviewer(-1, -1) match {
       case Some(r) => r
-      case None => new PaperReview (uid = getReviewUid())
+      case None =>
+        val (id, key) = getReviewUid()
+        new PaperReview (uid=id, key=key)
     }
   }
 
@@ -83,28 +89,38 @@ object JConfBackend extends JeevesLib with Serializable {
   private var _usercount = 1;
   private def getUserUid (
     email: String, name: String, password: String, isGrad: Boolean
-    , acmNum: Int, role: Int): Int = {
+    , acmNum: Int, role: Int): (Int, String) = {
+    // Generate a secretId.
+    val secretId = RandomGenerator.generateSecretId();
+    // Use the secretId.
     val userRecord: ConfUserRecord =
-      new ConfUserRecord(email, name, password, isGrad, acmNum, role);
+      new ConfUserRecord(secretId, email, name, password, isGrad, acmNum, role);
     JConfTables.writeDBUser(userRecord);
-    userRecord.id
+    (userRecord.id, secretId)
   }
   private var _papercount = 1;
-  private def getPaperUid (title: String, file: String) : Int = {
-    val paperRecord: PaperItemRecord = new PaperItemRecord(title, file)
+  private def getPaperUid (title: String, file: String) : (Int, String) = {
+    val secretId = RandomGenerator.generateSecretId();
+    val paperRecord: PaperItemRecord =
+      new PaperItemRecord(secretId, title, file)
     JConfTables.writeDBPaper(paperRecord)
-    paperRecord.id
+    (paperRecord.id, secretId)
   }
   private var _reviewcount = 1;
   def getReviewUid (
     paperId: Int = -1, reviewerId: Int = -1, body: String = ""
     , problemScore: Int = 3, backgroundScore: Int = 3
-    , approachScore: Int = 3, resultScore: Int = 3): Int = {
+    , approachScore: Int = 3, resultScore: Int = 3): (Int, String) = {
+    val key = RandomGenerator.generateSecretId();
+
     val reviewRecord: PaperReviewRecord =
-      new PaperReviewRecord(paperId, reviewerId, body
-      , problemScore, backgroundScore, approachScore, resultScore);
+      new PaperReviewRecord(secretId=key, paperId=paperId, reviewerId=reviewerId
+      , body=body
+      , problemScore=problemScore, backgroundScore=backgroundScore
+      , approachScore=approachScore, resultScore=resultScore);
+
     JConfTables.writeDBReview(reviewRecord)
-    reviewRecord.id
+    (reviewRecord.id, key)
   }
 
   def getContext(user: ConfUser): ConfContext =
@@ -120,10 +136,11 @@ object JConfBackend extends JeevesLib with Serializable {
   def addUser(email: String
     , name: String, password: String, isGrad: Boolean, acmNum: Int
     , role: UserStatus): ConfUser = {
-    val id =
+    val (id, secretId) =
       getUserUid (email, name, password, isGrad, acmNum
       , Conversions.role2Field(role));
-    val user = new ConfUser(id, email, name, password, isGrad, acmNum, role);
+    val user =
+      new ConfUser(id, secretId, email, name, password, isGrad, acmNum, role);
 
     // Add paper to in-memory cache.
     jconfUsers += (id -> user)
@@ -136,9 +153,9 @@ object JConfBackend extends JeevesLib with Serializable {
     , file: String = "", tags : List[PaperTag] = Nil)
       : PaperRecord = {
     // TODO: Make sure UID is unique...
-    val uid = getPaperUid (name, file);
+    val (uid, secretId) = getPaperUid (name, file);
 
-    val paper = new PaperRecord(uid, name, authors, file, tags)
+    val paper = new PaperRecord(uid, secretId, name, authors, file, tags)
     authors.foreach(a => a.addSubmittedPaper(uid))
     authors.foreach(a => JConfTables.writeDBAuthor(uid.toInt, a.uid.toInt))
 
@@ -155,27 +172,13 @@ object JConfBackend extends JeevesLib with Serializable {
 
     // Write persistently.
     JConfTables.writeAssignment(reviewer.uid.toInt, p.uid.toInt)
-
-    // TODO: Store in memory?  Load this from memory when we start up...
+    p.addReview(reviewer)
+    p.addTag(NeedsReview(reviewer.uid))
   }
   def isAssigned (p: PaperRecord, reviewer: ConfUser): Boolean = {
     JConfTables.isAssigned(reviewer.uid.toInt, p.uid.toInt)
   }
-  def addReview
-    (p: PaperRecord, reviewer: ConfUser, rtext: String
-      , problemScore: Int, backgroundScore: Int
-      , approachScore: Int, resultScore: Int)
-    : PaperReview = {
-    if (isAssigned (p, reviewer)) {
-      val r =
-        p.addReview(reviewer, rtext
-        , problemScore, backgroundScore, approachScore, resultScore);
-      r
-    } else {
-      throw new PermissionsError        
-    }
-  }
-
+  
   /* Searching. */
   def lookupCachedPaper(uid: Int): Option[PaperRecord] = { jconfPapers.get(uid) }
   def cachePaper(paper: PaperRecord) = jconfPapers += (paper.uid.toInt -> paper)

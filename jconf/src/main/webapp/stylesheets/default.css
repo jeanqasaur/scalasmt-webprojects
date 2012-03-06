@@ -21,6 +21,17 @@ body {
 	font-size: small;
 }
 
+table
+{ text-align: left;
+font-size: small;
+color: #404040;
+width: 260px;
+background-color: #ffffff;
+border: 0px #d79900 solid;
+border-collapse: collapse;
+border-spacing: 0px;
+}
+
 h1, h2, h3 {
 	margin: 0;
 	padding: 0;

@@ -20,25 +20,30 @@ case object PCStatus extends UserStatus
 /* Conference User */
 case class ConfUser(
             val uid: BigInt
+  ,         val secretId: String  // Used in the link
   ,         val email: String
   , private var _name: String
   , private var _password: String
   , private var _isGrad: Boolean
-  , private var _acmNum: Int = -1
+  , private var _acmNum: BigInt = -1
   ,         val role: UserStatus
   , private var _submittedPapers: List[BigInt] = Nil )
   extends JeevesRecord {
     /*************/
     /* Policies. */
     /*************/
+    private val isSelf: Formula = CONTEXT.viewer~'uid === uid
+
     private val isReviewer: Formula =
       CONTEXT.viewer.status === ReviewerStatus
     private val isPC: Formula = CONTEXT.viewer.status === PCStatus
 
     private val selfL = mkLevel ();
-    policy (selfL, !(CONTEXT.viewer~'uid === uid), LOW);
+    policy (selfL, !isSelf, LOW);
     logConfUserPolicy();
-    def isSelf(): Formula = selfL
+    def showIsSelf(ctxt: ConfContext): Boolean = {
+      concretize(ctxt, selfL)
+    }
 
     /* If you can see this user, you can see their name. */
     private val nameL = mkLevel ();
@@ -51,6 +56,25 @@ case class ConfUser(
       mkSensitive(nameL, StringVal(_name), StringVal("--"))
     def showName (ctxt: ConfContext): String = {
       concretize(ctxt, name).asInstanceOf[StringVal].v
+    }
+
+    def setIsGrad (isGrad: Boolean): Unit = {
+      _isGrad = isGrad
+    }
+    def showIsGrad(ctxt: ConfContext): Boolean = {
+      _isGrad
+    }
+
+    private val numL = mkLevel()
+    policy (numL, !(isSelf || isPC), LOW)
+    def setAcmNum (acmNum: BigInt): Unit = {
+      _acmNum = acmNum
+    }
+    def getAcmNum (): IntExpr = {
+      mkSensitiveInt(numL, _acmNum, -1)
+    }
+    def showAcmNum (ctxt: ConfContext): Int = {
+      concretize(ctxt, _acmNum).asInstanceOf[BigInt].toInt
     }
 
     // Submitted papers.

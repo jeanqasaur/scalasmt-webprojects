@@ -9,8 +9,10 @@ import org.squeryl.PrimitiveTypeMode._
 
 import JConfBackend._
 
-class PaperReview(val uid: BigInt
-  , private val _paperId: BigInt = -1
+class PaperReview(
+            val  uid: BigInt
+  ,         val  key: String
+  ,         var  paperId: BigInt = -1
   , private val _reviewerId: BigInt = -1
   , private var _body: String = ""
   , private var _problemScore: Int = 3
@@ -27,14 +29,14 @@ class PaperReview(val uid: BigInt
     val vrole = CONTEXT.viewer.role;
     (vrole === ReviewerStatus) || (vrole === PCStatus);
   }
-  policy(_reviewerL, !_isInternalF, LOW);
+  policy(_reviewerL,
+    !((CONTEXT.viewer~'uid === uid) || (CONTEXT.viewer.role === PCStatus))
+    , LOW);
   logPaperReviewPolicy();
 
-  def getReviewer(): IntExpr =
-    mkSensitiveInt(_reviewerL, _reviewerId, -1)
+  val reviewer: IntExpr = mkSensitiveInt(_reviewerL, _reviewerId, -1)
   def showReviewer(ctxt: ConfContext): ConfUser = {
-    println(_reviewerId);
-    val reviewerId: BigInt = concretize(ctxt, getReviewer()).asInstanceOf[BigInt]
+    val reviewerId: BigInt = concretize(ctxt, reviewer).asInstanceOf[BigInt]
     JConfBackend.getUserById(reviewerId.toInt) match {
       case Some(u) => u
       case None => 
@@ -71,5 +73,25 @@ class PaperReview(val uid: BigInt
 
   def getPaperReviewRecord(): PaperReviewRecord = {
     transaction { JConfTables.reviews.get(uid.toInt) }
+  }
+
+  /* URL links. */
+  private val _editL = mkLevel()
+  policy(_editL, !(CONTEXT.viewer~'uid === reviewer), LOW)
+
+  def showReviewLink(ctxt: ConfContext): String = {
+    "review?id=" + uid + "&key=" + key
+  }
+  private val _editReviewLink = "edit_review?id=" + uid + "&key=" + key
+  val editReviewLink: Symbolic = 
+    mkSensitive(_editL, StringVal(_editReviewLink), StringVal(""))
+  def showEditReviewLink(ctxt: ConfContext): String = {
+    show[StringVal](ctxt, editReviewLink).v
+  }
+  private val _postReviewLink = "review?id=" + uid + "&key=" + key
+  val postReviewLink: Symbolic =
+    mkSensitive(_editL, StringVal(_postReviewLink), StringVal(""))
+  def showPostReviewLink(ctxt: ConfContext): String = {
+    show[StringVal](ctxt, postReviewLink).v
   }
 }

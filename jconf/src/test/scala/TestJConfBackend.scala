@@ -79,9 +79,11 @@ class TestJConfBackend extends FunSuite {
     }
 
   }
-
+  */
   test ("review assignment") {
     expect (true) { isAssigned(paper0, reviewer0); }
+    expect (true) { paper0.showNeedsReviewBy(getReviewerCtxt0()) }
+
     expect (true) { isAssigned(paper0, reviewer1); }
     expect (false) { isAssigned(paper1, reviewer0); }
     expect (false) { isAssigned(paper1, reviewer1); }
@@ -89,7 +91,7 @@ class TestJConfBackend extends FunSuite {
     assignReview(paper1, author0);
     expect (false) { isAssigned(paper1, author0); }
   }
-
+  /*
   test ("review tag visibility") {
     expect (false) {
       concretize(getAuthorCtxt0(Review), paper0.hasTag(ReviewedBy(reviewer0)));

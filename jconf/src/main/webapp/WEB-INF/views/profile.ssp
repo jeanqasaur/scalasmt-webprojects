@@ -24,6 +24,27 @@
           <td><b>Name</b></td><td><%= user.showName (ctxt) %></td>
         </tr>
         <tr>
+          <td><b>Student status</b></td>
+          <td>
+            #if (user.showIsGrad(ctxt))
+              Grad
+            #else
+              Undergrad
+            #end
+          </td>
+        </tr>
+        #{
+          val acmNum: Int = user.showAcmNum(ctxt)
+        }#
+        <tr>
+          <td><b>ACM number</b></td>
+          <td>
+            #if (acmNum > 0)
+              <%= acmNum %>
+            #end
+          </td>
+        </tr>
+        <tr>
           <td><b>Role</b></td>
           <td>#match (user.role)
               #case(cap.jeeves.jconf.backend.PublicStatus)

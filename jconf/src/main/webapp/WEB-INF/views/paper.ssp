@@ -16,8 +16,15 @@
       <p><i>The paper you have requested is not available.</i></p>
     #else
       <h1>Paper Details.</h1>
-      #if (paper.showIsAuthor(ctxt))
-        <a href="edit_paper?id=<%= paper.uid %>">Edit paper</a>
+      #{
+        val editLink: String = paper.showEditLink(ctxt)
+        val authors = paper.showAuthors(ctxt)
+        val uploadLink: String = paper.showUploadLink(ctxt)
+        val uploadFile: String = paper.showFile(ctxt)
+        val tags = paper.showTags(ctxt)
+      }#
+      #if (!editLink.isEmpty())
+        <a href="<%= editLink %>">Edit paper</a>
       #end
       <table>
         <tr>
@@ -27,9 +34,6 @@
         <tr>
           <td><b>Authors</b></td>
           <td>
-          #{
-            val authors = paper.showAuthors(ctxt)
-          }#
           #for (author <- authors)
             <%= author.showName(ctxt) %><br>
           #end
@@ -38,26 +42,17 @@
         <tr>
           <td><b>Uploaded Paper</b></td>
           <td>
-            <a href="pdf?id=<%= paper.uid %>&filename=<%= paper.showFile(ctxt) %>"><%= paper.showFile(ctxt) %></a>
+            <%= uploadFile %>
+            #if (!uploadLink.isEmpty())
+              <a href="<%= uploadLink %>">Download</a>
+            #end
           </td>
         </tr>
         <tr>
           <td><b>Tags</b></td>
           <td>
-          #{
-            val tags = paper.showTags(ctxt)
-          }#
           #for (tag <- tags)
-            #match (tag)
-            #case(cap.jeeves.jconf.backend.NeedsReview(user.uid))
-              Needs Review<br>
-            #case(cap.jeeves.jconf.backend.ReviewedBy(user.uid))
-              Reviewed<br>
-            #case(cap.jeeves.jconf.backend.Accepted)
-              Accepted<br>
-            #otherwise
-              <i>Internal error.</i>
-            #end
+            <%= tag.showTag(ctxt) %><br>
           #end
           </td>
         </tr>
@@ -69,10 +64,13 @@
           }#
           #for (review <- reviews)
             <%= review.uid %>:
-            <a href="review?paperId=<%= paper.uid %>?reviewId=<%= review.uid %>"><%= review.showReviewer(ctxt).showName(ctxt) %></a><br>
-          #end
-          #if (paper.showNeedsReviewBy(ctxt))
-            <a href="review">Review Paper</a>
+            <a href="<%= review.showReviewLink(ctxt) %>"><%= review.showReviewer(ctxt).showName(ctxt) %></a><br>
+            #{
+              val editReviewLink = review.showEditReviewLink(ctxt)
+            }#
+            #if (!editReviewLink.isEmpty())
+              <a href="<%= editReviewLink %>">Review Paper</a>
+            #end
           #end
           </td>
         </tr>

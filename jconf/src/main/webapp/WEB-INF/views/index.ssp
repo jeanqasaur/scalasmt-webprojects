@@ -1,4 +1,5 @@
 <%@ val name: String %>
+<%@ val errorMsg: String %>
 <%@ val user: cap.jeeves.jconf.backend.ConfUser %>
 <%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
 <%@ val submittedPapers: List[cap.jeeves.jconf.backend.PaperRecord] %>
@@ -15,6 +16,11 @@
 
     <div id="content">
     <h1>Welcome to jconf.</h1>
+
+    #if (!errorMsg.isEmpty())
+      <p><i><%= errorMsg %></i></p>
+    #end
+    
     <p>Hello, <%= name %>.</p>
 
     <h1>Papers.</h1>
@@ -25,7 +31,7 @@
     <ul>
       #for (p <- submittedPapers)
         <li>
-          <b><a href="paper?id=<%= p.uid %>"><%= p.uid %>: <%= p.showTitle(ctxt) %></a></b><br>
+          <b><a href="<%= p.showLink(ctxt) %>"><%= p.uid %>: <%= p.showTitle(ctxt) %></a></b><br>
             #{
               val authors = p.showAuthors(ctxt)
             }#
@@ -36,7 +42,7 @@
               val reviews = p.showReviews(ctxt)
             }#
             #for (review <- reviews)
-              Review</br>
+              Reviewed by <%= review.showReviewer(ctxt).showName(ctxt) %></br>
             #end
         </li>
       #end
@@ -52,16 +58,19 @@
           </tr>
         #for (p <- reviewPapers)
           <tr>
-          <td><a href="paper?id=<%= p.uid %>"><%= p.uid %></a></td>
-          <td><b><%= p.showTitle(ctxt) %></b><br></td>
-          <td>
-              #if (p.showIsReviewedBy(ctxt, user))
-                <a href="review?paperId=<%= p.uid%>&reviewerId=<%= user.uid %>">See Review</a>
-                <a href="edit_review?paperId=<%= p.uid%>">Edit Review</a>
-              #else
-                <a href="edit_review?paperId=<%= p.uid%>">Submit Review</a>
+            <td><a href="<%= p.showLink(ctxt) %>"><%= p.uid %></a></td>
+            <td><b><%= p.showTitle(ctxt) %></b><br></td>
+            <td>
+              #{
+                val review = p.showReviewByReviewer(ctxt, user.uid)
+                val reviewEditLink = review.showEditReviewLink(ctxt)
+              }#
+              #if (review.uid > -1)
+                #if (!reviewEditLink.isEmpty())
+                  <a href="<%= reviewEditLink %>">Edit Review</a>
+                #end
               #end
-          </td>
+            </td>
           </tr>
         #end
       </ul>
