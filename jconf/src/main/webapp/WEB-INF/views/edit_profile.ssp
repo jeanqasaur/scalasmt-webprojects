@@ -24,29 +24,34 @@
         </td>
       </tr>
       <tr>
-        <td><b>Student status</b></td>
+        <td><b>Affiliation</b></td>
         <td>
-          <input type="radio" name="isGrad" value="no"
-            #if (!user.showIsGrad(ctxt))
-              checked
-            #end
-            /> Undergrad
-          <input type="radio" name="isGrad" value="yes"
-            #if (user.showIsGrad(ctxt))
-              checked
-            #end
-            /> Grad
+          <input type="text" name="affiliation" value="<%= user.showAffiliation(ctxt) %>" />
         </td>
       </tr>
-      #{
-        val acmNum: String = user.showAcmNum(ctxt)
-      }#
-      <tr>
-        <td><b>ACM number</b></td>
-        <td><input type="text" name="acmNum" maxlength=20
-            value="<%= user.showAcmNum(ctxt) %>" />
-        </td>
-      </tr>
+      #if (user.role == cap.jeeves.jconf.backend.AuthorStatus)
+        <tr>
+          <td><b>Student status</b></td>
+          <td>
+            <input type="radio" name="isGrad" value="no"
+              #if (!user.showIsGrad(ctxt))
+                checked
+              #end
+              /> Undergrad
+            <input type="radio" name="isGrad" value="yes"
+              #if (user.showIsGrad(ctxt))
+                checked
+              #end
+              /> Grad
+          </td>
+        </tr>
+        <tr>
+          <td><b>ACM number</b></td>
+          <td><input type="text" name="acmNum" maxlength=20
+             value="<%= user.showAcmNum(ctxt) %>" />
+          </td>
+        </tr>
+      #end
       <tr>
         <td><b>Role</b></td>
         <td>#match (user.role)

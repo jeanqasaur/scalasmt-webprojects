@@ -23,12 +23,13 @@ class ConfUserRecord(
     val secretId: String
   , val email: String
   , var name: String
+  , var affiliation: String
   , var pwd: String
   , var isGrad: Boolean
   , var acmNum: String
   , var role: Int
   ) extends KeyedEntity[Int] {
-  def this() = this("", "", "", "", false, "", -1)
+  def this() = this("", "", "", "", "", false, "", -1)
   val id = 0;
 
   def getSubmittedPapers(): List[BigInt] = {
@@ -41,13 +42,26 @@ class ConfUserRecord(
     }
   }
 
+  def getConflicts(): List[BigInt] = {
+    transaction {
+      val authorConflicts: Iterable[Int] = {
+        from(JConfTables.conflicts)(c =>
+          where(c.authorId.~ === id)
+          select(c.reviewerId))
+      }
+      authorConflicts.toList.map(rid => BigInt(rid))
+    }
+  }
+
   def getConfUser() = {
     lookupCachedUser(id) match {
       case Some(u) => u
       case None =>
         val u =
-          new ConfUser(id, secretId, email, name, pwd, isGrad, acmNum
-            , Conversions.field2Role(role), getSubmittedPapers() );
+          new ConfUser(id, secretId, email, name, affiliation
+            , pwd, isGrad, acmNum
+            , Conversions.field2Role(role)
+            , getConflicts(), getSubmittedPapers() );
         cacheUser(u);
         u
     }
@@ -98,6 +112,7 @@ extends KeyedEntity[Int] {
   }
 }
 
+class AuthorConflictRecord(val authorId: Int, val reviewerId: Int)
 class PaperAuthorRecord(
     val paperId: Int
   , val authorId: Int ) {
@@ -164,12 +179,27 @@ object JConfTables extends Schema {
       case e: Exception => None
     }
   }
-  def updateDBUser(user: ConfUser, name: String, isGrad: Boolean, acmNum: String)
+ 
+  def getDBPotentialConflicts(): List[ConfUser] = {
+    transaction {
+      val userRecords: Iterable[ConfUserRecord] = from(users)(u =>
+        where((u.role === Conversions.role2Field(ReviewerStatus))
+          or (u.role === Conversions.role2Field(PCStatus)))
+        select(u)
+      )
+      userRecords.toList.map(_.getConfUser())
+    }
+  } 
+
+  def updateDBUser(user: ConfUser, name: String, affiliation: String
+    , isGrad: Boolean, acmNum: String)
     : Unit = {
     val userRecord: ConfUserRecord = user.getConfUserRecord();
     userRecord.name = name
+    userRecord.affiliation = affiliation
     userRecord.isGrad = isGrad
     userRecord.acmNum = acmNum
+
     transaction { users.update(userRecord) }
   }
 
@@ -229,6 +259,17 @@ object JConfTables extends Schema {
           where ((userId.~ === a.reviewerId) and (p.id === a.paperId))
           select(p) )
       paperRecords.toList.map(p => p.getPaperRecord())
+    }
+  }
+
+  val conflicts = table[AuthorConflictRecord]
+  on(conflicts)(a => declare(
+      a.authorId    is(indexed)
+    , a.reviewerId  is(indexed)
+  ))
+  def writeDBConflict(authorId: Int, reviewerId: Int): Unit = {
+    transaction{
+      conflicts.insert(new AuthorConflictRecord(authorId, reviewerId))
     }
   }
 
