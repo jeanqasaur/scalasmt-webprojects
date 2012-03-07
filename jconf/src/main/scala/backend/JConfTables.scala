@@ -272,6 +272,12 @@ object JConfTables extends Schema {
       conflicts.insert(new AuthorConflictRecord(authorId, reviewerId))
     }
   }
+  def removeDBConflict(authorId: Int, reviewerId: Int): Unit = {
+    transaction {
+      conflicts.deleteWhere(c =>
+        (c.authorId === authorId.~) and (c.reviewerId === reviewerId.~))
+    }
+  }
 
   /* Authors. */
   val authors = table[PaperAuthorRecord]
