@@ -102,6 +102,11 @@ object Init {
         "kuat@mit.edu", "Kuat Yessenov", "MIT"
         , "kuat", true, "", ReviewerStatus);
 
+      val studentJean =
+        JConfBackend.addUser(
+        "jeanyang@csail.mit.edu", "Jean Yang", "MIT CSAIL"
+        , "jean", true, "", AuthorStatus, List(pcArmando.uid))
+
       // Add some dummy papers.
       val paper0Name = "A Language for Automatically Enforcing Privacy";
       val paper0 = JConfBackend.addPaper(paper0Name, List(authorJean));

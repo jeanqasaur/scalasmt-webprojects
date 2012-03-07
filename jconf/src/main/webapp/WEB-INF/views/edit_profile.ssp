@@ -51,6 +51,19 @@
              value="<%= user.showAcmNum(ctxt) %>" />
           </td>
         </tr>
+        <tr>
+          <td><b>Conflicts</b></td>
+          <td>
+             #for (conflict <- cap.jeeves.jconf.backend.JConfBackend.getPotentialConflicts)
+              <input type="checkbox" name="conflict" value="<%= conflict.uid %>"
+                #if (user.showHasConflict(ctxt, conflict.uid))
+                  checked
+                #end
+                />
+                  <%= conflict.showName(ctxt) %><br>
+              #end
+          </td>
+        </tr>
       #end
       <tr>
         <td><b>Role</b></td>

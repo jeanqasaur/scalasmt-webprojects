@@ -41,6 +41,16 @@
             <td><b>ACM number</b></td>
             <td><%= user.showAcmNum(ctxt) %></td>
           </tr>
+          <tr>
+            <td><b>Conflicts</b></td>
+            <td>
+              #for (conflict <- cap.jeeves.jconf.backend.JConfBackend.getPotentialConflicts)
+                #if (user.showHasConflict(ctxt, conflict.uid)) 
+                  <%= conflict.showName(ctxt) %><br>
+                #end
+              #end
+            </td>
+          </tr>
         #end
         <tr>
           <td><b>Role</b></td>

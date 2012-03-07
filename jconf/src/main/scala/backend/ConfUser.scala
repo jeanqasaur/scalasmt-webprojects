@@ -145,8 +145,43 @@ case class ConfUser(
         , "Your password is " + _password + "." )
     }
 
+    def addConflict(c: BigInt): Unit = {
+      _conflicts = c::_conflicts
+    }
+    def setConflicts(cs: List[BigInt]): Unit = {
+      // If something is added...
+      cs.foreach{ c =>
+        if (!_conflicts.exists(_ == c)) {
+          JConfTables.writeDBConflict(uid.toInt, c.toInt)
+        }
+      }
+      // If something has been removed...
+      _conflicts.foreach{ c =>
+        if (!cs.exists(_ == c)) {
+          JConfTables.removeDBConflict(uid.toInt, c.toInt)
+        }
+      }
 
-    def update(params: Map[String, String]): Unit = {
+      _conflicts = cs
+    }
+    def getConflicts(): List[IntExpr] = {
+      _conflicts.map( (c: BigInt) => {
+        val conflictL = mkLevel ()
+        policy ( conflictL
+        , !(isPC || isSelf || (CONTEXT.viewer~'uid === c))
+        , LOW )
+        mkSensitiveInt(conflictL, c, -1) } )
+    }
+    def hasConflict(userId: BigInt): Formula = {
+      (getConflicts ()).has(userId)
+    }
+    def showHasConflict(ctxt: ConfContext, userId: BigInt): Boolean = {
+      concretize(ctxt, hasConflict(userId))
+    }
+
+    def update(params: Map[String, String]
+      , conflicts: List[BigInt])
+    : Unit = {
       val name: String = params("name")
       val affiliation: String = params("affiliation")
       val isGrad: Boolean = {
@@ -161,7 +196,8 @@ case class ConfUser(
       setAffiliation(affiliation)
       setIsGrad(isGrad)
       setAcmNum(acmNum)
-    
+      setConflicts(conflicts)
+
       JConfTables.updateDBUser(this, name, affiliation, isGrad, acmNum)
     }
 

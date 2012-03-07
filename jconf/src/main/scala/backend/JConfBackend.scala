@@ -26,7 +26,7 @@ object JConfBackend extends JeevesLib with Serializable {
 
   // A list of conflicts.
   private var conflicts: List[ConfUser] = JConfTables.getDBPotentialConflicts()
-  def getPossibleConflicts(): List[ConfUser] = conflicts
+  def getPotentialConflicts(): List[ConfUser] = conflicts
 
   /* Debugging variables. */
   private var numConfUserPs = 0;
@@ -147,13 +147,21 @@ object JConfBackend extends JeevesLib with Serializable {
   def addUser(email: String
     , name: String, affiliation: String
     , password: String, isGrad: Boolean, acmNum: String
-    , role: UserStatus): ConfUser = {
+    , role: UserStatus, userConflicts: List[BigInt] = Nil): ConfUser = {
+    // For this conference, only authors should be allowed to list conflicts.
+    if (role != AuthorStatus) {
+      assert(userConflicts == Nil);
+    }
+
     val (id, secretId) =
       getUserUid (email, name, affiliation, password, isGrad, acmNum
       , Conversions.role2Field(role));
     val user =
       new ConfUser(id, secretId, email, name, affiliation
-      , password, isGrad, acmNum, role, Nil);
+      , password, isGrad, acmNum, role, userConflicts);
+    userConflicts.foreach { c =>
+      JConfTables.writeDBConflict(id, c.toInt)
+    }
 
     // Add conflict if necessary.
     if ((role == ReviewerStatus) || (role == PCStatus)) {

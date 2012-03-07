@@ -169,8 +169,14 @@ with JeevesLib {
   // Update and display profile.
   post("/profile") {
     ifLoggedIn { (user: ConfUser) =>
-      // TODO: Need to update other fields as well.
-      user.update(params);
+      val conflicts: List[BigInt] = {
+        try {
+          multiParams("conflict").toList.map((v: String) => BigInt(v.toInt))
+        } catch {
+          case e: Exception => Nil 
+        }
+      }
+      user.update(params, conflicts);
       session("user") = user;
       renderPageWithUser("profile.ssp", user)
     }
