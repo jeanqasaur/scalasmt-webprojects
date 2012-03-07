@@ -49,8 +49,10 @@ with JeevesLib {
   }
 
   def renderPage(page: String, args: Map[String, Any] = Map()): Unit = {
+    var newArgs = args;
+    newArgs += ("title" -> "PLDI Student Research Competition 2012")
     contentType = "text/html"
-    templateEngine.layout(path + page, args)
+    templateEngine.layout(path + page, newArgs)
   }
   def renderPageWithUser(
     page: String, user: ConfUser, args: Map[String, Any] = Map()): Unit = {
