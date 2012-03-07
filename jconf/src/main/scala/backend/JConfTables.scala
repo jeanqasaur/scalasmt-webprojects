@@ -25,10 +25,10 @@ class ConfUserRecord(
   , var name: String
   , var pwd: String
   , var isGrad: Boolean
-  , var acmNum: Int
+  , var acmNum: String
   , var role: Int
   ) extends KeyedEntity[Int] {
-  def this() = this("", "", "", "", false, -1, -1)
+  def this() = this("", "", "", "", false, "", -1)
   val id = 0;
 
   def getSubmittedPapers(): List[BigInt] = {
@@ -164,7 +164,7 @@ object JConfTables extends Schema {
       case e: Exception => None
     }
   }
-  def updateDBUser(user: ConfUser, name: String, isGrad: Boolean, acmNum: Int)
+  def updateDBUser(user: ConfUser, name: String, isGrad: Boolean, acmNum: String)
     : Unit = {
     val userRecord: ConfUserRecord = user.getConfUserRecord();
     userRecord.name = name

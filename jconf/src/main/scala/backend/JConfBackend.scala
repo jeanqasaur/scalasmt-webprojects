@@ -54,7 +54,7 @@ object JConfBackend extends JeevesLib with Serializable {
           val defaultName = "Default User";
           val defaultPwd = "";
           val defaultGrad = false;
-          val defaultAcm = -1
+          val defaultAcm = ""
           val defaultStatus = PublicStatus;
           val (id, secretId) =
             getUserUid(
@@ -89,7 +89,7 @@ object JConfBackend extends JeevesLib with Serializable {
   private var _usercount = 1;
   private def getUserUid (
     email: String, name: String, password: String, isGrad: Boolean
-    , acmNum: Int, role: Int): (Int, String) = {
+    , acmNum: String, role: Int): (Int, String) = {
     // Generate a secretId.
     val secretId = RandomGenerator.generateSecretId();
     // Use the secretId.
@@ -134,7 +134,7 @@ object JConfBackend extends JeevesLib with Serializable {
   }
 
   def addUser(email: String
-    , name: String, password: String, isGrad: Boolean, acmNum: Int
+    , name: String, password: String, isGrad: Boolean, acmNum: String
     , role: UserStatus): ConfUser = {
     val (id, secretId) =
       getUserUid (email, name, password, isGrad, acmNum

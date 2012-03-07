@@ -233,14 +233,13 @@ class PaperRecord(         val uid: BigInt
   }
 
   private val path: String = new java.io.File("").getAbsolutePath()
-  private val _backupLoc = path + "/papers/" + "jcp" + key + "_" + _file
-  private val _tomcatLoc =
-    path + "/webapps/jconf/papers/" + "jcp" + key + "_" + _file
   def getBackupLoc(): Symbolic = {
-    mkSensitive(_editL, StringVal(_backupLoc), StringVal(""))
+    val backupLoc = path + "/papers/" + "jcp" + key + "_" + _file
+    mkSensitive(_editL, StringVal(backupLoc), StringVal(""))
   }
   def getTomcatLoc(): Symbolic = {
-    mkSensitive(_editL, StringVal(_tomcatLoc), StringVal(""))
+    val tomcatLoc = path + "/webapps/jconf/papers/" + "jcp" + key + "_" + _file
+    mkSensitive(_editL, StringVal(tomcatLoc), StringVal(""))
   }
   // Permanent storage location for file.
   def showFileLocations(ctxt: ConfContext): (String, String) = {
@@ -267,7 +266,7 @@ class PaperRecord(         val uid: BigInt
   }
   private val _postLink = "paper?id=" + uid + "&key=" + key
   def postLink: Symbolic = {
-    mkSensitive(_editL, StringVal(_editLink), StringVal(""))
+    mkSensitive(_editL, StringVal(_postLink), StringVal(""))
   }
   def showPostLink(ctxt: ConfContext): String = {
     show[StringVal](ctxt, postLink).v
