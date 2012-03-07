@@ -1,4 +1,4 @@
-<%@ val title: String = "jconf . csail" %>
+<%@ val title: String %>
 <%@ val user: cap.jeeves.jconf.backend.ConfUser %>
 <%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
 <html>
