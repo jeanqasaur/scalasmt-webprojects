@@ -25,7 +25,7 @@ case class ConfUser(
   , private var _name: String
   , private var _password: String
   , private var _isGrad: Boolean
-  , private var _acmNum: BigInt = -1
+  , private var _acmNum: String = ""
   ,         val role: UserStatus
   , private var _submittedPapers: List[BigInt] = Nil )
   extends JeevesRecord {
@@ -67,14 +67,14 @@ case class ConfUser(
 
     private val numL = mkLevel()
     policy (numL, !(isSelf || isPC), LOW)
-    def setAcmNum (acmNum: BigInt): Unit = {
+    def setAcmNum (acmNum: String): Unit = {
       _acmNum = acmNum
     }
-    def getAcmNum (): IntExpr = {
-      mkSensitiveInt(numL, _acmNum, -1)
+    def getAcmNum (): Symbolic = {
+      mkSensitive(numL, StringVal(_acmNum), StringVal(""))
     }
-    def showAcmNum (ctxt: ConfContext): Int = {
-      concretize(ctxt, _acmNum).asInstanceOf[BigInt].toInt
+    def showAcmNum (ctxt: ConfContext): String = {
+      show[StringVal](ctxt, getAcmNum ()).v
     }
 
     // Submitted papers.

@@ -34,15 +34,11 @@
           </td>
         </tr>
         #{
-          val acmNum: Int = user.showAcmNum(ctxt)
+          val acmNum: String = user.showAcmNum(ctxt)
         }#
         <tr>
           <td><b>ACM number</b></td>
-          <td>
-            #if (acmNum > 0)
-              <%= acmNum %>
-            #end
-          </td>
+          <td><%= acmNum %></td>
         </tr>
         <tr>
           <td><b>Role</b></td>

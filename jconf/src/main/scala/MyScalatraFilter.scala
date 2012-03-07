@@ -113,9 +113,8 @@ with JeevesLib {
               addUser(params("username")
               , ""
               , RandomGenerator.generatePassword()
-              // TODO!!~
               , false
-              , -1
+              , ""
               , role);
 
             // E-mail the user about the password.

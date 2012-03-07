@@ -77,13 +77,13 @@ object Init {
       // Add some dummy users.
       val pcArmando =
         JConfBackend.addUser(
-        "asolar@mit.edu", "Armando Solar-Lezama", "armando", true, -1, PCStatus);
+        "asolar@mit.edu", "Armando Solar-Lezama", "armando", true, "", PCStatus);
       val authorJean =
         JConfBackend.addUser(
-        "jeanyang@mit.edu", "Jean Yang", "jean", true, -1, ReviewerStatus);
+        "jeanyang@mit.edu", "Jean Yang", "jean", true, "", ReviewerStatus);
       val reviewerKuat =
         JConfBackend.addUser(
-        "kuat@mit.edu", "Kuat Yessenov", "kuat", true, -1, ReviewerStatus);
+        "kuat@mit.edu", "Kuat Yessenov", "kuat", true, "", ReviewerStatus);
 
       // Add some dummy papers.
       val paper0Name = "A Language for Automatically Enforcing Privacy";
