@@ -23,10 +23,12 @@ case class ConfUser(
   ,         val secretId: String  // Used in the link
   ,         val email: String
   , private var _name: String
+  , private var _affiliation: String
   , private var _password: String
   , private var _isGrad: Boolean
   , private var _acmNum: String = ""
   ,         val role: UserStatus
+  , private var _conflicts: List[BigInt]
   , private var _submittedPapers: List[BigInt] = Nil )
   extends JeevesRecord {
     /*************/
@@ -56,6 +58,15 @@ case class ConfUser(
       mkSensitive(nameL, StringVal(_name), StringVal("--"))
     def showName (ctxt: ConfContext): String = {
       concretize(ctxt, name).asInstanceOf[StringVal].v
+    }
+    def setAffiliation (a: String): Unit = {
+      _affiliation = a;
+      affiliation = mkSensitive(nameL, StringVal(_affiliation), StringVal("--"))
+    }
+    var affiliation: Symbolic =
+      mkSensitive(nameL, StringVal(_affiliation), StringVal("--"))
+    def showAffiliation (ctxt: ConfContext): String = {
+      concretize(ctxt, affiliation).asInstanceOf[StringVal].v
     }
 
     def setIsGrad (isGrad: Boolean): Unit = {
@@ -130,10 +141,29 @@ case class ConfUser(
           "jeanyang@csail.mit.edu"
         , "Jean Yang"
         , email
-        , "Welcome to JConf"
+        , "Your JConf Password"
         , "Your password is " + _password + "." )
     }
 
+
+    def update(params: Map[String, String]): Unit = {
+      val name: String = params("name")
+      val affiliation: String = params("affiliation")
+      val isGrad: Boolean = {
+        try { params("isGrad") == "yes" }
+        catch { case e: Exception => false }
+      }
+      val acmNum: String = {
+        try { params("acmNum") } catch { case e: Exception => "" }
+      }
+
+      setName(name)
+      setAffiliation(affiliation)
+      setIsGrad(isGrad)
+      setAcmNum(acmNum)
+    
+      JConfTables.updateDBUser(this, name, affiliation, isGrad, acmNum)
+    }
 
     def getConfUserRecord(): ConfUserRecord = {
       transaction { JConfTables.users.get(uid.toInt) }

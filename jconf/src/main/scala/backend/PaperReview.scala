@@ -30,7 +30,8 @@ class PaperReview(
     (vrole === ReviewerStatus) || (vrole === PCStatus);
   }
   policy(_reviewerL,
-    !((CONTEXT.viewer~'uid === uid) || (CONTEXT.viewer.role === PCStatus))
+    !((CONTEXT.viewer~'uid === _reviewerId)
+      || (CONTEXT.viewer.role === PCStatus))
     , LOW);
   logPaperReviewPolicy();
 

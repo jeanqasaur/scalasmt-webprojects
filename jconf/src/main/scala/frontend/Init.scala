@@ -72,18 +72,35 @@ object Init {
     , new File(paperPath) )
   }
 
-  def initDummyUsers (): Unit = {
+  def initUsers (): Unit = {
     if (clearEverything) {
       // Add some dummy users.
       val pcArmando =
         JConfBackend.addUser(
-        "asolar@mit.edu", "Armando Solar-Lezama", "armando", true, "", PCStatus);
+        "asolar@mit.edu", "Armando Solar-Lezama", "MIT"
+        , "armando", true, "", PCStatus);
+      
+      /* Add actual reviewers. */
+      JConfBackend.addUser("dummyemail0@mit.edu", "Andrew Rybalchenko", "TUM"
+        , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
+      JConfBackend.addUser("dummyemail1@mit.edu", "Kathleen Fisher", "Tufts"
+        , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
+      JConfBackend.addUser("dummyemail2@mit.edu", "Martin Vechev", "ETH"
+        , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
+      JConfBackend.addUser("dummyemail3@mit.edu", "Isil Dillig", "William & Mary"
+        , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
+      JConfBackend.addUser("dummyemail4@mit.edu", "Sriram Rajamani", "Microsoft"
+        , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
+
+      // These 
       val authorJean =
         JConfBackend.addUser(
-        "jeanyang@mit.edu", "Jean Yang", "jean", true, "", ReviewerStatus);
+        "jeanyang@mit.edu", "Jean Yang", "MIT"
+        , "jean", true, "", ReviewerStatus);
       val reviewerKuat =
         JConfBackend.addUser(
-        "kuat@mit.edu", "Kuat Yessenov", "kuat", true, "", ReviewerStatus);
+        "kuat@mit.edu", "Kuat Yessenov", "MIT"
+        , "kuat", true, "", ReviewerStatus);
 
       // Add some dummy papers.
       val paper0Name = "A Language for Automatically Enforcing Privacy";

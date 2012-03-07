@@ -26,7 +26,7 @@ with JeevesLib {
 
   Init.initDB ()
   Init.initDirectory ()
-  Init.initDummyUsers ()
+  Init.initUsers ()
 
   val path = "/WEB-INF/views/"
   val title = "jeeves social net"
@@ -41,8 +41,8 @@ with JeevesLib {
         try {
           displayPage(user)
         } catch {
-          case ia: IllegalAccessError => redirect("index?illegalAccess=yes")
-          case ie: JConfInternalError => redirect("index?internalError=yes")
+          case ia: IllegalAccessError => redirect("index?msg=illegalAccess")
+          case ie: JConfInternalError => redirect("index?msg=internalError")
         }
       case None => redirect("login")
     }
@@ -74,20 +74,31 @@ with JeevesLib {
     ifLoggedIn{ (user: ConfUser) =>
       val ctxt = getContext(user);
 
-      var errorMsg = "";
-      if (hasParam(params, "illegalAccess")) {
-        errorMsg = "You do not have permission to access that page."       
-      };
-      if (hasParam(params, "internalError")) {
-        errorMsg = "An internal error has occurred."
-      };
+      val msg = {
+        if (hasParam(params, "msg")) {
+          params("msg") match {
+            case "illegalAccess" =>
+              "You do not have permission to access that page."
+            case "internalError" => "An internal error has occured."
+            case "password" =>
+              "Your password has been sent to " + user.email + "."
+          }
+        } else { "" }
+      }
 
       renderPageWithUser("index.ssp", user
-        , Map( "errorMsg" -> errorMsg
+        , Map( "msg" -> msg
                , "name" -> user.showName(getContext(user))
                , "submittedPapers" -> user.showSubmittedPapers(ctxt)
                , "reviewPapers" -> user.showReviewPapers(ctxt)
                , "reviews" -> user.showReviews(ctxt)))
+    }
+  }
+
+  get("/send_password") {
+    ifLoggedIn{ (user: ConfUser) =>
+      user.emailPassword()
+      redirect("index?msg=password")
     }
   }
 
@@ -111,6 +122,7 @@ with JeevesLib {
             // Make a new user and add them to the database.
             val u =
               addUser(params("username")
+              , ""
               , ""
               , RandomGenerator.generatePassword()
               , false
@@ -158,7 +170,7 @@ with JeevesLib {
   post("/profile") {
     ifLoggedIn { (user: ConfUser) =>
       // TODO: Need to update other fields as well.
-      JConfUtil.updateUserProfile(user, params);
+      user.update(params);
       session("user") = user;
       renderPageWithUser("profile.ssp", user)
     }
@@ -203,6 +215,10 @@ with JeevesLib {
           ""
         }
       }
+
+      // Update the paper record with the new information.
+      JConfUtil.updatePaperRecord(paper, filename, params)
+
       // Write file to disk...
       if (uploadedFile.getSize > 0) {
         val (backupLoc, tomcatLoc) = paper.showFileLocations(getContext(user))
@@ -214,7 +230,6 @@ with JeevesLib {
         }
       }
 
-      JConfUtil.updatePaperRecord(paper, filename, params)
       renderPageWithUser("paper.ssp", user, Map("paper" -> paper))
     }
   }

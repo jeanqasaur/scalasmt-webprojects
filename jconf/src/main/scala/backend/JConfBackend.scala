@@ -24,6 +24,10 @@ object JConfBackend extends JeevesLib with Serializable {
   private val jconfPapers: Map[Int, PaperRecord] = Map[Int, PaperRecord]()
   private val jconfReviews: Map[Int, PaperReview] = Map[Int, PaperReview]()
 
+  // A list of conflicts.
+  private var conflicts: List[ConfUser] = JConfTables.getDBPotentialConflicts()
+  def getPossibleConflicts(): List[ConfUser] = conflicts
+
   /* Debugging variables. */
   private var numConfUserPs = 0;
   def logConfUserPolicy() = numConfUserPs = numConfUserPs + 1
@@ -52,17 +56,22 @@ object JConfBackend extends JeevesLib with Serializable {
         case Some(user) => user
         case None => {
           val defaultName = "Default User";
+          val defaultAffiliation = "";
           val defaultPwd = "";
           val defaultGrad = false;
           val defaultAcm = ""
           val defaultStatus = PublicStatus;
+          val defaultConflicts = Nil;
           val (id, secretId) =
             getUserUid(
-              defaultEmail, defaultName, defaultPwd, defaultGrad, defaultAcm
+              defaultEmail, defaultName, defaultAffiliation
+            , defaultPwd, defaultGrad, defaultAcm
             , Conversions.role2Field(defaultStatus))
           new ConfUser ( id, secretId
-            , defaultEmail, defaultName, defaultPwd, defaultGrad, defaultAcm
-            , defaultStatus )
+            , defaultEmail, defaultName, defaultAffiliation
+            , defaultPwd, defaultGrad, defaultAcm
+            , defaultStatus
+            , defaultConflicts )
         }
       }
     }
@@ -88,13 +97,15 @@ object JConfBackend extends JeevesLib with Serializable {
   /* Making papers. */
   private var _usercount = 1;
   private def getUserUid (
-    email: String, name: String, password: String, isGrad: Boolean
+    email: String, name: String, affiliation: String
+    , password: String, isGrad: Boolean
     , acmNum: String, role: Int): (Int, String) = {
     // Generate a secretId.
     val secretId = RandomGenerator.generateSecretId();
     // Use the secretId.
     val userRecord: ConfUserRecord =
-      new ConfUserRecord(secretId, email, name, password, isGrad, acmNum, role);
+      new ConfUserRecord(secretId, email, name, affiliation
+      , password, isGrad, acmNum, role);
     JConfTables.writeDBUser(userRecord);
     (userRecord.id, secretId)
   }
@@ -134,13 +145,20 @@ object JConfBackend extends JeevesLib with Serializable {
   }
 
   def addUser(email: String
-    , name: String, password: String, isGrad: Boolean, acmNum: String
+    , name: String, affiliation: String
+    , password: String, isGrad: Boolean, acmNum: String
     , role: UserStatus): ConfUser = {
     val (id, secretId) =
-      getUserUid (email, name, password, isGrad, acmNum
+      getUserUid (email, name, affiliation, password, isGrad, acmNum
       , Conversions.role2Field(role));
     val user =
-      new ConfUser(id, secretId, email, name, password, isGrad, acmNum, role);
+      new ConfUser(id, secretId, email, name, affiliation
+      , password, isGrad, acmNum, role, Nil);
+
+    // Add conflict if necessary.
+    if ((role == ReviewerStatus) || (role == PCStatus)) {
+      conflicts = user::conflicts
+    }
 
     // Add paper to in-memory cache.
     jconfUsers += (id -> user)

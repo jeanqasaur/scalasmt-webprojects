@@ -10,12 +10,11 @@
   ${include("header.ssp")}
 
   <div id="content">
-    <p>Welcome to the JConf system!  Please enter your password, which should have been setn to your e-mail.</p>
+    <p>Welcome to the JConf system!  Please enter your password, which should have been sent to your e-mail.</p>
 
     <p><i>If you did not receive your password, please e-mail jeanyang [at] mit [dot] edu.</i></p>
 
     <form action="login_user" method="post">
-    <input type="hidden" name="ac" value="log">
     <table>
       <tr>
         <td><b>E-mail</b></td>

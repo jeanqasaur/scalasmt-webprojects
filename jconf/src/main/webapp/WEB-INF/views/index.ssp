@@ -1,5 +1,5 @@
 <%@ val name: String %>
-<%@ val errorMsg: String %>
+<%@ val msg: String %>
 <%@ val user: cap.jeeves.jconf.backend.ConfUser %>
 <%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
 <%@ val submittedPapers: List[cap.jeeves.jconf.backend.PaperRecord] %>
@@ -17,8 +17,8 @@
     <div id="content">
     <h1>Welcome to jconf.</h1>
 
-    #if (!errorMsg.isEmpty())
-      <p><i><%= errorMsg %></i></p>
+    #if (!msg.isEmpty())
+      <p><i><%= msg %></i></p>
     #end
     
     <p>Hello, <%= name %>.</p>

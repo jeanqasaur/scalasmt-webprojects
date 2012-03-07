@@ -15,31 +15,33 @@
       <p><i>The profile you have requested is not available.</i></p>
     #else
       <h1>User Profile.</h1>
-      <small><a href="edit_profile">Edit Profile</a></small><br>
+      <p><small>
+        <a href="edit_profile">Edit Profile</a>
+        <a href="send_password">Resend Password</a>
+      </small></p>
       <table>
+        <tr><td><b>Username</b></td><td><%= user.email %></td></tr>
+        <tr><td><b>Name</b></td><td><%= user.showName (ctxt) %></td></tr>
         <tr>
-          <td><b>Username</b></td><td><%= user.email %></td>
+          <td><b>Affliation</b></td>
+          <td><%= user.showAffiliation (ctxt) %></td>
         </tr>
-        <tr>
-          <td><b>Name</b></td><td><%= user.showName (ctxt) %></td>
-        </tr>
-        <tr>
-          <td><b>Student status</b></td>
-          <td>
-            #if (user.showIsGrad(ctxt))
-              Grad
-            #else
-              Undergrad
-            #end
-          </td>
-        </tr>
-        #{
-          val acmNum: String = user.showAcmNum(ctxt)
-        }#
-        <tr>
-          <td><b>ACM number</b></td>
-          <td><%= acmNum %></td>
-        </tr>
+        #if (user.role == cap.jeeves.jconf.backend.AuthorStatus)
+          <tr>
+            <td><b>Student status</b></td>
+            <td>
+              #if (user.showIsGrad(ctxt))
+                Grad
+              #else
+                Undergrad
+              #end
+           </td>
+          </tr>
+          <tr>
+            <td><b>ACM number</b></td>
+            <td><%= user.showAcmNum(ctxt) %></td>
+          </tr>
+        #end
         <tr>
           <td><b>Role</b></td>
           <td>#match (user.role)
