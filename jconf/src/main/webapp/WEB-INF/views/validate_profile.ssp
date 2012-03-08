@@ -1,4 +1,4 @@
-<%@ val title: String = "jconf . csail" %>
+<%@ val title: String %>
 <%@ val user: cap.jeeves.jconf.backend.ConfUser %>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -7,7 +7,7 @@
 </head>
 <body>
 <div id="wrapper">
-  ${include("header.ssp")}
+  #do(layout("snippets/header.ssp", Map("user" -> user))) #end
 
   <div id="content">
     <p>Welcome to the JConf system!  Please enter your password, which should have been sent to your e-mail.</p>
@@ -25,7 +25,7 @@
         <td><input type="password" name="password" size=15 maxlength=20 /></td>
       </tr>
     </table>
-    <input type="submit" name="validate" class="button" value="Validate Account" />
+    <input type="submit" name="action" class="button" value="Validate" />
     </form>
   </div>
   ${include("footer.ssp")}

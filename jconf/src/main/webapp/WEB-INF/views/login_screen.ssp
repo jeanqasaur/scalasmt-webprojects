@@ -1,4 +1,4 @@
-<%@ val title: String = "jconf . csail" %>
+<%@ val title: String %>
 <%@ val errorMsg: String = "" %>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -7,11 +7,7 @@
 </head>
 <body>
 <div id="wrapper">
-  <div id="header">
-  <h1>${title}</h1>
-  </div>
-  <div id="menu">
-  </div>
+  #do(layout("snippets/header.ssp", Map())) #end
   <div id="content">
     #if (errorMsg != null)
       <p><i><%= errorMsg %></i></p>
