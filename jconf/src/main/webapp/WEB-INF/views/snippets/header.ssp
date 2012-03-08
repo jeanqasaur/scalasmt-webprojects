@@ -1,0 +1,14 @@
+<%@ val user: cap.jeeves.jconf.backend.ConfUser = null %>
+<div id="header">
+  <h1>PLDI Student Research Competition 2012</h1>
+</div>
+<div id="menu">
+  <ul>
+    <li><a href="about" accesskey="1" title="About">About</a></li>
+    #if (user != null)
+      <li><a href="index" accesskey="2" title="Home">Home</a></li>
+      <li><a href="profile" accesskey="3" title="Profile">Profile</a></li>
+      <li><a href="logout" accesskey="4" title="Logout">Logout</a></li>
+    #end
+  </ul>
+</div>

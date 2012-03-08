@@ -3,7 +3,7 @@
 <%@ val stage: cap.jeeves.jconf.backend.PaperStage %>
 <%@ val submissionDeadline: String %>
 <%@ val notificationDeadline: String %>
-<%@ val user: cap.jeeves.jconf.backend.ConfUser %>i
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
 <%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
 <%@ val submittedPapers: List[cap.jeeves.jconf.backend.PaperRecord] %>
 <%@ val reviewPapers: List[cap.jeeves.jconf.backend.PaperRecord] %>
@@ -15,7 +15,7 @@
   </head>
 <body>
   <div id="wrapper">
-    ${include("header.ssp")}
+    #do(layout("snippets/header.ssp", Map("user" -> user))) #end
 
     <div id="content">
     <h1>Welcome to the PLDI Student Research Competition 2012.</h1>

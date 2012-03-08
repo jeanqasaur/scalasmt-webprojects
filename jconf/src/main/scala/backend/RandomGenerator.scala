@@ -9,6 +9,6 @@ object RandomGenerator {
     (new BigInteger(130, random).toString(32)).substring(0, len)
   }
 
-  def generatePassword(): String = generateString(12)
+  def generatePassword(): String = generateString(8)
   def generateSecretId(): String = generateString(6)
 }

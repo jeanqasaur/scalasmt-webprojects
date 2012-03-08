@@ -11,7 +11,7 @@
   </head>
 <body>
   <div id="wrapper">
-    ${include("header.ssp")}
+    #do(layout("snippets/header.ssp", Map("user" -> user))) #end
 
     <div id="content">
     <h1>Paper Review.</h1>

@@ -30,6 +30,7 @@ object Init {
         transaction { JConfTables.create; }
       } catch {
         case e: Exception =>
+        println("Tables exist already.")
         try {
           if (clearEverything) {
             transaction {

@@ -96,6 +96,15 @@ with JeevesLib {
 
   get("/") { redirect("index") }
 
+  get("/about") { 
+    session.get("user") match {
+      case Some(u) =>
+        val user = u.asInstanceOf[ConfUser];
+        renderPageWithUser("about.ssp", user)
+      case None => renderPage("about.ssp")
+   }
+  }
+
   get("/index") {
     ifLoggedIn{ (user: ConfUser) =>
       val ctxt = getContext(user);
@@ -157,11 +166,15 @@ with JeevesLib {
           loginUser(params("username"), params("password")) match {
             case Some(user) =>
               session("user") = user
-              val isValidating: Boolean =
-                params.exists((param: (String, String)) =>
-                  param._1 == "validate")
-              if (isValidating) { redirect("edit_profile") }
-              else { redirect("index") }
+              redirect("index")
+            case None =>
+              loginRedirect("Incorrect username or password.")
+          }
+        case "Validate" =>
+          loginUser(params("username"), params("password")) match {
+            case Some(user) =>
+              session("user") = user
+              redirect("edit_profile")
             case None =>
               loginRedirect("Incorrect username or password.")
           }
