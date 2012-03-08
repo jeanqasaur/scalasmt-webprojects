@@ -19,7 +19,7 @@ object Init {
 
     val dbUsername = "jeanyang";
     val dbPassword = "scalasmt";
-    val dbConnection = "jdbc:mysql://mysql.csail.mit.edu/JeevesConfDB"
+    val dbConnection = "jdbc:mysql://mysql.csail.mit.edu/JYTestDB"
     SessionFactory.concreteFactory = Some(()=>
       Session.create(
         java.sql.DriverManager.getConnection(
@@ -79,21 +79,21 @@ object Init {
       val pcArmando =
         JConfBackend.addUser(
         "asolar@mit.edu", "Armando Solar-Lezama", "MIT"
-        , "armando", true, "", PCStatus);
+        , RandomGenerator.generatePassword(), true, "", PCStatus);
       
       /* Add actual reviewers. */
-      JConfBackend.addUser("dummyemail0@mit.edu", "Andrew Rybalchenko", "TUM"
+      JConfBackend.addUser("rybal@in.tum.de", "Andrew Rybalchenko", "TUM"
         , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
-      JConfBackend.addUser("dummyemail1@mit.edu", "Kathleen Fisher", "Tufts"
+      JConfBackend.addUser("kfisher@eecs.tufts.edu", "Kathleen Fisher", "Tufts"
         , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
-      JConfBackend.addUser("dummyemail2@mit.edu", "Martin Vechev", "ETH"
+      JConfBackend.addUser("mtvechev@us.ibm.com", "Martin Vechev", "ETH"
         , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
-      JConfBackend.addUser("dummyemail3@mit.edu", "Isil Dillig", "William & Mary"
+      JConfBackend.addUser("idillig@cs.wm.edu", "Isil Dillig", "William & Mary"
         , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
-      JConfBackend.addUser("dummyemail4@mit.edu", "Sriram Rajamani", "Microsoft"
+      JConfBackend.addUser("sriram@microsoft.com", "Sriram Rajamani", "Microsoft"
         , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
 
-      // These 
+      /*
       val authorJean =
         JConfBackend.addUser(
         "jeanyang@mit.edu", "Jean Yang", "MIT"
@@ -102,6 +102,7 @@ object Init {
         JConfBackend.addUser(
         "kuat@mit.edu", "Kuat Yessenov", "MIT"
         , "kuat", true, "", ReviewerStatus);
+      */
 
       val studentJean =
         JConfBackend.addUser(
@@ -109,6 +110,7 @@ object Init {
         , "jean", true, "", AuthorStatus, List(pcArmando.uid))
 
       // Add some dummy papers.
+      /*
       val paper0Name = "A Language for Automatically Enforcing Privacy";
       val paper0 = JConfBackend.addPaper(paper0Name, List(authorJean));
       JConfBackend.assignReview(paper0, reviewerKuat);
@@ -116,6 +118,7 @@ object Init {
       val paper1Name = "Matchmaker";
       val paper1 = JConfBackend.addPaper(paper1Name, List(reviewerKuat));
       JConfBackend.assignReview(paper1, authorJean);
+      */
     }
    }
  }
