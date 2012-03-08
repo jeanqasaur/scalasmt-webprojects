@@ -164,19 +164,23 @@ case class ConfUser(
 
       _conflicts = cs
     }
-    def getConflicts(): List[IntExpr] = {
+    // Conflicts are public right now...
+    def getConflicts(): List[BigInt] = {
+      _conflicts
+      /*
       _conflicts.map( (c: BigInt) => {
         val conflictL = mkLevel ()
         policy ( conflictL
         , !(isPC || isSelf || (CONTEXT.viewer~'uid === c))
         , LOW )
-        mkSensitiveInt(conflictL, c, -1) } )
+        mkSensitiveInt(conflictL, c, -1) } ) */
     }
-    def hasConflict(userId: BigInt): Formula = {
-      (getConflicts ()).has(userId)
+    def hasConflict(userId: BigInt): Boolean = {
+      (getConflicts ()).exists(_ == userId)
     }
     def showHasConflict(ctxt: ConfContext, userId: BigInt): Boolean = {
-      concretize(ctxt, hasConflict(userId))
+//      concretize(ctxt, 
+      hasConflict(userId)
     }
 
     def update(params: Map[String, String]

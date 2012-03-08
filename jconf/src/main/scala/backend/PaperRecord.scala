@@ -16,8 +16,6 @@ import JConfBackend._
 sealed trait PaperStage extends JeevesRecord
 object Submission extends PaperStage
 object Review extends PaperStage
-object Rebuttal extends PaperStage
-object Decision extends PaperStage
 object Public extends PaperStage
 
 sealed trait PaperTag extends JeevesRecord {
@@ -49,7 +47,8 @@ class PaperRecord(         val uid: BigInt
                  , private var _title: String
                  , private var _authors: List[ConfUser] = Nil
                  , private var _file: String = ""
-                 , private var _tags: List[PaperTag] = Nil )
+                 , private var _tags: List[PaperTag] = Nil
+                 , private val _conflicts: List[BigInt] )
                extends JeevesRecord with Serializable {
   /**************/
   /* Variables. */
@@ -69,14 +68,12 @@ class PaperRecord(         val uid: BigInt
   private val isPC: Formula =
     (CONTEXT.viewer.role === PCStatus)
   private val authorCanSeeReview: Formula =
-    (CONTEXT.stage === Rebuttal) || (CONTEXT.stage === Decision)
+    (CONTEXT.stage === Public)
   private def isPublic : Formula =
     (CONTEXT.stage === Public) && (getTags ()).has(Accepted)
 
   policy ( _authorL
-         , !(isAuthor
-           || (isInternal && (CONTEXT.stage === Decision))
-           || isPublic)
+         , !(isAuthor || isPC || isPublic)
          , LOW);
   logPaperRecordPolicy();
   policy (titleL
@@ -125,10 +122,7 @@ class PaperRecord(         val uid: BigInt
       // Can see the "Accepted" tag if is an internal user at the decision
       // stage or if all information is visible.
       case Accepted =>
-        val stage = CONTEXT.stage;
-        val canSee : Formula =
-          (isInternal && (stage == Decision)) || (stage === Public);
-        policy (level, !canSee, LOW);
+        policy (level, !(isInternal || CONTEXT.stage === Public), LOW);
         logPaperRecordPolicy();
       case EmptyTag => ()
     }
@@ -177,11 +171,7 @@ class PaperRecord(         val uid: BigInt
   def addReviewPolicy (r: PaperReview): Symbolic = {
     val level = mkLevel();
     policy( level
-            , !( // Viewer is the reviewer.
-                r.reviewer === CONTEXT.viewer~'uid ||
-                // Internal people can see reviews.
-                ((CONTEXT.stage === Decision) && isInternal) ||
-                (isAuthor && authorCanSeeReview) )
+            , !( isInternal || (isAuthor && authorCanSeeReview) )
             , LOW );
     logPaperRecordPolicy();
     mkSensitive(level, r, defaultReview)
@@ -206,19 +196,12 @@ class PaperRecord(         val uid: BigInt
     show[PaperReview](ctxt, getReviewByReviewer(reviewerId))
   }
 
-  def showIsAuthor (ctxt: ConfContext): Boolean = {
-    println("showIsAuthor")
-    _authors.foreach(a => println(a.uid))
-    println("...")
-    println(concretize(ctxt, isAuthor))
-    concretize(ctxt, isAuthor)
-  }
+  def showIsAuthor (ctxt: ConfContext): Boolean = concretize(ctxt, isAuthor)
 
   def getPaperItemRecord(): PaperItemRecord =
     transaction { JConfTables.papers.get(uid.toInt) }
   
   def debugPrint(): Unit = {
-    println("PaperRecord(id=" + uid + ",title=" + _title + ")")
     _authors.foreach(a => a.debugPrint())
   }
 
@@ -226,7 +209,7 @@ class PaperRecord(         val uid: BigInt
 
   /* URLs. */
   private val _editL = mkLevel()
-  policy(_editL, !isAuthor, LOW)
+  policy(_editL, !(isAuthor && CONTEXT.stage === Submission), LOW)
 
   def showLink(ctxt: ConfContext): String = {
     "paper?id=" + uid + "&key=" + key

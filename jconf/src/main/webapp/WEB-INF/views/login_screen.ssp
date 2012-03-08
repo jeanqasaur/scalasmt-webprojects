@@ -16,7 +16,6 @@
     #if (errorMsg != null)
       <p><i><%= errorMsg %></i></p>
     #end
-    4:55 3.3.12<br>
     <form action="login_user" method="post">
     <input type="hidden" name="ac" value="log">
     <table>
@@ -29,8 +28,11 @@
       <td><input type="password" name="password" size=15 maxlength=20 /></td>
     </tr>
     </table>
-    <input type="submit" name="login" class="button" value="Login" />
-    <input type="submit" name="signup" class="button" value="Sign Up" />
+    <p>
+      <input type="submit" name="action" class="button" value="Log In" />
+      <input type="submit" name="action" class="button" value="Sign Up" />
+      <input type="submit" name="action" class="button" value="Send Password" />
+    </p>
     </form>
   </div>
   ${include("footer.ssp")}

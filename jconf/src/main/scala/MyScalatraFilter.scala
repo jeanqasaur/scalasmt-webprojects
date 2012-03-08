@@ -12,6 +12,7 @@ import org.squeryl.Session
 import org.squeryl.SessionFactory
 import java.net.URL
 import java.io.File
+import java.util.{Calendar, Date, GregorianCalendar, Locale, TimeZone}
 import scalate.ScalateSupport
 
 class MyScalatraFilter
@@ -21,7 +22,6 @@ with JeevesLib {
   class JConfInternalError extends Exception
 
   val date = new java.util.Date()
-  println("Initializing MyScalaFilter... " + date.getTime().toString())
   System.setProperty("smt.home", "/opt/z3/bin/z3")
 
   Init.initDB ()
@@ -30,8 +30,32 @@ with JeevesLib {
 
   val path = "/WEB-INF/views/"
   val title = "jeeves social net"
-  val paperStage = Submission
   def emptyName = ""
+
+  def getCalendar (): Calendar =
+    new GregorianCalendar(TimeZone.getTimeZone("EST"), Locale.US)
+  val submissionDeadline: Calendar = {
+    val c = getCalendar ()
+    c.set(2012, Calendar.MARCH, 12, 22, 59, 59)
+    c
+  }
+  val notificationDeadline: Calendar = {
+    val c = getCalendar ()
+    c.set(2012, Calendar.APRIL, 6, 11, 00, 00)
+    c
+  }
+  val currentTime: Calendar = getCalendar ()
+
+  val confStage =
+    if (currentTime.before(submissionDeadline)) {
+      Submission
+    } else if (currentTime.before(notificationDeadline)) {
+      Review
+    } else {
+      Public
+    }
+
+  def getContext(user: ConfUser): ConfContext = new ConfContext(user, confStage)
 
   def ifLoggedIn(displayPage: ConfUser => Any) {
     session.get("user") match {
@@ -91,6 +115,9 @@ with JeevesLib {
       renderPageWithUser("index.ssp", user
         , Map( "msg" -> msg
                , "name" -> user.showName(getContext(user))
+               , "stage" -> confStage
+               , "submissionDeadline" -> submissionDeadline.getTime().toString()
+               , "notificationDeadline" -> notificationDeadline.getTime().toString()
                , "submittedPapers" -> user.showSubmittedPapers(ctxt)
                , "reviewPapers" -> user.showReviewPapers(ctxt)
                , "reviews" -> user.showReviews(ctxt)))
@@ -107,35 +134,25 @@ with JeevesLib {
   post("/login_user") {
     val username = JConfUtil.cleanUsername(params("username"))
     if (JConfUtil.isWellFormed(username)) {
-      val isSigningUp: Boolean =
-        params.exists((param: (String, String)) => param._1 == "signup")
-      // If we are signing up in...
-      if (isSigningUp) {
-        JConfTables.getDBConfUserByEmail(username) match {
-          // User already exists in database.  Redirect to the login page.
-          case Some(user) =>
-          loginRedirect("Username already exists in database.")
-          case None =>
-          // Everyone is author status by default.
-          println(params("username") + " does not already exist...");
-            // TODO: Change this?
-            val role: UserStatus = AuthorStatus
+      params("action") match {
+        case "Sign Up" =>
+          // If we are signing up...
+          JConfTables.getDBConfUserByEmail(username) match {
+            // User already exists in database.  Redirect to the login page.
+            case Some(user) =>
+              loginRedirect("Username already exists in database.")
+            case None =>
+              // Everyone is author status by default.
+              val u =
+                addUser(params("username")
+                , "", "", RandomGenerator.generatePassword()
+                , false, "", AuthorStatus);
 
-            // Make a new user and add them to the database.
-            val u =
-              addUser(params("username")
-              , ""
-              , ""
-              , RandomGenerator.generatePassword()
-              , false
-              , ""
-              , role);
-
-            // E-mail the user about the password.
-            u.emailPassword();
-            redirect("validate_profile?id="+ u.uid)
-          }
-        } else {
+              // E-mail the user about the password.
+              u.emailPassword();
+              redirect("validate_profile?id="+ u.uid)
+            }
+        case "Log In" =>
           // Assuming otherwise we are logging in...
           loginUser(params("username"), params("password")) match {
             case Some(user) =>
@@ -148,11 +165,14 @@ with JeevesLib {
             case None =>
               loginRedirect("Incorrect username or password.")
           }
-        }
-      } else {
-        loginRedirect("Incorrect/malformed username.")
+        case "Send Password" =>
+          sendUserPassword(username);
+          loginRedirect("Your password has been send to " + username + ".")
+        case other =>
+          loginRedirect("Incorrect/malformed username.")
       }
     }
+  }
 
   get("/login") {
     session.get("user") match {
