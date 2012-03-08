@@ -100,12 +100,23 @@ extends KeyedEntity[Int] {
       tags.toList.map(t => Conversions.field2Tag(t.tagId, t.tagData))
     }
   }
+
+  def getConflicts(authors: List[ConfUser]): List[BigInt] = {
+    var conflicts: List[BigInt] = List()
+    authors.foreach { a =>
+      conflicts = (a.getConflicts ()) ::: conflicts
+    }
+    conflicts
+  }
+
   def getPaperRecord() = {
     lookupCachedPaper(id) match {
       case Some(p) => p
       case None =>
+        val authors = getAuthors ()
         val p =
-          new PaperRecord(id, secretId, title, getAuthors (), file, getTags ())
+          new PaperRecord(id, secretId, title, authors, file
+            , getTags (), getConflicts (authors))
         cachePaper(p);
         p
     }
@@ -232,6 +243,9 @@ object JConfTables extends Schema {
   ))
   def writeDBPaper(paperRecord: PaperItemRecord) = {
     transaction { papers.insert(paperRecord) }
+  }
+  def removeDBPaper(paperRecord: PaperItemRecord) = {
+    transaction { papers.deleteWhere(p => p.id === paperRecord.id.~) }
   }
   def updateDBPaper(paper: PaperRecord, title: String, file: String) = {
     val paperRecord: PaperItemRecord = paper.getPaperItemRecord()

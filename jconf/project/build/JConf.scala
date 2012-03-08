@@ -11,6 +11,8 @@ class JConf(info: ProjectInfo) extends DefaultWebProject(info) {
   val derbyDriver = "org.apache.derby" % "derby" % "10.7.1.1"
   val scalatraVersion = "2.0.0.RC1"
 
+  override def fork = forkRun("-agentlib:hprof=heap=sites,cpu=times" :: Nil)
+
   override def compileOptions =
     CompileOption("-Xexperimental") ::
     Unchecked ::

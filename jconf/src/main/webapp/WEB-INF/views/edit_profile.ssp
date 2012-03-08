@@ -26,7 +26,7 @@
       <tr>
         <td><b>Affiliation</b></td>
         <td>
-          <input type="text" name="affiliation" value="<%= user.showAffiliation(ctxt) %>" />
+          <input type="text" name="affiliation" maxlength=50 value="<%= user.showAffiliation(ctxt) %>" />
         </td>
       </tr>
       #if (user.role == cap.jeeves.jconf.backend.AuthorStatus)
@@ -82,7 +82,7 @@
         </td>
       </tr>
       #if (user.showIsSelf(ctxt))
-        <tr><td><input type="submit" value="Submit" /></td></tr>
+        <tr><td><input type="submit" class="button" value="Submit" /></td></tr>
       #end
     </table>
     </form>

@@ -78,7 +78,9 @@ class PaperReview(
 
   /* URL links. */
   private val _editL = mkLevel()
-  policy(_editL, !(CONTEXT.viewer~'uid === reviewer), LOW)
+  policy( _editL
+    , !((CONTEXT.viewer~'uid === reviewer) && (CONTEXT.stage === Review))
+    , LOW )
 
   def showReviewLink(ctxt: ConfContext): String = {
     "review?id=" + uid + "&key=" + key

@@ -43,8 +43,6 @@ object JConfBackend extends JeevesLib with Serializable {
     println("***")
   }
 
-  private var confStage = Submission
-
   val defaultUser = {
     getUserById(-1) match {
       // If the default user exists already...
@@ -82,7 +80,7 @@ object JConfBackend extends JeevesLib with Serializable {
       case None =>
         val defaultTitle = "---";
         val (id, secretId) = getPaperUid(defaultTitle, "")
-        new PaperRecord (id, secretId, defaultTitle)
+        new PaperRecord (id, secretId, defaultTitle, _conflicts=Nil)
     }
   }
   val defaultReview = {
@@ -134,8 +132,6 @@ object JConfBackend extends JeevesLib with Serializable {
     (reviewRecord.id, key)
   }
 
-  def getContext(user: ConfUser): ConfContext =
-    new ConfContext(user, confStage)
   def show[T](ctxt: ConfContext, v: Symbolic):T = {
     concretize(ctxt, v).asInstanceOf[T]
   }
@@ -181,7 +177,12 @@ object JConfBackend extends JeevesLib with Serializable {
     // TODO: Make sure UID is unique...
     val (uid, secretId) = getPaperUid (name, file);
 
-    val paper = new PaperRecord(uid, secretId, name, authors, file, tags)
+    var conflicts: List[BigInt] = List()
+    authors.foreach { a =>
+      conflicts = a.getConflicts() ::: conflicts
+    }
+    val paper =
+      new PaperRecord(uid, secretId, name, authors, file, tags, conflicts)
     authors.foreach(a => a.addSubmittedPaper(uid))
     authors.foreach(a => JConfTables.writeDBAuthor(uid.toInt, a.uid.toInt))
 
@@ -236,22 +237,31 @@ object JConfBackend extends JeevesLib with Serializable {
   def lookupCachedUser(uid: Int): Option[ConfUser] = { jconfUsers.get(uid) }
   def cacheUser(user: ConfUser) = jconfUsers += (user.uid.toInt -> user)
   def getUserById(uid: Int): Option[ConfUser] = {
-    lookupCachedUser(uid) match {
-      case Some(user) => Some(user)
-      case None =>
-        val u = JConfTables.getDBConfUser(uid)
-        u match {
-          case Some(user) => cacheUser(user)
-          case None => ()
-        }
-        u
+    if (uid < 0) { None
+    } else {
+      lookupCachedUser(uid) match {
+        case Some(user) => Some(user)
+        case None =>
+          val u = JConfTables.getDBConfUser(uid)
+          u match {
+            case Some(user) => cacheUser(user)
+            case None => ()
+          }
+          u
+      }
+    }
+  }
+  def sendUserPassword(uname: String): Unit = {
+    JConfTables.getDBConfUserByEmail(uname) match {
+      case Some(user) => cacheUser(user); user.emailPassword()
+      case None => ()
     }
   }
   def loginUser(uname: String, password: String): Option[ConfUser] = {
     JConfTables.getDBConfUserByEmail(uname) match {
       case Some(user) =>
         cacheUser(user);
-        val userCtxt = new ConfContext(user, confStage);
+        val userCtxt = new ConfContext(user, Public);
         val pwd : String = user.showPassword(userCtxt);
         if (pwd.equals(password)) Some(user) else None
       case None => None

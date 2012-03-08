@@ -67,7 +67,7 @@
       </tr>
       #if (paper.showNeedsReviewBy(ctxt))
         <tr>
-          <td><input type="submit" value="Submit" /></td>
+          <td><input type="submit" class="button" value="Submit" /></td>
         </tr>
       #end
     </table>
