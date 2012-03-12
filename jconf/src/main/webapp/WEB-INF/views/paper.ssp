@@ -6,10 +6,13 @@
   <head>
     <title>${title}</title>
     <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+    ${include("snippets/goToLink.ssp")}
   </head>
 <body>
   <div id="wrapper">
     #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+    #do(layout("snippets/processing.ssp")) #end
 
     <div id="content">
     #if (paper == null)
@@ -24,7 +27,7 @@
         val tags = paper.showTags(ctxt)
       }#
       #if (!editLink.isEmpty())
-        <a href="<%= editLink %>">Edit paper</a>
+        <a href="<%= editLink %>" onclick="javascript:goToLink('<%= editLink %>')">Edit paper</a>
       #end
       <table>
         <tr>
@@ -44,7 +47,7 @@
           <td>
             <%= uploadFile %>
             #if (!uploadLink.isEmpty())
-              <a href="<%= uploadLink %>">Download</a>
+              <a href="<%= uploadLink %>" onclick="javascript:goToLink('<%= uploadLink %>')">Download</a>
             #end
           </td>
         </tr>
@@ -63,14 +66,18 @@
             val reviews = paper.showReviews(ctxt)
           }#
           #for (review <- reviews)
+            #{
+              val reviewLink = review.showReviewLink(ctxt)
+            }#
             <%= review.uid %>:
-            <a href="<%= review.showReviewLink(ctxt) %>"><%= review.showReviewer(ctxt).showName(ctxt) %></a><br>
+            <a href="<%= reviewLink %>" onclick="javascript:goToLink('<%= reviewLink %>')"><%= review.showReviewer(ctxt).showName(ctxt) %></a>
             #{
               val editReviewLink = review.showEditReviewLink(ctxt)
             }#
             #if (!editReviewLink.isEmpty())
-              <a href="<%= editReviewLink %>">Review Paper</a>
+              <a href="<%= editReviewLink %>" onclick="javascript:goToLink('<%= editReviewLink %>')">Review Paper</a>
             #end
+            <br>
           #end
           </td>
         </tr>

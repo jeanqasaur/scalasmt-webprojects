@@ -4,14 +4,19 @@
 <head>
   <title>${title}</title>
   <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  ${include("snippets/goToLink.ssp")}
 </head>
 <body>
 <div id="wrapper">
   #do(layout("snippets/header.ssp", Map())) #end
+
+  #do(layout("snippets/processing.ssp")) #end
+
   <div id="content">
     #if (errorMsg != null)
       <p><i><%= errorMsg %></i></p>
     #end
+    <p>Welcome to the login page for the PLDI Student Research Competition 2012.  Please remember that the submission deadline is Wednesday, March 14, at 23:59.</p>
     <form action="login_user" method="post">
     <input type="hidden" name="ac" value="log">
     <table>
@@ -25,9 +30,9 @@
     </tr>
     </table>
     <p>
-      <input type="submit" name="action" class="button" value="Log In" />
-      <input type="submit" name="action" class="button" value="Sign Up" />
-      <input type="submit" name="action" class="button" value="Send Password" />
+      <input type="submit" onclick="javascript:goToLink('login_user')" name="action" class="button" value="Log In" />
+      <input type="submit" onclick="javascript:goToLink('login_user')" name="action" class="button" value="Sign Up" />
+      <input type="submit" onclick="javascript:goToLink('login_user')" name="action" class="button" value="Send Password" />
     </p>
     </form>
   </div>

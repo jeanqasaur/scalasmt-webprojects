@@ -8,14 +8,21 @@
   <head>
     <title>${title}</title>
     <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+    ${include("snippets/goToLink.ssp")}
   </head>
 <body>
   <div id="wrapper">
     #do(layout("snippets/header.ssp", Map("user" -> user))) #end
 
+    #do(layout("snippets/processing.ssp")) #end
+
+    #{
+      val reviewLink: String = review.showPostReviewLink(ctxt)
+    }#
+
     <div id="content">
     <h1>Edit Review.</h1>
-    <form action="<%= review.showPostReviewLink(ctxt) %>" method="post">
+    <form action="<%= reviewLink %>" method="post">
     <table>
       <tr>
         <td><b>Paper</b></td>
@@ -67,7 +74,7 @@
       </tr>
       #if (paper.showNeedsReviewBy(ctxt))
         <tr>
-          <td><input type="submit" class="button" value="Submit" /></td>
+          <td><input type="submit" onclick="javascript:goToLink('<%= reviewLink %>')" class="button" value="Submit" /></td>
         </tr>
       #end
     </table>

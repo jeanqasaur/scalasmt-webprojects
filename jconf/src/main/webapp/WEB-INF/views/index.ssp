@@ -1,3 +1,4 @@
+<%@ val title: String %>
 <%@ val name: String %>
 <%@ val msg: String %>
 <%@ val stage: cap.jeeves.jconf.backend.PaperStage %>
@@ -10,12 +11,15 @@
 <%@ val reviews: List[cap.jeeves.jconf.backend.PaperReview] %>
 <html>
   <head>
-    <title>jconf . csail</title>
+    <title><%= title %></title>
     <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+    ${include("snippets/goToLink.ssp")}
   </head>
 <body>
   <div id="wrapper">
     #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+    #do(layout("snippets/processing.ssp")) #end
 
     <div id="content">
     <h1>Welcome to the PLDI Student Research Competition 2012.</h1>
@@ -39,14 +43,21 @@
     <h1>Papers.</h1>
 
     #if (stage == cap.jeeves.jconf.backend.Submission)
-      <p><a href="new_paper">Start new paper</a></p>
+      <p><a href="new_paper" onclick="javascript:goToLink('new_paper')">Start new paper</a></p>
+    #end
+
+    #if (user.role == cap.jeeves.jconf.backend.PCStatus)
+      <a href="assign_papers" onclick="javascript:goToLink('assign_papers')">Assign papers</a></p>
     #end
 
     <h2>Submitted.</h2>
     <ul>
       #for (p <- submittedPapers)
         <li>
-          <b><a href="<%= p.showLink(ctxt) %>"><%= p.uid %>: <%= p.showTitle(ctxt) %></a></b><br>
+          #{
+            val paperLink: String = p.showLink(ctxt)
+          }#
+          <b><a href="<%= paperLink %>" onclick="javascript:goToLink('<%= paperLink %>')"><%= p.uid %>: <%= p.showTitle(ctxt) %></a></b><br>
             #{
               val authors = p.showAuthors(ctxt)
             }#
@@ -62,19 +73,26 @@
         </li>
       #end
     </ul>
-
-    #if (user.role == cap.jeeves.jconf.backend.ReviewerStatus)
+    #{
+      val hasReviews =
+        ((user.role == cap.jeeves.jconf.backend.ReviewerStatus) ||
+          (user.role == cap.jeeves.jconf.backend.PCStatus))
+    }#
+    #if (hasReviews)
       <h2>To Review.</h2>
       <table>
           <tr>
-            <td><b>#</b></td>
-            <td><b>Title</b></td>
+            <td><b>Paper</b></td>
             <td><b>Review Status</b></td>
           </tr>
         #for (p <- reviewPapers)
           <tr>
-            <td><a href="<%= p.showLink(ctxt) %>"><%= p.uid %></a></td>
-            <td><b><%= p.showTitle(ctxt) %></b><br></td>
+            <td>
+              #{
+                val reviewPaperLink: String = p.showLink(ctxt)
+              }#
+              <a href="<%= reviewPaperLink %>" onclick="javascript:goToLink('<%= reviewPaperLink %>')"><%= p.uid %>: <b><%= p.showTitle(ctxt) %></b></a>
+            </td>
             <td>
               #{
                 val review = p.showReviewByReviewer(ctxt, user.uid)
@@ -82,7 +100,7 @@
               }#
               #if (review.uid > -1)
                 #if (!reviewEditLink.isEmpty())
-                  <a href="<%= reviewEditLink %>">Edit Review</a>
+                  <a href="<%= reviewEditLink %>" onclick="javascript:goToLink('<%= reviewEditLink %>')">Edit Review</a>
                 #end
               #end
             </td>

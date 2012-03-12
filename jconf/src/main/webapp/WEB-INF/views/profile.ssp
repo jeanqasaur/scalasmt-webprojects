@@ -5,10 +5,13 @@
   <head>
     <title>${title}</title>
     <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+    ${include("snippets/goToLink.ssp")}
   </head>
 <body>
   <div id="wrapper">
     #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+    #do(layout("snippets/processing.ssp")) #end
 
     <div id="content">
     #if (user == null)
@@ -16,8 +19,8 @@
     #else
       <h1>User Profile.</h1>
       <p><small>
-        <a href="edit_profile">Edit Profile</a>
-        <a href="send_password">Resend Password</a>
+        <a href="edit_profile" onclick="javascript:goToLink('edit_profile')">Edit Profile</a>
+        <a href="send_password" onclick="javascript:goToLink('send_password')">Resend Password</a>
       </small></p>
       <table>
         <tr><td><b>Username</b></td><td><%= user.email %></td></tr>
