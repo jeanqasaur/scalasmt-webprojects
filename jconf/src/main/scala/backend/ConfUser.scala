@@ -47,26 +47,16 @@ case class ConfUser(
       concretize(ctxt, selfL)
     }
 
-    /* If you can see this user, you can see their name. */
-    private val nameL = mkLevel ();
     // No policies on name--should always be high...
-    def setName (n: String): Unit = {
-      _name = n;
-      name = mkSensitive(nameL, StringVal(_name), StringVal("--"))
-    }
-    var name: Symbolic =
-      mkSensitive(nameL, StringVal(_name), StringVal("--"))
+    def setName (n: String): Unit = { _name = n; }
     def showName (ctxt: ConfContext): String = {
-      concretize(ctxt, name).asInstanceOf[StringVal].v
+      _name
     }
     def setAffiliation (a: String): Unit = {
       _affiliation = a;
-      affiliation = mkSensitive(nameL, StringVal(_affiliation), StringVal("--"))
     }
-    var affiliation: Symbolic =
-      mkSensitive(nameL, StringVal(_affiliation), StringVal("--"))
     def showAffiliation (ctxt: ConfContext): String = {
-      concretize(ctxt, affiliation).asInstanceOf[StringVal].v
+      _affiliation
     }
 
     def setIsGrad (isGrad: Boolean): Unit = {
@@ -141,7 +131,7 @@ case class ConfUser(
           "jeanyang@csail.mit.edu"
         , "Jean Yang"
         , email
-        , "Your JConf Password"
+        , "Your PLDI SRC 2012 Password"
         , "Your password is " + _password + "." )
     }
 

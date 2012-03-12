@@ -4,10 +4,13 @@
 <head>
   <title>${title}</title>
   <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  ${include("snippets/goToLink.ssp")}
 </head>
 <body>
 <div id="wrapper">
   #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+  #do(layout("snippets/processing.ssp")) #end
 
   <div id="content">
     <p>Welcome to the JConf system!  Please enter your password, which should have been sent to your e-mail.</p>
@@ -25,7 +28,7 @@
         <td><input type="password" name="password" size=15 maxlength=20 /></td>
       </tr>
     </table>
-    <input type="submit" name="action" class="button" value="Validate" />
+    <input type="submit" onclick="javascript:goToLink('login_user')" name="action" class="button" value="Validate" />
     </form>
   </div>
   ${include("footer.ssp")}

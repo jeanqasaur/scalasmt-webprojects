@@ -145,6 +145,10 @@ class PaperRecord(         val uid: BigInt
     (getTags ()).map(t => concretize(ctxt, t).asInstanceOf[PaperTag])
   }
 
+  def hasConflict(reviewer: BigInt): Boolean = {
+    _conflicts.exists(_ == reviewer)
+  }
+
   def addReview (reviewer: ConfUser, body: String = ""
     , problemScore: Int = 3, backgroundScore: Int = 3
     , approachScore: Int = 3, resultScore: Int =3)
@@ -221,7 +225,7 @@ class PaperRecord(         val uid: BigInt
     mkSensitive(_editL, StringVal(backupLoc), StringVal(""))
   }
   def getTomcatLoc(): Symbolic = {
-    val tomcatLoc = path + "/webapps/jconf/papers/" + "jcp" + key + "_" + _file
+    val tomcatLoc = path + "/webapps/src2012/papers/" + "jcp" + key + "_" + _file
     mkSensitive(_editL, StringVal(tomcatLoc), StringVal(""))
   }
   // Permanent storage location for file.
@@ -232,12 +236,23 @@ class PaperRecord(         val uid: BigInt
   }
   // Where the file is stored for display online.
   def getFileStorageLocation(paperSecretId: String, filename: String): String = {
-    path + "/webapps/jconf/papers/" + "jcp" + paperSecretId + "_" + filename
+    path + "/webapps/src2012/papers/" + "jcp" + paperSecretId + "_" + filename
   }
 
   // The public link for this directory.
   def showFileDisplayLocation(ctxt: ConfContext): String = {
     "papers/" + "jcp" + key + "_" + showFile(ctxt)
+  }
+
+  private val _assignL = mkLevel ()
+  policy (_assignL, !isPC, LOW)
+  private val _assignLink = "assign_paper?id=" + uid + "&key=" + key
+  def getAssignLink(userId: BigInt): Symbolic = {
+    mkSensitive(_assignL
+      , StringVal(_assignLink + "&userId=" + userId), StringVal(""))
+  }
+  def showAssignLink(ctxt: ConfContext, userId: BigInt): String = {
+    show[StringVal](ctxt, getAssignLink(userId)).v
   }
 
   private val _editLink = "edit_paper?id=" + uid + "&key=" + key

@@ -10,7 +10,7 @@
   #do(layout("snippets/header.ssp", Map("user" -> user))) #end
 
   <div id="content">
-  <p>This conference management system was built using the <a href="http://sites.google.com/site/jeevesprogramming/" target="blank">Jeeves programming language</a>, a research language created by the <a href="http://groups.csail.mit.edu/cap/" target="blank">Computer-Aided Programming Group</a> at MIT under the direction of <a href="http://people.csail.mit.edu/asolar/" target="blank">Professor Armando Solar-Lezama</a>.</p>
+  <p>This conference management system was built using the <a href="http://sites.google.com/site/jeevesprogramming/" target="blank">Jeeves programming language</a>, a research language created by Jean Yang and Kuat Yessenov of the <a href="http://groups.csail.mit.edu/cap/" target="blank">Computer-Aided Programming Group</a> at MIT under the direction of <a href="http://people.csail.mit.edu/asolar/" target="blank">Professor Armando Solar-Lezama</a>.</p>
 
 <p>Jeeves is a language for automatically enforcing privacy policies.  The programmer provides declarative privacy policies, implements core functionality agnostic to these policies, and relies on the language runtime to produce outputs consistent with the policies.</p>
 

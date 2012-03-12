@@ -5,10 +5,13 @@
   <head>
     <title>${title}</title>
     <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  ${include("snippets/goToLink.ssp")}
   </head>
 <body>
   <div id="wrapper">
     #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+    #do(layout("snippets/processing.ssp")) #end
 
     <div id="content">
     <h1>Edit Profile.</h1>
@@ -82,7 +85,9 @@
         </td>
       </tr>
       #if (user.showIsSelf(ctxt))
-        <tr><td><input type="submit" class="button" value="Submit" /></td></tr>
+        <tr>
+          <td><input type="submit" onclick="javascript:goToLink('profile')" class="button" value="Submit" /></td>
+        </tr>
       #end
     </table>
     </form>

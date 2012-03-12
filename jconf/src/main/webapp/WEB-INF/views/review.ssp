@@ -8,10 +8,13 @@
   <head>
     <title>${title}</title>
     <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+    ${include("snippets/goToLink.ssp")}
   </head>
 <body>
   <div id="wrapper">
     #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+    #do(layout("snippets/processing.ssp")) #end
 
     <div id="content">
     <h1>Paper Review.</h1>
@@ -19,7 +22,7 @@
         val reviewEditLink = review.showEditReviewLink(ctxt)
       }#
       #if (!reviewEditLink.isEmpty())
-        <p><small><a href="<%= reviewEditLink %>">Edit Review</a></small></p>
+        <p><small><a href="<%= reviewEditLink %>" onclick="javascript:goToLink('<%= reviewEditLink %>')">Edit Review</a></small></p>
       #end
       <table>
         <tr>

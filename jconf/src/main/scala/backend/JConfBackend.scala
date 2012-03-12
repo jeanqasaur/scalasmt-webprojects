@@ -28,6 +28,9 @@ object JConfBackend extends JeevesLib with Serializable {
   private var conflicts: List[ConfUser] = JConfTables.getDBPotentialConflicts()
   def getPotentialConflicts(): List[ConfUser] = conflicts
 
+  // A list of the PC members.
+  private var pcMembers: List[ConfUser] = conflicts.filter(_.role == PCStatus)
+
   /* Debugging variables. */
   private var numConfUserPs = 0;
   def logConfUserPolicy() = numConfUserPs = numConfUserPs + 1
@@ -44,7 +47,7 @@ object JConfBackend extends JeevesLib with Serializable {
   }
 
   val defaultUser = {
-    getUserById(-1) match {
+    getUserById(1) match {
       // If the default user exists already...
       case Some(u) => u
       // Otherwise create a new one.
@@ -75,7 +78,7 @@ object JConfBackend extends JeevesLib with Serializable {
     }
   }
   val defaultPaper = {
-    getPaperById(-1) match {
+    getPaperById(1) match {
       case Some(p) => p
       case None =>
         val defaultTitle = "---";
@@ -163,6 +166,9 @@ object JConfBackend extends JeevesLib with Serializable {
     if ((role == ReviewerStatus) || (role == PCStatus)) {
       conflicts = user::conflicts
     }
+    if (role == PCStatus) {
+      pcMembers = user::pcMembers;
+    }
 
     // Add paper to in-memory cache.
     jconfUsers += (id -> user)
@@ -186,6 +192,11 @@ object JConfBackend extends JeevesLib with Serializable {
     authors.foreach(a => a.addSubmittedPaper(uid))
     authors.foreach(a => JConfTables.writeDBAuthor(uid.toInt, a.uid.toInt))
 
+    // Assign the PC member to review the paper.
+    pcMembers.foreach {
+      u => assignReview(paper, u); println("PC assignment")
+    }
+
     // Add paper to in-memory cache.
     jconfPapers += (uid -> paper)
     paper
@@ -196,6 +207,10 @@ object JConfBackend extends JeevesLib with Serializable {
     // TODO: Where do we want to have integrity policies about this manifest?
     if (!((reviewer.role == ReviewerStatus) || (reviewer.role == PCStatus)))
       return;
+
+    if (isAssigned(p, reviewer)) {
+      return;
+    }
 
     // Write persistently.
     JConfTables.writeAssignment(reviewer.uid.toInt, p.uid.toInt)

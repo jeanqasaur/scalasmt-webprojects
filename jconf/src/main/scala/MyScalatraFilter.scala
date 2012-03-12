@@ -36,7 +36,7 @@ with JeevesLib {
     new GregorianCalendar(TimeZone.getTimeZone("EST"), Locale.US)
   val submissionDeadline: Calendar = {
     val c = getCalendar ()
-    c.set(2012, Calendar.MARCH, 12, 22, 59, 59)
+    c.set(2012, Calendar.MARCH, 14, 22, 59, 59)
     c
   }
   val notificationDeadline: Calendar = {
@@ -115,6 +115,8 @@ with JeevesLib {
             case "illegalAccess" =>
               "You do not have permission to access that page."
             case "internalError" => "An internal error has occured."
+            case "assignments" =>
+              "Your assignments have been made."
             case "password" =>
               "Your password has been sent to " + user.email + "."
           }
@@ -266,7 +268,9 @@ with JeevesLib {
         if (!(backupLoc.isEmpty() || tomcatLoc.isEmpty())) {
           val backupFile = new File(backupLoc)
           val tomcatFile = new File(tomcatLoc)
+          println("Writing file to " + backupLoc + "...")
           uploadedFile.write(backupFile)
+          println("Copying file to " + tomcatFile + "...")
          FileUtils.copyFile(backupFile, tomcatFile)
         }
       }
@@ -358,13 +362,50 @@ with JeevesLib {
   }
   get("/edit_paper") {
     ifLoggedIn { (user: ConfUser) =>
-      val paper: PaperRecord =
-        JConfBackend.getPaperById(params("id").toInt) match {
-          case Some(p) =>  p
-          case None => throw new JConfInternalError
-        }
-
+      val paper: PaperRecord = getPaper(params("id").toInt, params("key"))
       renderPageWithUser("edit_paper.ssp", user, Map("paper" -> paper))
+    }
+  }
+  get("/assign_papers") {
+    ifLoggedIn { (user: ConfUser) =>
+      if (user.role == PCStatus) {
+        val papers: List[PaperRecord] = JConfTables.getAllDBPapers()
+        val conflicts: List[ConfUser] = JConfBackend.getPotentialConflicts()
+        renderPageWithUser("assign_papers.ssp", user
+          , Map("papers" -> papers, "conflicts" -> conflicts))
+      } else {
+        redirect("index?msg=illegalAccess")
+      }
+    }
+  }
+  post("/paper_assignments") {
+    ifLoggedIn { (user: ConfUser) =>
+      if (user.role == PCStatus) {
+        val reviewers: List[ConfUser] = JConfBackend.getPotentialConflicts()
+        val assignments: Seq[String] = multiParams("assignment")
+        assignments.foreach{ a =>
+          try {
+            val asst: Array[String] = a.split(":")
+            val paperId = asst.apply(0).toInt;
+            if (params.exists(_._1 == "changed"+paperId)) {
+            val (paper, reviewer) = {
+              val paperOpt = JConfBackend.getPaperById(paperId);
+              val reviewOpt = reviewers.find(_.uid == asst.apply(1).toInt);
+              (paperOpt, reviewOpt) match {
+                  case (Some(p), Some(r)) => (p, r)
+                  case (_, _) => throw new JConfInternalError
+                }
+              }
+              assignReview(paper, reviewer)
+            }
+          } catch {
+            case e: Exception => throw new JConfInternalError
+          }
+        }
+        redirect("index?msg=assignments")
+      } else {
+        redirect("index?msg=illegalAccess")
+      }
     }
   }
 
