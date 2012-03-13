@@ -83,35 +83,35 @@ object Init {
       val pcArmando =
         backend.addUser(
         "asolar@mit.edu", "Armando Solar-Lezama", "MIT"
-        , armandoPassword, true, "", PCStatus);
+        , armandoPassword, true, "", backend.pcStatus);
       
       /* Add actual reviewers. */
       backend.addUser("rybal@in.tum.de", "Andrew Rybalchenko", "TUM"
-        , RandomGenerator.generatePassword(), true, "", ReviewerStatus)
+        , RandomGenerator.generatePassword(), true, "", backend.reviewerStatus)
       backend.addUser("kfisher@eecs.tufts.edu", "Kathleen Fisher", "Tufts"
-        , RandomGenerator.generatePassword(), true, "", ReviewerStatus)
+        , RandomGenerator.generatePassword(), true, "", backend.reviewerStatus)
       backend.addUser("mtvechev@us.ibm.com", "Martin Vechev", "ETH"
-        , RandomGenerator.generatePassword(), true, "", ReviewerStatus)
+        , RandomGenerator.generatePassword(), true, "", backend.reviewerStatus)
       backend.addUser("idillig@cs.wm.edu", "Isil Dillig", "William & Mary"
-        , RandomGenerator.generatePassword(), true, "", ReviewerStatus)
+        , RandomGenerator.generatePassword(), true, "", backend.reviewerStatus)
       backend.addUser("sriram@microsoft.com", "Sriram Rajamani", "Microsoft"
-        , RandomGenerator.generatePassword(), true, "", ReviewerStatus)
+        , RandomGenerator.generatePassword(), true, "", backend.reviewerStatus)
 
       val studentJean =
         backend.addUser(
         "jeanyang@csail.mit.edu", "Jean Yang", "MIT CSAIL"
-        , "jean", true, "", AuthorStatus, List(pcArmando.uid))
+        , "jean", true, "", backend.authorStatus, List(pcArmando.uid))
 
       // Add some dummy papers.
       if (test) {
         val authorJean =
           backend.addUser(
           "jeanyang@mit.edu", "Jean Yang", "MIT"
-          , "jean", true, "", ReviewerStatus);
+          , "jean", true, "", backend.reviewerStatus);
         val reviewerKuat =
           backend.addUser(
           "kuat@mit.edu", "Kuat Yessenov", "MIT"
-          , "kuat", true, "", ReviewerStatus);
+          , "kuat", true, "", backend.reviewerStatus);
 
         val paper0Name = "A Language for Automatically Enforcing Privacy";
         val paper0 = backend.addPaper(paper0Name, List(authorJean));
