@@ -18,20 +18,10 @@ extends JeevesLib with Atom with Serializable {
 
   register(this)
 
-  // PaperStage objects.
-  register(Submission)
-  register(Review)
-  register(Public)
-
-  // PaperTag objects.
-  register(Accepted)
-  register(EmptyTag)
-
-  // UserStatus objects.
-  register(PublicStatus)
-  register(AuthorStatus)
-  register(ReviewerStatus)
-  register(PCStatus)
+  val publicStatus = PublicStatus(this)
+  val authorStatus = AuthorStatus(this)
+  val reviewerStatus = ReviewerStatus(this)
+  val pcStatus = PCStatus(this)
 
   /* Database initialization. */
   private val TEST = true;
@@ -82,7 +72,7 @@ extends JeevesLib with Atom with Serializable {
           val defaultPwd = "";
           val defaultGrad = false;
           val defaultAcm = ""
-          val defaultStatus = PublicStatus;
+          val defaultStatus = publicStatus;
           val defaultConflicts = Nil;
           val (id, secretId) =
             getUserUid(
@@ -302,7 +292,7 @@ extends JeevesLib with Atom with Serializable {
     JConfTables.getDBConfUserByEmail(this, uname) match {
       case Some(user) =>
         cacheUser(user);
-        val userCtxt = new ConfContext(this, user, Public);
+        val userCtxt = new ConfContext(this, user, Public(this));
         val pwd : String = user.showPassword(userCtxt);
         if (pwd.equals(password)) Some(user) else None
       case None => None

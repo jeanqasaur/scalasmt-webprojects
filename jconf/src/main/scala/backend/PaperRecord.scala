@@ -14,9 +14,15 @@ import org.squeryl.PrimitiveTypeMode._
 import scala.collection.immutable.List;
 
 sealed trait PaperStage extends Atom with Serializable
-object Submission extends PaperStage
-object Review extends PaperStage
-object Public extends PaperStage
+case class Submission(b: JConfBackend) extends PaperStage {
+  b.register(this)
+}
+case class Review(b: JConfBackend) extends PaperStage {
+  b.register(this)
+}
+case class Public(b: JConfBackend) extends PaperStage {
+  b.register(this)
+}
 
 sealed trait PaperTag extends Atom with Serializable {
   def showTag(ctxt: ConfContext): String
@@ -31,10 +37,14 @@ case class ReviewedBy (b: JConfBackend, reviewer: BigInt) extends PaperTag {
 
   def showTag(ctxt: ConfContext): String = { "Reviewed by " + reviewer }
 }
-object Accepted extends PaperTag {
+case class Accepted (b: JConfBackend) extends PaperTag {
+  b.register(this)
+
   def showTag(ctxt: ConfContext): String = { "Accepted" }
 }
-object EmptyTag extends PaperTag {
+case class EmptyTag (b: JConfBackend) extends PaperTag {
+  b.register(this)
+
   def showTag(ctxt: ConfContext): String = { "--" }
 }
 
@@ -61,14 +71,14 @@ class PaperRecord(         val b: JConfBackend
   /*************/
   private val isAuthor: Formula = authors.has(b.CONTEXT.viewer~'uid);
   private val isInternal: Formula =
-    (b.CONTEXT.viewer.role === ReviewerStatus) ||
-    (b.CONTEXT.viewer.role === PCStatus)
+    (b.CONTEXT.viewer.role === b.reviewerStatus) ||
+    (b.CONTEXT.viewer.role === b.pcStatus)
   private val isPC: Formula =
-    (b.CONTEXT.viewer.role === PCStatus)
+    (b.CONTEXT.viewer.role === b.pcStatus)
   private val authorCanSeeReview: Formula =
-    (b.CONTEXT.stage === Public)
+    (b.CONTEXT.stage === Public(b))
   private def isPublic : Formula =
-    (b.CONTEXT.stage === Public) && (getTags ()).has(Accepted)
+    (b.CONTEXT.stage === Public(b)) && (getTags ()).has(Accepted(b))
 
   b.policy ( _authorL
          , !(isAuthor || isPC || isPublic)
@@ -117,16 +127,16 @@ class PaperRecord(         val b: JConfBackend
       case ReviewedBy (b, reviewer) =>
         b.policy (level, !isPC, b.LOW);
         b.logPaperRecordPolicy();
-      // Can see the "Accepted" tag if is an internal user at the decision
+      // Can see the "Accepted(b)" tag if is an internal user at the decision
       // stage or if all information is visible.
-      case Accepted =>
+      case Accepted(b) =>
         b.policy (level
-          , !(isInternal || b.CONTEXT.stage === Public)
+          , !(isInternal || b.CONTEXT.stage === Public(b))
           , b.LOW);
         b.logPaperRecordPolicy();
-      case EmptyTag => ()
+      case EmptyTag(b) => ()
     }
-    b.mkSensitive(level, tag, EmptyTag)
+    b.mkSensitive(level, tag, EmptyTag(b))
   }
 
   def addTag (newtag: PaperTag) = {
@@ -221,7 +231,7 @@ class PaperRecord(         val b: JConfBackend
   private val _editL = b.mkLevel()
   b.policy(_editL
     , !(isAuthor
-      && (b.CONTEXT.stage === Submission))
+      && (b.CONTEXT.stage === Submission(b)))
     , b.LOW)
 
   def showLink(ctxt: ConfContext): String = {
@@ -240,7 +250,7 @@ class PaperRecord(         val b: JConfBackend
   // Permanent storage location for file.
   def showFileLocations(ctxt: ConfContext): (String, String) = {
     val backupLoc = {
-      b.concretize[Atom](ctxt, getBackupLoc ()).asInstanceOf[StringVal]
+      b.concretize(ctxt, getBackupLoc ()).asInstanceOf[StringVal]
     }
     val tomcatLoc = b.concretize(ctxt, getTomcatLoc ()).asInstanceOf[StringVal]
     (backupLoc.v, tomcatLoc.v)
@@ -264,8 +274,8 @@ class PaperRecord(         val b: JConfBackend
       , b.emptyStringVal)
   }
   def showAssignLink(ctxt: ConfContext, userId: BigInt): String = {
-    (b.concretize[Atom](
-      ctxt, getAssignLink(userId)).asInstanceOf[StringVal]).v
+    b.concretize(
+      ctxt, getAssignLink(userId)).asInstanceOf[StringVal].v
   }
 
   private val _editLink = "edit_paper?id=" + uid + "&key=" + key
@@ -273,7 +283,7 @@ class PaperRecord(         val b: JConfBackend
     b.mkSensitive(_editL, StringVal(b, _editLink), b.emptyStringVal)
   }
   def showEditLink(ctxt: ConfContext): String = {
-    (b.concretize[Atom](ctxt, editLink).asInstanceOf[StringVal]).v
+    b.concretize(ctxt, editLink).asInstanceOf[StringVal].v
   }
   private val _postLink = "paper?id=" + uid + "&key=" + key
   def postLink: b.Symbolic = {

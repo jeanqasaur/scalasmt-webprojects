@@ -46,11 +46,11 @@ with JeevesLib {
 
   def getConfStage(backend: JConfBackend) =
     if (currentTime.before(submissionDeadline)) {
-      Submission
+      Submission(backend)
     } else if (currentTime.before(notificationDeadline)) {
-      Review
+      Review(backend)
     } else {
-      Public
+      Public(backend)
     }
 
   def getContext(backend: JConfBackend, user: ConfUser): ConfContext = {
@@ -175,7 +175,7 @@ with JeevesLib {
               val u =
                 backend.addUser(params("username")
                 , "", "", RandomGenerator.generatePassword()
-                , false, "", AuthorStatus);
+                , false, "", backend.authorStatus);
 
               // E-mail the user about the password.
               u.emailPassword();

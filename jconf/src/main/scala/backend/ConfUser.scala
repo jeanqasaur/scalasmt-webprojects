@@ -9,10 +9,18 @@ import cap.scalasmt._
 import org.squeryl.PrimitiveTypeMode._
 
 sealed trait UserStatus extends Atom with Serializable
-object PublicStatus extends UserStatus
-object AuthorStatus extends UserStatus
-object ReviewerStatus extends UserStatus
-object PCStatus extends UserStatus
+case class PublicStatus (b: JConfBackend) extends UserStatus {
+  b.register(this)
+}
+case class AuthorStatus (b: JConfBackend) extends UserStatus {
+  b.register(this)
+}
+case class ReviewerStatus (b: JConfBackend) extends UserStatus {
+  b.register(this)
+}
+case class PCStatus (b: JConfBackend) extends UserStatus {
+  b.register(this)
+}
 
 /* Conference User */
 case class ConfUser(
@@ -36,8 +44,8 @@ case class ConfUser(
     private val isSelf: Formula = b.CONTEXT.viewer~'uid === uid
 
     private val isReviewer: Formula =
-      b.CONTEXT.viewer.status === ReviewerStatus
-    private val isPC: Formula = b.CONTEXT.viewer.status === PCStatus
+      b.CONTEXT.viewer.status === b.reviewerStatus
+    private val isPC: Formula = b.CONTEXT.viewer.status === b.pcStatus
 
     private val selfL = b.mkLevel ();
     b.policy (selfL, !isSelf, b.LOW);
@@ -82,8 +90,7 @@ case class ConfUser(
       _submittedPapers.map(p => b.mkSensitiveInt(selfL, p, -1))
     def showSubmittedPapers (ctxt: ConfContext): List[PaperRecord] = {
       val paperIds: List[BigInt] =
-        submittedPapers.map(p =>
-          b.concretize[BigInt](ctxt, p));
+        submittedPapers.map(p => b.concretize(ctxt, p));
         paperIds.map(pid => b.getPaperById(pid.toInt) match {
             case Some(paper) => paper
             case None => b.defaultPaper
@@ -114,7 +121,7 @@ case class ConfUser(
     }
     def showReviews (ctxt: ConfContext): List[PaperReview] = {
       (getReviews ()).map(r =>
-        b.concretize[Atom](ctxt, r).asInstanceOf[PaperReview])
+        b.concretize(ctxt, r).asInstanceOf[PaperReview])
     }
 
     // Password.
@@ -171,7 +178,6 @@ case class ConfUser(
       (getConflicts ()).exists(_ == userId)
     }
     def showHasConflict(ctxt: ConfContext, userId: BigInt): Boolean = {
-//      b.concretize(ctxt, 
       hasConflict(userId)
     }
 

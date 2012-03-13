@@ -31,25 +31,25 @@ class PaperReview(
   private val _scoreL = b.mkLevel ();
   private val _isInternalF: Formula = {
     val vrole = b.CONTEXT.viewer.role;
-    (vrole === ReviewerStatus) || (vrole === PCStatus);
+    (vrole === b.reviewerStatus) || (vrole === b.pcStatus);
   }
   b.policy(_reviewerL,
     !((b.CONTEXT.viewer~'uid === _reviewerId)
-      || (b.CONTEXT.viewer.role === PCStatus))
+      || (b.CONTEXT.viewer.role === b.pcStatus))
     , b.LOW);
   b.logPaperReviewPolicy();
 
   val reviewer: IntExpr = b.mkSensitiveInt(_reviewerL, _reviewerId, -1)
   def showReviewer(ctxt: ConfContext): ConfUser = {
     val reviewerId: BigInt =
-      b.concretize[BigInt](ctxt, reviewer).asInstanceOf[BigInt]
+      b.concretize(ctxt, reviewer).asInstanceOf[BigInt]
     b.getUserById(reviewerId.toInt) match {
       case Some(u) => u
       case None => b.defaultUser
     }
   }
   def getReviewerTag(): b.Symbolic =
-    b.mkSensitive(_reviewerL, ReviewedBy(b, _reviewerId), EmptyTag)
+    b.mkSensitive(_reviewerL, ReviewedBy(b, _reviewerId), EmptyTag(b))
   def showReviewerTag(ctxt: ConfContext): PaperTag = {
     println("showing reviewer tag")
     b.concretize(ctxt, getReviewerTag()).asInstanceOf[PaperTag]
@@ -83,14 +83,15 @@ class PaperReview(
   /* URL links. */
   private val _reviewL = b.mkLevel()
   b.policy ( _reviewL
-    , !((b.CONTEXT.viewer.role === ReviewerStatus) ||
-        (b.CONTEXT.viewer.role === PCStatus) ||
-        ((b.CONTEXT.viewer.role === AuthorStatus) &&
-        b.CONTEXT.stage === Public))
+    , !((b.CONTEXT.viewer.role === b.reviewerStatus) ||
+        (b.CONTEXT.viewer.role === b.pcStatus) ||
+        ((b.CONTEXT.viewer.role === b.authorStatus) &&
+        b.CONTEXT.stage === Public(b)))
     , b.LOW )
   private val _editL = b.mkLevel()
   b.policy( _editL
-    , !((b.CONTEXT.viewer~'uid === reviewer) && (b.CONTEXT.stage === Review))
+    , !((b.CONTEXT.viewer~'uid === reviewer)
+      && (b.CONTEXT.stage === Review(b)))
     , b.LOW )
 
   private val _reviewLink: String = "review?id=" + uid + "&key=" + key
