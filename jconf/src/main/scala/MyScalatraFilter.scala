@@ -46,24 +46,37 @@ with JeevesLib {
 
   def getConfStage(backend: JConfBackend) =
     if (currentTime.before(submissionDeadline)) {
-      Submission(backend)
+      backend.submissionStage
     } else if (currentTime.before(notificationDeadline)) {
-      Review(backend)
+      backend.reviewStage
     } else {
-      Public(backend)
+      backend.publicStage
     }
 
   def getContext(backend: JConfBackend, user: ConfUser): ConfContext = {
-    new ConfContext(backend, user, getConfStage(backend))
+    session.get("context") match {
+      case Some(c) => {
+        val ctxt = c.asInstanceOf[ConfContext]
+        ctxt.stage = getConfStage(backend)
+        ctxt
+      }
+      case None => {
+        val ctxt = new ConfContext(backend, user, getConfStage(backend))
+        session("context") = ctxt
+        ctxt
+      }
+    }
   }
 
   def withBackend(action: JConfBackend => Any) {
     session.get("backend") match {
       case Some(b) => action(b.asInstanceOf[JConfBackend])
       case None =>
+        // Initialize backend.
         val backend = new JConfBackend()
         Init.initUsers(backend)
         session("backend") = backend
+        
         action(backend)
     }
   }
