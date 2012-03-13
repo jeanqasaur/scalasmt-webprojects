@@ -21,7 +21,7 @@
       <h1>Paper Details.</h1>
       #{
         val editLink: String = paper.showEditLink(ctxt)
-        val authors = paper.showAuthors(ctxt)
+        val authors = cap.jeeves.jconf.backend.JConfBackend.showAuthorsByPaper(ctxt, paper)
         val uploadLink: String = paper.showUploadLink(ctxt)
         val uploadFile: String = paper.showFile(ctxt)
         val tags = paper.showTags(ctxt)
@@ -69,8 +69,10 @@
             #{
               val reviewLink = review.showReviewLink(ctxt)
             }#
-            <%= review.uid %>:
-            <a href="<%= reviewLink %>" onclick="javascript:goToLink('<%= reviewLink %>')"><%= review.showReviewer(ctxt).showName(ctxt) %></a>
+            #if (!reviewLink.isEmpty())
+              <%= review.uid %>:
+                <a href="<%= reviewLink %>" onclick="javascript:goToLink('<%= reviewLink %>')"><%= review.showReviewer(ctxt).showName(ctxt) %></a>
+            #end
             #{
               val editReviewLink = review.showEditReviewLink(ctxt)
             }#

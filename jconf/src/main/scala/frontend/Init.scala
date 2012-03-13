@@ -2,7 +2,7 @@ package cap.jeeves.jconf.frontend
 
 //import cap.jeeves._
 import cap.jeeves.jconf.backend._
-//import JConfBackend._
+//import backend._
 
 import java.io.File
 import org.apache.commons.io.FileUtils
@@ -75,51 +75,51 @@ object Init {
     , new File(paperPath) )
   }
 
-  def initUsers (): Unit = {
+  def initUsers (backend: JConfBackend): Unit = {
     if (clearEverything) {
       // Add some dummy users.
       val armandoPassword =
         if (test) { "armando" } else { RandomGenerator.generatePassword() }
       val pcArmando =
-        JConfBackend.addUser(
+        backend.addUser(
         "asolar@mit.edu", "Armando Solar-Lezama", "MIT"
         , armandoPassword, true, "", PCStatus);
       
       /* Add actual reviewers. */
-      JConfBackend.addUser("rybal@in.tum.de", "Andrew Rybalchenko", "TUM"
-        , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
-      JConfBackend.addUser("kfisher@eecs.tufts.edu", "Kathleen Fisher", "Tufts"
-        , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
-      JConfBackend.addUser("mtvechev@us.ibm.com", "Martin Vechev", "ETH"
-        , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
-      JConfBackend.addUser("idillig@cs.wm.edu", "Isil Dillig", "William & Mary"
-        , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
-      JConfBackend.addUser("sriram@microsoft.com", "Sriram Rajamani", "Microsoft"
-        , RandomGenerator.generatePassword(), true, "", ReviewerStatus )
+      backend.addUser("rybal@in.tum.de", "Andrew Rybalchenko", "TUM"
+        , RandomGenerator.generatePassword(), true, "", ReviewerStatus)
+      backend.addUser("kfisher@eecs.tufts.edu", "Kathleen Fisher", "Tufts"
+        , RandomGenerator.generatePassword(), true, "", ReviewerStatus)
+      backend.addUser("mtvechev@us.ibm.com", "Martin Vechev", "ETH"
+        , RandomGenerator.generatePassword(), true, "", ReviewerStatus)
+      backend.addUser("idillig@cs.wm.edu", "Isil Dillig", "William & Mary"
+        , RandomGenerator.generatePassword(), true, "", ReviewerStatus)
+      backend.addUser("sriram@microsoft.com", "Sriram Rajamani", "Microsoft"
+        , RandomGenerator.generatePassword(), true, "", ReviewerStatus)
 
       val studentJean =
-        JConfBackend.addUser(
+        backend.addUser(
         "jeanyang@csail.mit.edu", "Jean Yang", "MIT CSAIL"
         , "jean", true, "", AuthorStatus, List(pcArmando.uid))
 
       // Add some dummy papers.
       if (test) {
         val authorJean =
-          JConfBackend.addUser(
+          backend.addUser(
           "jeanyang@mit.edu", "Jean Yang", "MIT"
           , "jean", true, "", ReviewerStatus);
         val reviewerKuat =
-          JConfBackend.addUser(
+          backend.addUser(
           "kuat@mit.edu", "Kuat Yessenov", "MIT"
           , "kuat", true, "", ReviewerStatus);
 
         val paper0Name = "A Language for Automatically Enforcing Privacy";
-        val paper0 = JConfBackend.addPaper(paper0Name, List(authorJean));
-        JConfBackend.assignReview(paper0, reviewerKuat);
+        val paper0 = backend.addPaper(paper0Name, List(authorJean));
+        backend.assignReview(paper0, reviewerKuat);
 
         val paper1Name = "Matchmaker";
-        val paper1 = JConfBackend.addPaper(paper1Name, List(reviewerKuat));
-        JConfBackend.assignReview(paper1, authorJean);
+        val paper1 = backend.addPaper(paper1Name, List(reviewerKuat));
+        backend.assignReview(paper1, authorJean);
       }
     }
   }

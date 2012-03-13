@@ -9,8 +9,6 @@ import org.squeryl.Schema
 import org.squeryl.Session
 import org.squeryl.SessionFactory
 
-import JConfBackend._
-
 object UserStatusField extends Enumeration {
   type UserStatusField = Value
   val PublicStatus = Value(1, "PublicStatus")
@@ -32,39 +30,13 @@ class ConfUserRecord(
   def this() = this("", "", "", "", "", false, "", -1)
   val id = 0;
 
-  def getSubmittedPapers(): List[BigInt] = {
-    transaction {
-      val submittedPapers: Iterable[Int] =
-        from(JConfTables.authors)(a =>
-          where(a.authorId.~ === id)
-          select(a.paperId))
-      submittedPapers.toList.map(pid => BigInt(pid))
-    }
-  }
-
-  def getConflicts(): List[BigInt] = {
-    transaction {
-      val authorConflicts: Iterable[Int] = {
-        from(JConfTables.conflicts)(c =>
-          where(c.authorId.~ === id)
-          select(c.reviewerId))
-      }
-      authorConflicts.toList.map(rid => BigInt(rid))
-    }
-  }
-
-  def getConfUser() = {
-    lookupCachedUser(id) match {
-      case Some(u) => u
-      case None =>
-        val u =
-          new ConfUser(id, secretId, email, name, affiliation
-            , pwd, isGrad, acmNum
-            , Conversions.field2Role(role)
-            , getConflicts(), getSubmittedPapers() );
-        cacheUser(u);
-        u
-    }
+  def getConfUser(b: JConfBackend) = {
+    val u =
+      new ConfUser(b, id, secretId, email, name, affiliation
+      , pwd, isGrad, acmNum
+      , b.conversions.field2Role(role)
+      , JConfTables.getDBConflictsByAuthor(id) );
+    u
   }
 }
 
@@ -72,60 +44,49 @@ class Assignment(val reviewerId: Int, val paperId: Int);
 
 class PaperItemRecord(
   val secretId: String, var title: String, var file: String )
-extends KeyedEntity[Int] {
+  extends KeyedEntity[Int] {
   def this() = this("", "", "")
-  val id: Int = 0
+    val id: Int = 0
 
-  private def getAuthors(): List[ConfUser] = {
-   transaction {
-      val authors: Iterable[PaperAuthorRecord] = from(JConfTables.authors)(a =>
+  private def getAuthors(): List[BigInt] = {
+    transaction {
+      val authors: Iterable[Int] = from(JConfTables.authors)(a =>
         where(a.paperId === id.~)
-        select(a)
+        select(a.authorId)
       )
-      authors.toList.map(a =>
-        getUserById(a.authorId) match {
-          case Some(author) => author
-          case None =>
-            println(a.authorId)
-            throw new NoSuchUserError(a.authorId)
-        })
+    authors.toList.map(a => BigInt(a))
     }
   }
-  def getTags(): List[PaperTag] = {
+  def getTags(c: Conversions): List[PaperTag] = {
     transaction {
       val tags: Iterable[PaperTagRecord] = from(JConfTables.tags)(t =>
         where(t.paperId === id.~)
         select(t)
       );
-      tags.toList.map(t => Conversions.field2Tag(t.tagId, t.tagData))
+      tags.toList.map(t => c.field2Tag(t.tagId, t.tagData))
     }
   }
 
-  def getConflicts(authors: List[ConfUser]): List[BigInt] = {
+  def getConflicts(authors: List[BigInt]): List[BigInt] = {
     var conflicts: List[BigInt] = List()
-    authors.foreach { a =>
-      conflicts = (a.getConflicts ()) ::: conflicts
+      authors.foreach { a =>
+      conflicts = (JConfTables.getDBConflictsByAuthor (a.toInt)) ::: conflicts
     }
     conflicts
   }
 
-  def getPaperRecord() = {
-    lookupCachedPaper(id) match {
-      case Some(p) => p
-      case None =>
-        val authors = getAuthors ()
-        val p =
-          new PaperRecord(id, secretId, title, authors, file
-            , getTags (), getConflicts (authors))
-        cachePaper(p);
-        p
-    }
+  def getPaperRecord(backend: JConfBackend) = {
+    val authors = getAuthors ()
+    val p =
+      new PaperRecord(backend, id, secretId, title, authors, file
+        , getTags (backend.conversions), getConflicts (authors))
+    p
   }
 }
 
 class AuthorConflictRecord(val authorId: Int, val reviewerId: Int)
 class PaperAuthorRecord(
-    val paperId: Int
+  val paperId: Int
   , val authorId: Int ) {
   def debugPrint():Unit = {
     println(
@@ -146,8 +107,8 @@ extends KeyedEntity[Int] {
   def this() = this("", -1, -1, "", 3, 3, 3, 3)
   val id: Int = 0;
 
-  def getPaperReview(): PaperReview = {
-    new PaperReview(id, secretId, paperId, reviewerId, body
+  def getPaperReview(b: JConfBackend): PaperReview = {
+    new PaperReview(b, id, secretId, paperId, reviewerId, body
       , problemScore, backgroundScore, approachScore, resultScore )
   }
 }
@@ -164,12 +125,13 @@ object JConfTables extends Schema {
   def writeDBUser(userRecord: ConfUserRecord): Unit = {
     transaction { users.insert(userRecord) }
   }
-  def getDBConfUser(uid: Int): Option[ConfUser] = {
+  def getDBConfUser(b: JConfBackend, uid: Int): Option[ConfUser] = {
+    println("getting user " + uid + " from the database")
     try {
       val userRecord: Option[ConfUserRecord] =
         transaction { JConfTables.users.lookup(uid) }
       userRecord match {
-        case Some(u) => Some(u.getConfUser())
+        case Some(u) => Some(u.getConfUser(b))
         case None => None
       }
     } catch {
@@ -178,27 +140,38 @@ object JConfTables extends Schema {
       None
     }
   }
-  def getDBConfUserByEmail(email: String): Option[ConfUser] = {
+  def getDBConfUserByEmail(b: JConfBackend, email: String): Option[ConfUser] = {
     try {
       transaction {
+        println
         val userRecord = from(JConfTables.users)(u =>
         where(u.email like email)
         select(u)).single;
-        Some(userRecord.getConfUser())
+        val user = userRecord.getConfUser(b)
+        Some(user)
       }
     } catch {
       case e: Exception => None
     }
   }
+
+  def getDBSubmittedPapers(authorId: Int): List[BigInt] = {
+    transaction {
+      val submittedPapers: Iterable[Int] =
+        from(JConfTables.authors)(a =>
+          where(a.authorId.~ === authorId)
+          select(a.paperId))
+      submittedPapers.toList.map(pid => BigInt(pid))
+    }
+  }
  
-  def getDBPotentialConflicts(): List[ConfUser] = {
+  def getDBPotentialConflicts(b: JConfBackend): List[ConfUser] = {
     transaction {
       val userRecords: Iterable[ConfUserRecord] = from(users)(u =>
-        where((u.role === Conversions.role2Field(ReviewerStatus))
-          or (u.role === Conversions.role2Field(PCStatus)))
+        where((u.role === 3) or (u.role === 4))
         select(u)
       )
-      userRecords.toList.map(_.getConfUser())
+      userRecords.toList.map(_.getConfUser(b))
     }
   } 
 
@@ -253,26 +226,26 @@ object JConfTables extends Schema {
     paperRecord.file = file
     transaction { papers.update(paperRecord) }
   }
-  def getDBPaperRecord(uid: Int): Option[PaperRecord] = {
+  def getDBPaperRecord(backend: JConfBackend, uid: Int): Option[PaperRecord] = {
     transaction { papers.lookup(uid) } match {
-      case Some(paperRecord) => Some(paperRecord.getPaperRecord())
+      case Some(paperRecord) => Some(paperRecord.getPaperRecord(backend))
       case None => None
     }
   }
-  def getAllDBPapers(): List[PaperRecord] = {
+  def getAllDBPapers(b: JConfBackend): List[PaperRecord] = {
     transaction {
       val paperRecords =
         from(papers)(p => select(p)).toList
-      paperRecords.map(r => r.getPaperRecord())
+      paperRecords.map(r => r.getPaperRecord(b))
     }
   }
-  def getPapersByReviewer(userId: Int): List[PaperRecord] = {
+  def getPapersByReviewer(b: JConfBackend, userId: Int): List[PaperRecord] = {
     transaction {
       val paperRecords: Iterable[PaperItemRecord] =
         from(papers, assignments)( (p, a) =>
           where ((userId.~ === a.reviewerId) and (p.id === a.paperId))
           select(p) )
-      paperRecords.toList.map(p => p.getPaperRecord())
+      paperRecords.toList.map(p => p.getPaperRecord(b))
     }
   }
 
@@ -290,6 +263,17 @@ object JConfTables extends Schema {
     transaction {
       conflicts.deleteWhere(c =>
         (c.authorId === authorId.~) and (c.reviewerId === reviewerId.~))
+    }
+  }
+
+  def getDBConflictsByAuthor(authorId: Int): List[BigInt] = {
+    transaction {
+      val authorConflicts: Iterable[Int] = {
+        from(JConfTables.conflicts)(c =>
+          where(c.authorId.~ === authorId)
+          select(c.reviewerId))
+      }
+      authorConflicts.toList.map(rid => BigInt(rid))
     }
   }
 
@@ -328,46 +312,47 @@ object JConfTables extends Schema {
     transaction { reviews.update(reviewRecord) }
   }
 
-  def getDBPaperReview(uid: Int): Option[PaperReview] = {
+  def getDBPaperReview(b: JConfBackend, uid: Int): Option[PaperReview] = {
     try {
       val reviewRecord: Option[PaperReviewRecord] =
         transaction { JConfTables.reviews.lookup(uid) }
       reviewRecord match {
-        case Some(u) => Some(u.getPaperReview())
+        case Some(u) => Some(u.getPaperReview(b))
         case None => None
       }
     } catch {
       case e: Exception => println(e); None
     }
   }
-  def getReviewByPaperReviewer(paperId: Int, reviewerId: Int)
+  def getReviewByPaperReviewer(b: JConfBackend, paperId: Int, reviewerId: Int)
     : Option[PaperReview] = {
     try {
       transaction {
         Some(from(reviews)(r =>
           where((r.paperId === paperId.~) and (r.reviewerId === reviewerId.~))
-          select(r)).single.getPaperReview())
+          select(r)).single.getPaperReview(b))
       }
     } catch {
       case e: Exception => None
     }
   }
-  def getReviewsByPaper(paperId: Int): List[PaperReview] = {
+  def getReviewsByPaper(b: JConfBackend, paperId: Int): List[PaperReview] = {
     transaction {
       val rs: Iterable[PaperReviewRecord] =
         from(reviews)(r =>
           where(r.paperId === paperId.~)
           select(r));
-      rs.toList.map(r => r.getPaperReview())
+      rs.toList.map(r => r.getPaperReview(b))
     }
   }
-  def getReviewsByReviewer(reviewerId: Int): List[PaperReview] = {
+  def getReviewsByReviewer(b: JConfBackend, reviewerId: Int)
+  : List[PaperReview] = {
     transaction {
       val rs: Iterable[PaperReviewRecord] =
         from(reviews)(r =>
           where(r.reviewerId === reviewerId.~)
           select(r));
-      rs.toList.map(r => r.getPaperReview())
+      rs.toList.map(r => r.getPaperReview(b))
     }
   }
 
@@ -376,14 +361,14 @@ object JConfTables extends Schema {
       t.paperId is(indexed)
     , t.tagId   is(indexed)
   ))
-  def addDBTag(paperId: Int, newtag: PaperTag): Unit = {
-    val (tag, tagVal) = Conversions.tag2Field(newtag)
+  def addDBTag(c: Conversions, paperId: Int, newtag: PaperTag): Unit = {
+    val (tag, tagVal) = c.tag2Field(newtag)
     transaction {
       tags.insert(new PaperTagRecord(paperId, tag, tagVal))
     }
   }
-  def removeDBTag(paperId: Int, tag: PaperTag): Unit = {
-    val (tagId, tagVal) = Conversions.tag2Field(tag);
+  def removeDBTag(c: Conversions, paperId: Int, tag: PaperTag): Unit = {
+    val (tagId, tagVal) = c.tag2Field(tag);
     transaction {
       JConfTables.tags.deleteWhere(t =>
         (t.paperId === paperId.~) and (t.tagId === tagId.~)
