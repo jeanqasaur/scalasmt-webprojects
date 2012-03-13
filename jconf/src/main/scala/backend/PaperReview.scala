@@ -7,10 +7,12 @@ package cap.jeeves.jconf.backend
 import cap.scalasmt._
 import org.squeryl.PrimitiveTypeMode._
 
-import JConfBackend._
+import cap.scalasmt._
+import Expr._
 
 class PaperReview(
-            val  uid: BigInt
+            val  b: JConfBackend
+  ,         val  uid: BigInt
   ,         val  key: String
   ,         var  paperId: BigInt = -1
   , private val _reviewerId: BigInt = -1
@@ -19,36 +21,38 @@ class PaperReview(
   , private var _backgroundScore: Int = 3
   , private var _approachScore: Int = 3
   , private var _resultScore: Int = 3)
-  extends JeevesRecord with Serializable {
+  extends Atom with Serializable {
+  b.register(this)
+
   /*************/
   /* Policies. */
   /*************/
-  private val _reviewerL = mkLevel ();
-  private val _scoreL = mkLevel ();
+  private val _reviewerL = b.mkLevel ();
+  private val _scoreL = b.mkLevel ();
   private val _isInternalF: Formula = {
-    val vrole = CONTEXT.viewer.role;
+    val vrole = b.CONTEXT.viewer.role;
     (vrole === ReviewerStatus) || (vrole === PCStatus);
   }
-  policy(_reviewerL,
-    !((CONTEXT.viewer~'uid === _reviewerId)
-      || (CONTEXT.viewer.role === PCStatus))
-    , LOW);
-  logPaperReviewPolicy();
+  b.policy(_reviewerL,
+    !((b.CONTEXT.viewer~'uid === _reviewerId)
+      || (b.CONTEXT.viewer.role === PCStatus))
+    , b.LOW);
+  b.logPaperReviewPolicy();
 
-  val reviewer: IntExpr = mkSensitiveInt(_reviewerL, _reviewerId, -1)
+  val reviewer: IntExpr = b.mkSensitiveInt(_reviewerL, _reviewerId, -1)
   def showReviewer(ctxt: ConfContext): ConfUser = {
-    val reviewerId: BigInt = concretize(ctxt, reviewer).asInstanceOf[BigInt]
-    JConfBackend.getUserById(reviewerId.toInt) match {
+    val reviewerId: BigInt =
+      b.concretize[BigInt](ctxt, reviewer).asInstanceOf[BigInt]
+    b.getUserById(reviewerId.toInt) match {
       case Some(u) => u
-      case None => 
-        println("Cannot find reviewer " + reviewerId.toInt)
-        JConfBackend.defaultUser
+      case None => b.defaultUser
     }
   }
-  def getReviewerTag(): Symbolic =
-    mkSensitive(_reviewerL, ReviewedBy(_reviewerId), EmptyTag)
+  def getReviewerTag(): b.Symbolic =
+    b.mkSensitive(_reviewerL, ReviewedBy(b, _reviewerId), EmptyTag)
   def showReviewerTag(ctxt: ConfContext): PaperTag = {
-    concretize(ctxt, getReviewerTag()).asInstanceOf[PaperTag]
+    println("showing reviewer tag")
+    b.concretize(ctxt, getReviewerTag()).asInstanceOf[PaperTag]
   }
 
   def setBody (newbody: String) = _body = newbody
@@ -77,24 +81,35 @@ class PaperReview(
   }
 
   /* URL links. */
-  private val _editL = mkLevel()
-  policy( _editL
-    , !((CONTEXT.viewer~'uid === reviewer) && (CONTEXT.stage === Review))
-    , LOW )
+  private val _reviewL = b.mkLevel()
+  b.policy ( _reviewL
+    , !((b.CONTEXT.viewer.role === ReviewerStatus) ||
+        (b.CONTEXT.viewer.role === PCStatus) ||
+        ((b.CONTEXT.viewer.role === AuthorStatus) &&
+        b.CONTEXT.stage === Public))
+    , b.LOW )
+  private val _editL = b.mkLevel()
+  b.policy( _editL
+    , !((b.CONTEXT.viewer~'uid === reviewer) && (b.CONTEXT.stage === Review))
+    , b.LOW )
 
+  private val _reviewLink: String = "review?id=" + uid + "&key=" + key
+  val reviewLink: b.Symbolic = 
+    b.mkSensitive(_reviewL, StringVal(b, _reviewLink), StringVal(b, ""))
   def showReviewLink(ctxt: ConfContext): String = {
-    "review?id=" + uid + "&key=" + key
+    (b.concretize(ctxt, reviewLink).asInstanceOf[StringVal]).v
   }
   private val _editReviewLink = "edit_review?id=" + uid + "&key=" + key
-  val editReviewLink: Symbolic = 
-    mkSensitive(_editL, StringVal(_editReviewLink), StringVal(""))
+  val editReviewLink: b.Symbolic = 
+    b.mkSensitive(_editL, StringVal(b, _editReviewLink), StringVal(b, ""))
   def showEditReviewLink(ctxt: ConfContext): String = {
-    show[StringVal](ctxt, editReviewLink).v
+    (b.concretize(ctxt, editReviewLink).asInstanceOf[StringVal]).v
   }
   private val _postReviewLink = "review?id=" + uid + "&key=" + key
-  val postReviewLink: Symbolic =
-    mkSensitive(_editL, StringVal(_postReviewLink), StringVal(""))
+  val postReviewLink: b.Symbolic =
+    b.mkSensitive(_editL, StringVal(b, _postReviewLink), StringVal(b, ""))
   def showPostReviewLink(ctxt: ConfContext): String = {
-    show[StringVal](ctxt, postReviewLink).v
+    println("showing post review link")
+    (b.concretize(ctxt, postReviewLink).asInstanceOf[StringVal]).v
   }
 }

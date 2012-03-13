@@ -12,6 +12,7 @@ document.all.hideShow.style.visibility = 'visible';
 }
 } function goToLink(lname){
 showDiv();
-document.location.href = lname;
+return;
+//document.location.href = lname;
 }
 </script>

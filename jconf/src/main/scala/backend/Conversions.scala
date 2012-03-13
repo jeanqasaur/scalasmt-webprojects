@@ -1,6 +1,7 @@
 package cap.jeeves.jconf.backend
 
-object Conversions {
+//  TODO: Paramaterize by jcbackend.
+class Conversions(b: JConfBackend) {
   class MalformedTagError extends Exception
 
   // Roles.
@@ -23,16 +24,16 @@ object Conversions {
 
   def tag2Field(tag: PaperTag): (Int, Int) = {
     tag match {
-      case NeedsReview(reviewer)  => (1, reviewer.toInt)
-      case ReviewedBy(reviewer)   => (2, reviewer.toInt)
+      case NeedsReview(_b, reviewer)  => (1, reviewer.toInt)
+      case ReviewedBy(_b, reviewer)   => (2, reviewer.toInt)
       case Accepted               => (3, -1)
       case EmptyTag               => (4, -1)
     }
   }
   def field2Tag(tag: (Int, Int)): PaperTag = {
     tag match {
-      case (1, id) => NeedsReview(id)
-      case (2, id) => ReviewedBy(id)
+      case (1, id) => NeedsReview(b, id)
+      case (2, id) => ReviewedBy(b, id)
       case (3, _) => Accepted
       case (4, _) => EmptyTag
       case (_, _) => throw new MalformedTagError

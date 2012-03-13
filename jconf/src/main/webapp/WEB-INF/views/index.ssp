@@ -58,18 +58,6 @@
             val paperLink: String = p.showLink(ctxt)
           }#
           <b><a href="<%= paperLink %>" onclick="javascript:goToLink('<%= paperLink %>')"><%= p.uid %>: <%= p.showTitle(ctxt) %></a></b><br>
-            #{
-              val authors = p.showAuthors(ctxt)
-            }#
-            #for (author <- authors)
-              <%= author.showName(ctxt) %><br>
-            #end
-            #{
-              val reviews = p.showReviews(ctxt)
-            }#
-            #for (review <- reviews)
-              Reviewed by <%= review.showReviewer(ctxt).showName(ctxt) %></br>
-            #end
         </li>
       #end
     </ul>
