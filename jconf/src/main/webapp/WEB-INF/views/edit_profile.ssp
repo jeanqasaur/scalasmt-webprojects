@@ -1,4 +1,5 @@
 <%@ val title: String %>
+<%@ val backend: cap.jeeves.jconf.backend.JConfBackend %>
 <%@ val user: cap.jeeves.jconf.backend.ConfUser %>
 <%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
 <html>
@@ -57,7 +58,7 @@
         <tr>
           <td><b>Conflicts</b></td>
           <td>
-             #for (conflict <- cap.jeeves.jconf.backend.JConfBackend.getPotentialConflicts)
+             #for (conflict <- backend.getPotentialConflicts)
               <input type="checkbox" name="conflict" value="<%= conflict.uid %>"
                 #if (user.showHasConflict(ctxt, conflict.uid))
                   checked

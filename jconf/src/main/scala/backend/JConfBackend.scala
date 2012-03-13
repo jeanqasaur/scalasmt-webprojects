@@ -18,10 +18,15 @@ extends JeevesLib with Atom with Serializable {
 
   register(this)
 
+  // Constants.
   val publicStatus = PublicStatus(this)
   val authorStatus = AuthorStatus(this)
   val reviewerStatus = ReviewerStatus(this)
   val pcStatus = PCStatus(this)
+
+  val submissionStage = Submission(this)
+  val reviewStage = Review(this)
+  val publicStage = Public(this)
 
   /* Database initialization. */
   private val TEST = true;

@@ -1,4 +1,5 @@
 <%@ val title: String %>
+<%@ val backend: cap.jeeves.jconf.backend.JConfBackend %>
 <%@ val name: String %>
 <%@ val msg: String %>
 <%@ val stage: cap.jeeves.jconf.backend.PaperStage %>
