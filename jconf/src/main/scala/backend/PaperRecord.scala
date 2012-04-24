@@ -285,6 +285,15 @@ class PaperRecord(         val b: JConfBackend
   def showEditLink(ctxt: ConfContext): String = {
     b.concretize(ctxt, editLink).asInstanceOf[StringVal].v
   }
+
+  private val _withdrawLink = "withdraw_paper?id=" + uid + "&key=" + key
+  val withdrawLink: b.Symbolic = {
+    b.mkSensitive(_editL, StringVal(b, _withdrawLink), b.emptyStringVal)
+  }
+  def showWithdrawLink(ctxt: ConfContext): String = {
+    b.concretize(ctxt, withdrawLink).asInstanceOf[StringVal].v
+  }
+
   private val _postLink = "paper?id=" + uid + "&key=" + key
   def postLink: b.Symbolic = {
     b.mkSensitive(_editL, StringVal(b, _postLink), b.emptyStringVal)

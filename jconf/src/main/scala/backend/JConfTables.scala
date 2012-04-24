@@ -218,7 +218,10 @@ object JConfTables extends Schema {
     transaction { papers.insert(paperRecord) }
   }
   def removeDBPaper(paperRecord: PaperItemRecord) = {
-    transaction { papers.deleteWhere(p => p.id === paperRecord.id.~) }
+    transaction {
+      authors.deleteWhere(ap => ap.paperId === paperRecord.id.~)
+      papers.deleteWhere(p => p.id === paperRecord.id.~)
+    }
   }
   def updateDBPaper(paper: PaperRecord, title: String, file: String) = {
     val paperRecord: PaperItemRecord = paper.getPaperItemRecord()

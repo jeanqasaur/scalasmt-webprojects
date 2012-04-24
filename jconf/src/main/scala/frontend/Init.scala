@@ -85,18 +85,6 @@ object Init {
         "asolar@mit.edu", "Armando Solar-Lezama", "MIT"
         , armandoPassword, true, "", backend.pcStatus);
       
-      /* Add actual reviewers. */
-      backend.addUser("rybal@in.tum.de", "Andrew Rybalchenko", "TUM"
-        , RandomGenerator.generatePassword(), true, "", backend.reviewerStatus)
-      backend.addUser("kfisher@eecs.tufts.edu", "Kathleen Fisher", "Tufts"
-        , RandomGenerator.generatePassword(), true, "", backend.reviewerStatus)
-      backend.addUser("mtvechev@us.ibm.com", "Martin Vechev", "ETH"
-        , RandomGenerator.generatePassword(), true, "", backend.reviewerStatus)
-      backend.addUser("idillig@cs.wm.edu", "Isil Dillig", "William & Mary"
-        , RandomGenerator.generatePassword(), true, "", backend.reviewerStatus)
-      backend.addUser("sriram@microsoft.com", "Sriram Rajamani", "Microsoft"
-        , RandomGenerator.generatePassword(), true, "", backend.reviewerStatus)
-
       val studentJean =
         backend.addUser(
         "jeanyang@csail.mit.edu", "Jean Yang", "MIT CSAIL"

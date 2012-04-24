@@ -101,6 +101,15 @@ case class ConfUser(
       submittedPapers = (b.mkSensitiveInt(selfL, p.uid, -1)) :: submittedPapers
     }
     // TODO: Withdraw submitted paper
+    def withdrawSubmittedPaper (p: PaperRecord): Unit = {
+      // Remove from database.
+      JConfTables.removeDBPaper(p.getPaperItemRecord());
+      
+      // Remove from list and create a new sensitive list. 
+      _submittedPapers = _submittedPapers.filterNot(_ == p.uid)
+      submittedPapers =
+        _submittedPapers.map(p => b.mkSensitiveInt(selfL, p, -1))
+    }
 
     // Papers to review.
     def getReviewPapers (): List[b.Symbolic] = {

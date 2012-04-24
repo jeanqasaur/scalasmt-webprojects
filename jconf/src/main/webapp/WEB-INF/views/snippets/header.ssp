@@ -1,6 +1,6 @@
 <%@ val user: cap.jeeves.jconf.backend.ConfUser = null %>
 <div id="header">
-  <a href="index"><h1>PLDI Student Research Competition 2012</h1></a>
+  <a href="index"><h1>JConf</h1></a>
 </div>
 <div id="menu">
   <ul>

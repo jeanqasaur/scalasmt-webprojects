@@ -33,7 +33,7 @@
           <input type="text" name="affiliation" maxlength=50 value="<%= user.showAffiliation(ctxt) %>" />
         </td>
       </tr>
-      #if (user.role == cap.jeeves.jconf.backend.AuthorStatus)
+      #if (user.role == backend.authorStatus)
         <tr>
           <td><b>Student status</b></td>
           <td>
@@ -72,13 +72,13 @@
       <tr>
         <td><b>Role</b></td>
         <td>#match (user.role)
-            #case(cap.jeeves.jconf.backend.PublicStatus)
+            #case(backend.publicStatus)
               Public viewer
-            #case(cap.jeeves.jconf.backend.AuthorStatus)
+            #case(backend.authorStatus)
               Author
-            #case(cap.jeeves.jconf.backend.ReviewerStatus)
+            #case(backend.reviewerStatus)
               Reviewer
-            #case(cap.jeeves.jconf.backend.PCStatus)
+            #case(backend.pcStatus)
               PC member
             #otherwise
               <i>Internal error.</i>

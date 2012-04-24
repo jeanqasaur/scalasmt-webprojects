@@ -27,7 +27,6 @@ with JeevesLib {
   Init.initDirectory ()
 
   val path = "/WEB-INF/views/"
-  val title = "jeeves social net"
   def emptyName = ""
 
   def getCalendar (): Calendar =
@@ -45,6 +44,8 @@ with JeevesLib {
   val currentTime: Calendar = getCalendar ()
 
   def getConfStage(backend: JConfBackend) =
+    backend.submissionStage
+  /*
     if (currentTime.before(submissionDeadline)) {
       backend.submissionStage
     } else if (currentTime.before(notificationDeadline)) {
@@ -52,6 +53,7 @@ with JeevesLib {
     } else {
       backend.publicStage
     }
+  */
 
   def getContext(backend: JConfBackend, user: ConfUser): ConfContext = {
     session.get("context") match {
@@ -99,7 +101,7 @@ with JeevesLib {
     , args: Map[String, Any] = Map()): Unit = {
     var newArgs = args;
     newArgs += ("backend" -> backend)
-    newArgs += ("title" -> "PLDI Student Research Competition 2012")
+    newArgs += ("title" -> "JConf")
     contentType = "text/html"
     templateEngine.layout(path + page, newArgs)
   }
@@ -148,6 +150,8 @@ with JeevesLib {
                 "Your assignments have been made."
               case "password" =>
                 "Your password has been sent to " + user.email + "."
+              case "withdrawn" =>
+                "Your paper has been withdrawn."
             }
           } else { "" }
         }
@@ -155,7 +159,6 @@ with JeevesLib {
         renderPageWithUser("index.ssp", backend, user
           , Map( "msg" -> msg
                  , "name" -> user.showName(getContext(backend, user))
-                 , "stage" -> getConfStage(backend)
                  , "submissionDeadline" -> submissionDeadline.getTime().toString()
                  , "notificationDeadline" -> notificationDeadline.getTime().toString()
                  , "submittedPapers" -> user.showSubmittedPapers(ctxt)
@@ -436,6 +439,21 @@ with JeevesLib {
       }
     }
   }
+  get("/withdraw_paper") {
+    withBackend { (backend: JConfBackend) =>
+      ifLoggedIn { (user: ConfUser) =>
+        // Get paper.
+        val paper: PaperRecord =
+          getPaper(backend, params("id").toInt, params("key"))
+
+        // Remove paper for user.
+        user.withdrawSubmittedPaper(paper)
+
+        redirect("index?msg=withdrawn")
+      }
+    }
+  }
+
   get("/assign_papers") {
     withBackend { (backend: JConfBackend) =>
       ifLoggedIn { (user: ConfUser) =>
