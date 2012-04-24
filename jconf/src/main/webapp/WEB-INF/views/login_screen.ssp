@@ -17,7 +17,6 @@
     #if (errorMsg != null)
       <p><i><%= errorMsg %></i></p>
     #end
-    <p>Welcome to the login page for the PLDI Student Research Competition 2012.  Please remember that the submission deadline is Wednesday, March 14, at 23:59.</p>
     <form action="login_user" method="post">
     <input type="hidden" name="ac" value="log">
     <table>

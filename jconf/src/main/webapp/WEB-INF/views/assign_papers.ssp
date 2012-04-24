@@ -14,7 +14,7 @@
     #do(layout("snippets/header.ssp", Map("user" -> user))) #end
 
     <div id="content">
-    #if (user.role == cap.jeeves.jconf.backend.PCStatus)
+    #if (user.role == cap.jeeves.jconf.backend.pcStatus)
       <h1>Edit Paper Assignments.</h1>
 
       <form action="paper_assignments" method="post">

@@ -2,7 +2,6 @@
 <%@ val backend: cap.jeeves.jconf.backend.JConfBackend %>
 <%@ val name: String %>
 <%@ val msg: String %>
-<%@ val stage: cap.jeeves.jconf.backend.PaperStage %>
 <%@ val submissionDeadline: String %>
 <%@ val notificationDeadline: String %>
 <%@ val user: cap.jeeves.jconf.backend.ConfUser %>
@@ -23,8 +22,6 @@
     #do(layout("snippets/processing.ssp")) #end
 
     <div id="content">
-    <h1>Welcome to the PLDI Student Research Competition 2012.</h1>
-
     #if (!msg.isEmpty())
       <p><i><%= msg %></i></p>
     #end
@@ -32,9 +29,9 @@
     <p>Hello, <%= name %>.</p>
 
     <p>
-    #if (stage == cap.jeeves.jconf.backend.Submission)
+    #if (ctxt.stage == backend.submissionStage)
       <i>Submissions are open until <%= submissionDeadline %>.</i>
-    #elseif (stage == cap.jeeves.jconf.backend.Review)
+    #elseif (ctxt.stage == backend.reviewStage)
       <i>The review process is occuring until <%= notificationDeadline %>.</i>
     #else
       <i>The decision process is finished as of <%= notificationDeadline %>.</i>
@@ -43,11 +40,11 @@
 
     <h1>Papers.</h1>
 
-    #if (stage == cap.jeeves.jconf.backend.Submission)
+    #if (ctxt.stage == backend.submissionStage)
       <p><a href="new_paper" onclick="javascript:goToLink('new_paper')">Start new paper</a></p>
     #end
 
-    #if (user.role == cap.jeeves.jconf.backend.PCStatus)
+    #if (user.role == backend.pcStatus)
       <a href="assign_papers" onclick="javascript:goToLink('assign_papers')">Assign papers</a></p>
     #end
 
@@ -57,15 +54,20 @@
         <li>
           #{
             val paperLink: String = p.showLink(ctxt)
+            val withdrawLink: String = p.showWithdrawLink(ctxt)
           }#
-          <b><a href="<%= paperLink %>" onclick="javascript:goToLink('<%= paperLink %>')"><%= p.uid %>: <%= p.showTitle(ctxt) %></a></b><br>
+          <b><a href="<%= paperLink %>" onclick="javascript:goToLink('<%= paperLink %>')"><%= p.uid %>: <%= p.showTitle(ctxt) %></a></b>
+          #if (!withdrawLink.isEmpty())
+            <a href="<%= withdrawLink %>" onclick="javascript:goToLink('<%= withdrawLink %>')">Withdraw paper</a>
+          #end
+          <br>
         </li>
       #end
     </ul>
     #{
       val hasReviews =
-        ((user.role == cap.jeeves.jconf.backend.ReviewerStatus) ||
-          (user.role == cap.jeeves.jconf.backend.PCStatus))
+        ((user.role == backend.reviewerStatus) ||
+          (user.role == backend.pcStatus))
     }#
     #if (hasReviews)
       <h2>To Review.</h2>
