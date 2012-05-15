@@ -1,5 +1,4 @@
 <%@ val title: String %>
-<%@ val backend: cap.jeeves.jconf.backend.JConfBackend %>
 <%@ val user: cap.jeeves.jconf.backend.ConfUser %>
 <%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
 <%@ val review: cap.jeeves.jconf.backend.PaperReview %>

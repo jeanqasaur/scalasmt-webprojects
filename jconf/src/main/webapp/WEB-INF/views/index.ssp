@@ -1,5 +1,4 @@
 <%@ val title: String %>
-<%@ val backend: cap.jeeves.jconf.backend.JConfBackend %>
 <%@ val name: String %>
 <%@ val msg: String %>
 <%@ val submissionDeadline: String %>
@@ -29,9 +28,9 @@
     <p>Hello, <%= name %>.</p>
 
     <p>
-    #if (ctxt.stage == backend.submissionStage)
+    #if (ctxt.stage == cap.jeeves.jconf.backend.SubmissionStage)
       <i>Submissions are open until <%= submissionDeadline %>.</i>
-    #elseif (ctxt.stage == backend.reviewStage)
+    #elseif (ctxt.stage == cap.jeeves.jconf.backend.ReviewStage)
       <i>The review process is occuring until <%= notificationDeadline %>.</i>
     #else
       <i>The decision process is finished as of <%= notificationDeadline %>.</i>
@@ -40,11 +39,11 @@
 
     <h1>Papers.</h1>
 
-    #if (ctxt.stage == backend.submissionStage)
+    #if (ctxt.stage == cap.jeeves.jconf.backend.SubmissionStage)
       <p><a href="new_paper" onclick="javascript:goToLink('new_paper')">Start new paper</a></p>
     #end
 
-    #if (user.role == backend.pcStatus)
+    #if (user.role == cap.jeeves.jconf.backend.PCStatus)
       <a href="assign_papers" onclick="javascript:goToLink('assign_papers')">Assign papers</a></p>
     #end
 
@@ -66,8 +65,8 @@
     </ul>
     #{
       val hasReviews =
-        ((user.role == backend.reviewerStatus) ||
-          (user.role == backend.pcStatus))
+        ((user.role == cap.jeeves.jconf.backend.ReviewerStatus) ||
+          (user.role == cap.jeeves.jconf.backend.PCStatus))
     }#
     #if (hasReviews)
       <h2>To Review.</h2>
