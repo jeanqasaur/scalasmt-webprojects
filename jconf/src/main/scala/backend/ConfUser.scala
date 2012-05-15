@@ -6,26 +6,19 @@ package cap.jeeves.jconf.backend
  */
 
 import cap.scalasmt._
-import org.squeryl.PrimitiveTypeMode._
+import JConfBackend._
 
-sealed trait UserStatus extends Atom with Serializable
-case class PublicStatus (b: JConfBackend) extends UserStatus {
-  b.register(this)
-}
-case class AuthorStatus (b: JConfBackend) extends UserStatus {
-  b.register(this)
-}
-case class ReviewerStatus (b: JConfBackend) extends UserStatus {
-  b.register(this)
-}
-case class PCStatus (b: JConfBackend) extends UserStatus {
-  b.register(this)
-}
+ import org.squeryl.PrimitiveTypeMode._
+
+sealed trait UserStatus extends JeevesRecord
+case object PublicStatus extends UserStatus
+case object AuthorStatus extends UserStatus
+case object ReviewerStatus extends UserStatus
+case object PCStatus extends UserStatus
 
 /* Conference User */
 case class ConfUser(
-            val b: JConfBackend
-  ,         val uid: BigInt
+            val uid: BigInt
   ,         val secretId: String  // Used in the link
   ,         val email: String
   , private var _name: String
@@ -35,23 +28,21 @@ case class ConfUser(
   , private var _acmNum: String = ""
   ,         val role: UserStatus
   , private var _conflicts: List[BigInt] )
-  extends Atom {
-  b.register(this)
-
+  extends JeevesRecord {
     /*************/
     /* Policies. */
     /*************/
-    private val isSelf: Formula = b.CONTEXT.viewer~'uid === uid
+    private val isSelf: Formula = CONTEXT.viewer~'uid === uid
 
     private val isReviewer: Formula =
-      b.CONTEXT.viewer.status === b.reviewerStatus
-    private val isPC: Formula = b.CONTEXT.viewer.status === b.pcStatus
+      CONTEXT.viewer.status === ReviewerStatus
+    private val isPC: Formula = CONTEXT.viewer.status === PCStatus
 
-    private val selfL = b.mkLevel ();
-    b.policy (selfL, !isSelf, b.LOW);
-    b.logConfUserPolicy();
+    private val selfL = mkLevel ();
+    policy (selfL, !isSelf, LOW);
+    logConfUserPolicy();
     def showIsSelf(ctxt: ConfContext): Boolean = {
-      b.concretize(ctxt, selfL)
+      concretize(ctxt, selfL)
     }
 
     // No policies on name--should always be high...
@@ -73,32 +64,32 @@ case class ConfUser(
       _isGrad
     }
 
-    private val numL = b.mkLevel()
-    b.policy (numL, !(isSelf || isPC), b.LOW)
-    var acmNum = b.mkSensitive(numL, StringVal(b, _acmNum), StringVal(b, ""))
+    private val numL = mkLevel()
+    policy (numL, !(isSelf || isPC), LOW)
+    var acmNum = mkSensitive(numL, StringVal(_acmNum), StringVal(""))
     def setAcmNum (newNum: String): Unit = {
       _acmNum = newNum
-      acmNum = b.mkSensitive(numL, StringVal(b, _acmNum), StringVal(b, ""))
+      acmNum = mkSensitive(numL, StringVal(_acmNum), StringVal(""))
     }
     def showAcmNum (ctxt: ConfContext): String = {
-      (b.concretize(ctxt, acmNum).asInstanceOf[StringVal]).v
+      (concretize(ctxt, acmNum).asInstanceOf[StringVal]).v
     }
 
     // Submitted papers.
     var _submittedPapers = JConfTables.getDBSubmittedPapers(uid.toInt)
     var submittedPapers =
-      _submittedPapers.map(p => b.mkSensitiveInt(selfL, p, -1))
+      _submittedPapers.map(p => mkSensitiveInt(selfL, p, -1))
     def showSubmittedPapers (ctxt: ConfContext): List[PaperRecord] = {
       val paperIds: List[BigInt] =
-        submittedPapers.map(p => b.concretize(ctxt, p));
-        paperIds.map(pid => b.getPaperById(pid.toInt) match {
+        submittedPapers.map(p => concretize(ctxt, p));
+        paperIds.map(pid => getPaperById(pid.toInt) match {
             case Some(paper) => paper
-            case None => b.defaultPaper
+            case None => defaultPaper
           })
     }
     def addSubmittedPaper (p: PaperRecord): Unit = {
       _submittedPapers = p.uid :: _submittedPapers
-      submittedPapers = (b.mkSensitiveInt(selfL, p.uid, -1)) :: submittedPapers
+      submittedPapers = (mkSensitiveInt(selfL, p.uid, -1)) :: submittedPapers
     }
     // TODO: Withdraw submitted paper
     def withdrawSubmittedPaper (p: PaperRecord): Unit = {
@@ -108,41 +99,41 @@ case class ConfUser(
       // Remove from list and create a new sensitive list. 
       _submittedPapers = _submittedPapers.filterNot(_ == p.uid)
       submittedPapers =
-        _submittedPapers.map(p => b.mkSensitiveInt(selfL, p, -1))
+        _submittedPapers.map(p => mkSensitiveInt(selfL, p, -1))
     }
 
     // Papers to review.
-    def getReviewPapers (): List[b.Symbolic] = {
+    def getReviewPapers (): List[Symbolic] = {
       val papers: List[PaperRecord] =
-        JConfTables.getPapersByReviewer(b, uid.toInt);
-      papers.map(p => b.mkSensitive(selfL, p, b.defaultPaper))
+        JConfTables.getPapersByReviewer(uid.toInt);
+      papers.map(p => mkSensitive(selfL, p, defaultPaper))
     }
     def showReviewPapers (ctxt: ConfContext): List[PaperRecord] = {
       (getReviewPapers ()).map(p =>
-        b.concretize(ctxt, p).asInstanceOf[PaperRecord])
+        concretize(ctxt, p).asInstanceOf[PaperRecord])
     }
 
     // Reviews submitted.
-    def getReviews (): List[b.Symbolic] = {
+    def getReviews (): List[Symbolic] = {
       val reviews: List[PaperReview] =
-        JConfTables.getReviewsByReviewer(b, uid.toInt);
-      reviews.map(r => b.mkSensitive(selfL, r, b.defaultReview))
+        JConfTables.getReviewsByReviewer(uid.toInt);
+      reviews.map(r => mkSensitive(selfL, r, defaultReview))
     }
     def showReviews (ctxt: ConfContext): List[PaperReview] = {
       (getReviews ()).map(r =>
-        b.concretize(ctxt, r).asInstanceOf[PaperReview])
+        concretize(ctxt, r).asInstanceOf[PaperReview])
     }
 
     // Password.
     def setPassword (p: String) = {
       _password = p
       password =
-        b.mkSensitive(selfL, StringVal(b, _password), StringVal(b, "default"))
+        mkSensitive(selfL, StringVal(_password), StringVal("default"))
     }
     var password =
-      b.mkSensitive(selfL, StringVal(b, _password), StringVal(b, "default"))
+      mkSensitive(selfL, StringVal(_password), StringVal("default"))
     def showPassword (ctxt: ConfContext): String = {
-      b.concretize(ctxt, password).asInstanceOf[StringVal].v
+      concretize(ctxt, password).asInstanceOf[StringVal].v
     }
     def emailPassword(): Unit = {
       JConfMail.sendMail(
@@ -177,11 +168,11 @@ case class ConfUser(
       _conflicts
       /*
       _conflicts.map( (c: BigInt) => {
-        val conflictL = b.mkLevel ()
-        b.policy ( conflictL
-        , !(isPC || isSelf || (b.CONTEXT.viewer~'uid === c))
-        , b.LOW )
-        b.mkSensitiveInt(conflictL, c, -1) } ) */
+        val conflictL = mkLevel ()
+        policy ( conflictL
+        , !(isPC || isSelf || (CONTEXT.viewer~'uid === c))
+        , LOW )
+        mkSensitiveInt(conflictL, c, -1) } ) */
     }
     def hasConflict(userId: BigInt): Boolean = {
       (getConflicts ()).exists(_ == userId)

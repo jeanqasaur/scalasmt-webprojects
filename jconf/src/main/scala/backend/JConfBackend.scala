@@ -8,25 +8,12 @@ import scala.collection.mutable.Set
 
 import Expr._
 
-class JConfBackend ()
-extends JeevesLib with Atom with Serializable {
+object JConfBackend extends JeevesLib {
   class AccessError extends Exception
   class PermissionsError extends Exception
   class NoSuchUserError(uid: Int) extends Exception
   class NoSuchPaperError(uid: Int) extends Exception
   class TypeError extends Exception
-
-  register(this)
-
-  // Constants.
-  val publicStatus = PublicStatus(this)
-  val authorStatus = AuthorStatus(this)
-  val reviewerStatus = ReviewerStatus(this)
-  val pcStatus = PCStatus(this)
-
-  val submissionStage = Submission(this)
-  val reviewStage = Review(this)
-  val publicStage = Public(this)
 
   /* Database initialization. */
   private val TEST = true;
@@ -36,10 +23,10 @@ extends JeevesLib with Atom with Serializable {
   private val jconfPapers: Map[Int, PaperRecord] =  Map[Int, PaperRecord]()
   private val jconfReviews: Map[Int, PaperReview] = Map[Int, PaperReview]()
 
-  val conversions = new Conversions(this)
+  val conversions = new Conversions()
   // A list of conflicts.
   private var conflicts: List[ConfUser] =
-    JConfTables.getDBPotentialConflicts(this)
+    JConfTables.getDBPotentialConflicts()
   def getPotentialConflicts(): List[ConfUser] = conflicts
 
   // A list of the PC members.
@@ -60,7 +47,7 @@ extends JeevesLib with Atom with Serializable {
     println("***")
   }
 
-  val emptyStringVal = StringVal(this, "")
+  val emptyStringVal = StringVal("")
 
   val defaultUser = {
     getUserById(1) match {
@@ -69,7 +56,7 @@ extends JeevesLib with Atom with Serializable {
       // Otherwise create a new one.
       case None =>
       val defaultEmail = "defaultUser";
-      JConfTables.getDBConfUserByEmail(this, defaultEmail) match {
+      JConfTables.getDBConfUserByEmail(defaultEmail) match {
         case Some(user) => user
         case None => {
           val defaultName = "Default User";
@@ -77,14 +64,14 @@ extends JeevesLib with Atom with Serializable {
           val defaultPwd = "";
           val defaultGrad = false;
           val defaultAcm = ""
-          val defaultStatus = publicStatus;
+          val defaultStatus = PublicStatus;
           val defaultConflicts = Nil;
           val (id, secretId) =
             getUserUid(
               defaultEmail, defaultName, defaultAffiliation
             , defaultPwd, defaultGrad, defaultAcm
             , conversions.role2Field(defaultStatus))
-          new ConfUser ( this, id, secretId
+          new ConfUser ( id, secretId
             , defaultEmail, defaultName, defaultAffiliation
             , defaultPwd, defaultGrad, defaultAcm
             , defaultStatus
@@ -99,15 +86,15 @@ extends JeevesLib with Atom with Serializable {
       case None =>
         val defaultTitle = "---";
         val (id, secretId) = getPaperUid(defaultTitle, "")
-        new PaperRecord (this, id, secretId, defaultTitle, _conflicts=Nil)
+        new PaperRecord (id, secretId, defaultTitle, _conflicts=Nil)
     }
   }
   val defaultReview: PaperReview = {
-    JConfTables.getReviewByPaperReviewer(this, -1, -1) match {
+    JConfTables.getReviewByPaperReviewer(-1, -1) match {
       case Some(r) => r
       case None =>
         val (id, key) = getReviewUid()
-        new PaperReview (this, uid=id, key=key)
+        new PaperReview (uid=id, key=key)
     }
   }
 
@@ -164,7 +151,7 @@ extends JeevesLib with Atom with Serializable {
       getUserUid (email, name, affiliation, password, isGrad, acmNum
       , conversions.role2Field(role));
     val user =
-      new ConfUser(this, id, secretId, email, name, affiliation
+      new ConfUser(id, secretId, email, name, affiliation
       , password, isGrad, acmNum, role, userConflicts);
     userConflicts.foreach { c =>
       JConfTables.writeDBConflict(id, c.toInt)
@@ -196,7 +183,7 @@ extends JeevesLib with Atom with Serializable {
       conflicts = JConfTables.getDBConflictsByAuthor(a.uid.toInt) ::: conflicts
     }
     val paper =
-      new PaperRecord(this, uid, secretId, name, authors.map(a => a.uid)
+      new PaperRecord(uid, secretId, name, authors.map(a => a.uid)
       , file, tags, conflicts)
     authors.foreach(a => {
       JConfTables.writeDBAuthor(uid.toInt, a.uid.toInt);
@@ -226,7 +213,7 @@ extends JeevesLib with Atom with Serializable {
     JConfTables.writeAssignment(reviewer.uid.toInt, p.uid.toInt)
     val review = p.addReview(reviewer)
     cacheReview(review)
-    p.addTag(NeedsReview(this, reviewer.uid))
+    p.addTag(NeedsReview(reviewer.uid))
   }
   def isAssigned (p: PaperRecord, reviewer: ConfUser): Boolean = {
     JConfTables.isAssigned(reviewer.uid.toInt, p.uid.toInt)
@@ -239,7 +226,7 @@ extends JeevesLib with Atom with Serializable {
     lookupCachedPaper(uid) match {
       case Some(paper) => Some(paper)
       case None =>
-        val p = JConfTables.getDBPaperRecord(this, uid)
+        val p = JConfTables.getDBPaperRecord(uid)
         p match {
           case Some(paper) => cachePaper(paper)
           case None => ()
@@ -250,7 +237,7 @@ extends JeevesLib with Atom with Serializable {
   def getPapersByIds(ids: List[Int]): List[Option[PaperRecord]] =
     ids.map(id => getPaperById(id))
  
-  def getAllPapers(): List[PaperRecord] = { JConfTables.getAllDBPapers(this) }
+  def getAllPapers(): List[PaperRecord] = { JConfTables.getAllDBPapers() }
 
   /*
   def searchByTitle(title: String) = 
@@ -274,7 +261,7 @@ extends JeevesLib with Atom with Serializable {
       lookupCachedUser(uid) match {
         case Some(user) => Some(user)
         case None =>
-          val u = JConfTables.getDBConfUser(this, uid)
+          val u = JConfTables.getDBConfUser(uid)
           u match {
             case Some(user) => cacheUser(user)
             case None => ()
@@ -284,20 +271,20 @@ extends JeevesLib with Atom with Serializable {
     }
   }
   def getUserByEmail(username: String) = {
-    JConfTables.getDBConfUserByEmail(this, username)
+    JConfTables.getDBConfUserByEmail(username)
   }
 
   def sendUserPassword(uname: String): Unit = {
-    JConfTables.getDBConfUserByEmail(this, uname) match {
+    JConfTables.getDBConfUserByEmail(uname) match {
       case Some(user) => cacheUser(user); user.emailPassword()
       case None => ()
     }
   }
   def loginUser(uname: String, password: String): Option[ConfUser] = {
-    JConfTables.getDBConfUserByEmail(this, uname) match {
+    JConfTables.getDBConfUserByEmail(uname) match {
       case Some(user) =>
         cacheUser(user);
-        val userCtxt = new ConfContext(this, user, Public(this));
+        val userCtxt = new ConfContext(user, Public);
         val pwd : String = user.showPassword(userCtxt);
         if (pwd.equals(password)) Some(user) else None
       case None => None
@@ -315,7 +302,7 @@ extends JeevesLib with Atom with Serializable {
       lookupCachedReview(uid) match {
         case Some(r) => Some(r)
         case None => {
-          val r = JConfTables.getDBPaperReview(this, uid)
+          val r = JConfTables.getDBPaperReview(uid)
           r match {
             case Some(review) => cacheReview(review)
             case None => ()

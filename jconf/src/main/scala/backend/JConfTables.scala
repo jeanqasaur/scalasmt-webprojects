@@ -1,5 +1,7 @@
 package cap.jeeves.jconf.backend
 
+import JConfBackend._
+
 import org.squeryl.KeyedEntity
 import org.squeryl.adapters.MySQLAdapter
 import org.squeryl.PrimitiveTypeMode._
@@ -30,11 +32,11 @@ class ConfUserRecord(
   def this() = this("", "", "", "", "", false, "", -1)
   val id = 0;
 
-  def getConfUser(b: JConfBackend) = {
+  def getConfUser() = {
     val u =
-      new ConfUser(b, id, secretId, email, name, affiliation
+      new ConfUser(id, secretId, email, name, affiliation
       , pwd, isGrad, acmNum
-      , b.conversions.field2Role(role)
+      , conversions.field2Role(role)
       , JConfTables.getDBConflictsByAuthor(id) );
     u
   }
@@ -75,11 +77,11 @@ class PaperItemRecord(
     conflicts
   }
 
-  def getPaperRecord(backend: JConfBackend) = {
+  def getPaperRecord() = {
     val authors = getAuthors ()
     val p =
-      new PaperRecord(backend, id, secretId, title, authors, file
-        , getTags (backend.conversions), getConflicts (authors))
+      new PaperRecord(id, secretId, title, authors, file
+        , getTags (conversions), getConflicts (authors))
     p
   }
 }
@@ -107,8 +109,8 @@ extends KeyedEntity[Int] {
   def this() = this("", -1, -1, "", 3, 3, 3, 3)
   val id: Int = 0;
 
-  def getPaperReview(b: JConfBackend): PaperReview = {
-    new PaperReview(b, id, secretId, paperId, reviewerId, body
+  def getPaperReview(): PaperReview = {
+    new PaperReview(id, secretId, paperId, reviewerId, body
       , problemScore, backgroundScore, approachScore, resultScore )
   }
 }
@@ -125,13 +127,13 @@ object JConfTables extends Schema {
   def writeDBUser(userRecord: ConfUserRecord): Unit = {
     transaction { users.insert(userRecord) }
   }
-  def getDBConfUser(b: JConfBackend, uid: Int): Option[ConfUser] = {
+  def getDBConfUser(uid: Int): Option[ConfUser] = {
     println("getting user " + uid + " from the database")
     try {
       val userRecord: Option[ConfUserRecord] =
         transaction { JConfTables.users.lookup(uid) }
       userRecord match {
-        case Some(u) => Some(u.getConfUser(b))
+        case Some(u) => Some(u.getConfUser())
         case None => None
       }
     } catch {
@@ -140,14 +142,14 @@ object JConfTables extends Schema {
       None
     }
   }
-  def getDBConfUserByEmail(b: JConfBackend, email: String): Option[ConfUser] = {
+  def getDBConfUserByEmail(email: String): Option[ConfUser] = {
     try {
       transaction {
         println
         val userRecord = from(JConfTables.users)(u =>
         where(u.email like email)
         select(u)).single;
-        val user = userRecord.getConfUser(b)
+        val user = userRecord.getConfUser()
         Some(user)
       }
     } catch {
@@ -165,13 +167,13 @@ object JConfTables extends Schema {
     }
   }
  
-  def getDBPotentialConflicts(b: JConfBackend): List[ConfUser] = {
+  def getDBPotentialConflicts(): List[ConfUser] = {
     transaction {
       val userRecords: Iterable[ConfUserRecord] = from(users)(u =>
         where((u.role === 3) or (u.role === 4))
         select(u)
       )
-      userRecords.toList.map(_.getConfUser(b))
+      userRecords.toList.map(_.getConfUser())
     }
   } 
 
@@ -229,26 +231,26 @@ object JConfTables extends Schema {
     paperRecord.file = file
     transaction { papers.update(paperRecord) }
   }
-  def getDBPaperRecord(backend: JConfBackend, uid: Int): Option[PaperRecord] = {
+  def getDBPaperRecord(uid: Int): Option[PaperRecord] = {
     transaction { papers.lookup(uid) } match {
-      case Some(paperRecord) => Some(paperRecord.getPaperRecord(backend))
+      case Some(paperRecord) => Some(paperRecord.getPaperRecord())
       case None => None
     }
   }
-  def getAllDBPapers(b: JConfBackend): List[PaperRecord] = {
+  def getAllDBPapers(): List[PaperRecord] = {
     transaction {
       val paperRecords =
         from(papers)(p => select(p)).toList
-      paperRecords.map(r => r.getPaperRecord(b))
+      paperRecords.map(r => r.getPaperRecord())
     }
   }
-  def getPapersByReviewer(b: JConfBackend, userId: Int): List[PaperRecord] = {
+  def getPapersByReviewer(userId: Int): List[PaperRecord] = {
     transaction {
       val paperRecords: Iterable[PaperItemRecord] =
         from(papers, assignments)( (p, a) =>
           where ((userId.~ === a.reviewerId) and (p.id === a.paperId))
           select(p) )
-      paperRecords.toList.map(p => p.getPaperRecord(b))
+      paperRecords.toList.map(p => p.getPaperRecord())
     }
   }
 
@@ -315,47 +317,47 @@ object JConfTables extends Schema {
     transaction { reviews.update(reviewRecord) }
   }
 
-  def getDBPaperReview(b: JConfBackend, uid: Int): Option[PaperReview] = {
+  def getDBPaperReview(uid: Int): Option[PaperReview] = {
     try {
       val reviewRecord: Option[PaperReviewRecord] =
         transaction { JConfTables.reviews.lookup(uid) }
       reviewRecord match {
-        case Some(u) => Some(u.getPaperReview(b))
+        case Some(u) => Some(u.getPaperReview())
         case None => None
       }
     } catch {
       case e: Exception => println(e); None
     }
   }
-  def getReviewByPaperReviewer(b: JConfBackend, paperId: Int, reviewerId: Int)
+  def getReviewByPaperReviewer(paperId: Int, reviewerId: Int)
     : Option[PaperReview] = {
     try {
       transaction {
         Some(from(reviews)(r =>
           where((r.paperId === paperId.~) and (r.reviewerId === reviewerId.~))
-          select(r)).single.getPaperReview(b))
+          select(r)).single.getPaperReview())
       }
     } catch {
       case e: Exception => None
     }
   }
-  def getReviewsByPaper(b: JConfBackend, paperId: Int): List[PaperReview] = {
+  def getReviewsByPaper(paperId: Int): List[PaperReview] = {
     transaction {
       val rs: Iterable[PaperReviewRecord] =
         from(reviews)(r =>
           where(r.paperId === paperId.~)
           select(r));
-      rs.toList.map(r => r.getPaperReview(b))
+      rs.toList.map(r => r.getPaperReview())
     }
   }
-  def getReviewsByReviewer(b: JConfBackend, reviewerId: Int)
+  def getReviewsByReviewer(reviewerId: Int)
   : List[PaperReview] = {
     transaction {
       val rs: Iterable[PaperReviewRecord] =
         from(reviews)(r =>
           where(r.reviewerId === reviewerId.~)
           select(r));
-      rs.toList.map(r => r.getPaperReview(b))
+      rs.toList.map(r => r.getPaperReview())
     }
   }
 
