@@ -1,8 +1,7 @@
 package cap.jeeves.jconf.frontend
 
-//import cap.jeeves._
 import cap.jeeves.jconf.backend._
-//import backend._
+import JConfBackend._
 
 import java.io.File
 import org.apache.commons.io.FileUtils
@@ -75,39 +74,39 @@ object Init {
     , new File(paperPath) )
   }
 
-  def initUsers (backend: JConfBackend): Unit = {
+  def initUsers (): Unit = {
     if (clearEverything) {
       // Add some dummy users.
       val armandoPassword =
         if (test) { "armando" } else { RandomGenerator.generatePassword() }
       val pcArmando =
-        backend.addUser(
+        addUser(
         "asolar@mit.edu", "Armando Solar-Lezama", "MIT"
-        , armandoPassword, true, "", backend.pcStatus);
+        , armandoPassword, true, "", PCStatus);
       
       val studentJean =
-        backend.addUser(
+        addUser(
         "jeanyang@csail.mit.edu", "Jean Yang", "MIT CSAIL"
-        , "jean", true, "", backend.authorStatus, List(pcArmando.uid))
+        , "jean", true, "", AuthorStatus, List(pcArmando.uid))
 
       // Add some dummy papers.
       if (test) {
         val authorJean =
-          backend.addUser(
+          addUser(
           "jeanyang@mit.edu", "Jean Yang", "MIT"
-          , "jean", true, "", backend.reviewerStatus);
+          , "jean", true, "", ReviewerStatus);
         val reviewerKuat =
-          backend.addUser(
+          addUser(
           "kuat@mit.edu", "Kuat Yessenov", "MIT"
-          , "kuat", true, "", backend.reviewerStatus);
+          , "kuat", true, "", ReviewerStatus);
 
         val paper0Name = "A Language for Automatically Enforcing Privacy";
-        val paper0 = backend.addPaper(paper0Name, List(authorJean));
-        backend.assignReview(paper0, reviewerKuat);
+        val paper0 = addPaper(paper0Name, List(authorJean));
+        assignReview(paper0, reviewerKuat);
 
         val paper1Name = "Matchmaker";
-        val paper1 = backend.addPaper(paper1Name, List(reviewerKuat));
-        backend.assignReview(paper1, authorJean);
+        val paper1 = addPaper(paper1Name, List(reviewerKuat));
+        assignReview(paper1, authorJean);
       }
     }
   }
