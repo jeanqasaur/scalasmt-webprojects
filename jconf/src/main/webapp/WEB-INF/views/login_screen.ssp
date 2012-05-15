@@ -1,5 +1,4 @@
 <%@ val title: String %>
-<%@ val backend: cap.jeeves.jconf.backend.JConfBackend %>
 <%@ val errorMsg: String = "" %>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>

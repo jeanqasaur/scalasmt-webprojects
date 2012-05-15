@@ -1,5 +1,4 @@
 <%@ val title: String %>
-<%@ val backend: cap.jeeves.jconf.backend.JConfBackend %>
 <%@ val user: cap.jeeves.jconf.backend.ConfUser %>
 <%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
 <html>
@@ -33,7 +32,7 @@
           <input type="text" name="affiliation" maxlength=50 value="<%= user.showAffiliation(ctxt) %>" />
         </td>
       </tr>
-      #if (user.role == backend.authorStatus)
+      #if (user.role == cap.jeeves.jconf.backend.AuthorStatus)
         <tr>
           <td><b>Student status</b></td>
           <td>
@@ -58,7 +57,7 @@
         <tr>
           <td><b>Conflicts</b></td>
           <td>
-             #for (conflict <- backend.getPotentialConflicts)
+             #for (conflict <- cap.jeeves.jconf.backend.JConfBackend.getPotentialConflicts)
               <input type="checkbox" name="conflict" value="<%= conflict.uid %>"
                 #if (user.showHasConflict(ctxt, conflict.uid))
                   checked
@@ -72,13 +71,13 @@
       <tr>
         <td><b>Role</b></td>
         <td>#match (user.role)
-            #case(backend.publicStatus)
+            #case(cap.jeeves.jconf.backend.PublicStatus)
               Public viewer
-            #case(backend.authorStatus)
+            #case(cap.jeeves.jconf.backend.AuthorStatus)
               Author
-            #case(backend.reviewerStatus)
+            #case(cap.jeeves.jconf.backend.ReviewerStatus)
               Reviewer
-            #case(backend.pcStatus)
+            #case(cap.jeeves.jconf.backend.PCStatus)
               PC member
             #otherwise
               <i>Internal error.</i>
