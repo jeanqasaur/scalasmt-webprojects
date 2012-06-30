@@ -1,0 +1,9 @@
+<%@ val fieldName: String %>
+<%@ val fieldValue: Int %>
+#for (i <- 1 until 6)
+  <input type="radio" name="<%= fieldName %>" value="<%= i %>"
+  #if (fieldValue == i)
+    checked
+  #end
+  /><%= i %>
+#end
