@@ -32,14 +32,14 @@ case class ConfUser(
     /*************/
     /* Policies. */
     /*************/
-    private val isSelf: Formula = CONTEXT.viewer~'uid === uid
+    private def isSelf (ctxt: Symbolic) : Formula = ctxt.viewer~'uid === uid
 
-    private val isReviewer: Formula =
-      CONTEXT.viewer.status === ReviewerStatus
-    private val isPC: Formula = CONTEXT.viewer.status === PCStatus
+    private def isReviewer (ctxt: Symbolic): Formula =
+      ctxt.viewer.status === ReviewerStatus
+    private def isPC (ctxt: Symbolic): Formula = ctxt.viewer.status === PCStatus
 
     private val selfL = mkLevel ();
-    policy (selfL, !isSelf, LOW);
+    restrict (selfL, (ctxt: Symbolic) => isSelf (ctxt));
     logConfUserPolicy();
     def showIsSelf(ctxt: ConfContext): Boolean = {
       concretize(ctxt, selfL)
@@ -65,7 +65,7 @@ case class ConfUser(
     }
 
     private val numL = mkLevel()
-    policy (numL, !(isSelf || isPC), LOW)
+    restrict (numL, (ctxt: Symbolic) => (isSelf (ctxt) || isPC (ctxt)))
     var acmNum = mkSensitive(numL, StringVal(_acmNum), StringVal(""))
     def setAcmNum (newNum: String): Unit = {
       _acmNum = newNum
@@ -169,7 +169,7 @@ case class ConfUser(
       /*
       _conflicts.map( (c: BigInt) => {
         val conflictL = mkLevel ()
-        policy ( conflictL
+        restrict ( conflictL
         , !(isPC || isSelf || (CONTEXT.viewer~'uid === c))
         , LOW )
         mkSensitiveInt(conflictL, c, -1) } ) */
