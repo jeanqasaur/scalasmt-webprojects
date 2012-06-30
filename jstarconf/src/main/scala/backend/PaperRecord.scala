@@ -51,24 +51,24 @@ class PaperRecord(         val uid: BigInt
   /*************/
   /* Policies. */
   /*************/
-  private val isAuthor: Formula = authors.has(CONTEXT.viewer~'uid);
-  private val isInternal: Formula =
-    (CONTEXT.viewer.role === ReviewerStatus) ||
-    (CONTEXT.viewer.role === PCStatus)
-  private val isPC: Formula =
-    (CONTEXT.viewer.role === PCStatus)
-  private val authorCanSeeReview: Formula =
-    (CONTEXT.stage === Public)
-  private def isPublic : Formula =
-    (CONTEXT.stage === Public) && (getTags ()).has(Accepted)
+  private def isAuthor (ctxt: Symbolic): Formula =
+    authors.has(ctxt.viewer~'uid);
+  private def isInternal (ctxt: Symbolic): Formula =
+    (ctxt.viewer.role === ReviewerStatus) ||
+    (ctxt.viewer.role === PCStatus)
+  private def isPC (ctxt: Symbolic): Formula = (ctxt.viewer.role === PCStatus)
+  private def authorCanSeeReview (ctxt: Symbolic): Formula =
+    (ctxt.stage === Public)
+  private def isPublic (ctxt: Symbolic): Formula =
+    (ctxt.stage === Public) && (getTags ()).has(Accepted)
 
-  policy ( _authorL
-         , !(isAuthor || isPC || isPublic)
-         , LOW);
+  restrict ( _authorL
+         , (ctxt: Symbolic) =>
+            (isAuthor (ctxt) || isPC (ctxt) || isPublic (ctxt)) );
   logPaperRecordPolicy();
-  policy (titleL
-    , !(isAuthor
-      || isInternal || isPublic), LOW);
+  restrict (titleL
+    , (ctxt: Symbolic) => (isAuthor (ctxt)
+      || isInternal (ctxt) || isPublic (ctxt)));
   logPaperRecordPolicy();
 
   /************************/
@@ -102,19 +102,18 @@ class PaperRecord(         val uid: BigInt
     val level = mkLevel ();
     tag match {
       case NeedsReview(reviewerId) =>
-        policy (level
-          , !(isPC || (CONTEXT.viewer~'uid === reviewerId))
-          , LOW);
+        restrict (level
+          , (ctxt: Symbolic) =>
+            (isPC (ctxt) || (ctxt.viewer~'uid === reviewerId)) );
         logPaperRecordPolicy();
       case ReviewedBy (reviewer) =>
-        policy (level, !isPC, LOW);
+      restrict (level, (ctxt: Symbolic) => isPC (ctxt));
         logPaperRecordPolicy();
       // Can see the "Accepted(b)" tag if is an internal user at the decision
       // stage or if all information is visible.
       case Accepted =>
-        policy (level
-          , !(isInternal || CONTEXT.stage === Public)
-          , LOW);
+        restrict (level
+          , (ctxt: Symbolic) => (isInternal (ctxt) || ctxt.stage === Public) );
         logPaperRecordPolicy();
       case EmptyTag => ()
     }
@@ -174,10 +173,9 @@ class PaperRecord(         val uid: BigInt
   }
   def addReviewPolicy (r: PaperReview): Symbolic = {
     val level = mkLevel();
-    policy( level
-            , !( (isInternal && (!isAuthor)) ||
-                (isAuthor && authorCanSeeReview) )
-            , LOW );
+    restrict( level
+      , (ctxt: Symbolic) => ( (isInternal (ctxt) && (!isAuthor (ctxt))) ||
+                (isAuthor (ctxt) && authorCanSeeReview (ctxt)) ) );
     logPaperRecordPolicy();
     mkSensitive(level, r, defaultReview)
   }
@@ -198,7 +196,8 @@ class PaperRecord(         val uid: BigInt
     concretize(ctxt, getReviewByReviewer(reviewerId)).asInstanceOf[PaperReview]
   }
 
-  def showIsAuthor (ctxt: ConfContext): Boolean = concretize(ctxt, isAuthor)
+  def showIsAuthor (ctxt: ConfContext): Boolean =
+    concretize(ctxt, isAuthor (ctxt))
 
   def getPaperItemRecord(): PaperItemRecord =
     transaction { JConfTables.papers.get(uid.toInt) }
@@ -211,10 +210,8 @@ class PaperRecord(         val uid: BigInt
 
   /* URLs. */
   private val _editL = mkLevel()
-  policy(_editL
-    , !(isAuthor
-      && (CONTEXT.stage === Submission))
-    , LOW)
+  restrict(_editL
+    , (ctxt: Symbolic) => (isAuthor (ctxt) && (ctxt.stage === Submission)) )
 
   def showLink(ctxt: ConfContext): String = {
     "paper?id=" + uid + "&key=" + key
@@ -248,7 +245,7 @@ class PaperRecord(         val uid: BigInt
   }
 
   private val _assignL = mkLevel ()
-  policy (_assignL, !isPC, LOW)
+  restrict (_assignL, (ctxt: Symbolic) => isPC (ctxt))
   private val _assignLink = "assign_paper?id=" + uid + "&key=" + key
   def getAssignLink(userId: BigInt): Symbolic = {
     mkSensitive(_assignL

@@ -24,14 +24,13 @@ class PaperReview(
   /*************/
   private val _reviewerL = mkLevel ();
   private val _scoreL = mkLevel ();
-  private val _isInternalF: Formula = {
-    val vrole = CONTEXT.viewer.role;
+  private def _isInternalF (ctxt: Symbolic): Formula = {
+    val vrole = ctxt.viewer.role;
     (vrole === ReviewerStatus) || (vrole === PCStatus);
   }
-  policy(_reviewerL,
-    !((CONTEXT.viewer~'uid === _reviewerId)
-      || (CONTEXT.viewer.role === PCStatus))
-    , LOW);
+  restrict(_reviewerL,
+    (ctxt: Symbolic) => !((ctxt.viewer~'uid === _reviewerId)
+      || (ctxt.viewer.role === PCStatus)) );
   logPaperReviewPolicy();
 
   val reviewer: IntExpr = mkSensitiveInt(_reviewerL, _reviewerId, -1)
@@ -77,17 +76,15 @@ class PaperReview(
 
   /* URL links. */
   private val _reviewL = mkLevel()
-  policy ( _reviewL
-    , !((CONTEXT.viewer.role === ReviewerStatus) ||
-        (CONTEXT.viewer.role === PCStatus) ||
-        ((CONTEXT.viewer.role === AuthorStatus) &&
-        CONTEXT.stage === Public))
-    , LOW )
+  restrict ( _reviewL
+    , (ctxt: Symbolic) => !((ctxt.viewer.role === ReviewerStatus) ||
+        (ctxt.viewer.role === PCStatus) ||
+        ((ctxt.viewer.role === AuthorStatus) &&
+        ctxt.stage === Public)) )
   private val _editL = mkLevel()
-  policy( _editL
-    , !((CONTEXT.viewer~'uid === reviewer)
-      && (CONTEXT.stage === Review))
-    , LOW )
+  restrict( _editL
+    , (ctxt: Symbolic) => !((ctxt.viewer~'uid === reviewer)
+      && (ctxt.stage === Review)) )
 
   private val _reviewLink: String = "review?id=" + uid + "&key=" + key
   val reviewLink: Symbolic = 
