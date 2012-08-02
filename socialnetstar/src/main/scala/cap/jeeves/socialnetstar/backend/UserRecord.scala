@@ -13,21 +13,25 @@ import cap.scalasmt.Expr._
                                                                                                                                                                                             
 case class Name(s: String) extends JeevesRecord
 case class Email(s: String) extends JeevesRecord
-case class Network(s: String) extends JeevesRecord
+case class SocialCircle(s: String) extends JeevesRecord
 
-sealed trait UserLevel 
-object Anyone extends UserLevel
-object Self extends UserLevel
-object Friends extends UserLevel
+sealed trait PrivacyLevel 
+object Anyone extends PrivacyLevel
+object Self extends PrivacyLevel
+object Friends extends PrivacyLevel
 
 class UserRecord(
+    /*
+     * <attribute>V: actual value
+     * <attribute>L: privacy level */
+    
   nameV: Name, 
-  nameL: UserLevel,
-  emailV: Email,
-  emailL: UserLevel, 
-  networkV: Network, 
-  networkL: UserLevel, 
-  friendsL: UserLevel) 
+  nameL: PrivacyLevel, 
+  emailV: Email, 
+  emailL: PrivacyLevel, 
+  circleV: SocialCircle, 
+  circleL: PrivacyLevel, 
+  friendsL: PrivacyLevel) 
 extends JeevesRecord {
   private var friends: Set[UserRecord] = Set()
   var X: IntExpr = 1000
@@ -36,11 +40,11 @@ extends JeevesRecord {
   /** Mutators */
   def add(u: UserRecord) {friends = friends + u}
   def remove(u: UserRecord) {friends = friends - u}
-  def setLocation(x: BigInt, y: BigInt) (implicit ctxt:Sensitive){
+  def setLocation(x: BigInt, y: BigInt)(implicit ctxt:Sensitive){
     val l = mkLevel();
     restrict(l, distance(ctxt, this) >= 10);
-    this.X = mkSensitiveInt(l, x, 1000);
-    this.Y = mkSensitiveInt(l, y, 1000);
+    UserRecord.this.X = mkSensitiveInt(l, x, 1000);
+    UserRecord.this.Y = mkSensitiveInt(l, y, 1000);
   }
 
  /** Observers */
@@ -56,7 +60,7 @@ extends JeevesRecord {
   
   
 /** Helpers */
-  private def level(ul: UserLevel) (implicit ctxt:Sensitive)= {
+  private def level(ul: PrivacyLevel) (implicit ctxt:Sensitive)= {
     val l = mkLevel();
     val me = ctxt.viewer === this;
     ul match {

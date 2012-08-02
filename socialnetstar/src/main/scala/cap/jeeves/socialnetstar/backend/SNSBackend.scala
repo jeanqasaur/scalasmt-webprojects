@@ -12,7 +12,7 @@ import Expr._
  * External interface to social network.
  * @author kuat
  */
-object SocialNetBackend extends JeevesLib {
+object SNSBackend extends JeevesLib {
   private var users: List[UserRecord] = Nil;
 
   /* Database functions. */
@@ -33,7 +33,7 @@ object SocialNetBackend extends JeevesLib {
   def getFriendNetworks(user: UserRecord) =
     user.getFriends().map(_.network)
 
-  def getUsersByNetwork(network : Network) = 
+  def getUsersByNetwork(network : SocialCircle) = 
     users.filter(_.network === network)
 
   def announceName(u: UserRecord) = 
