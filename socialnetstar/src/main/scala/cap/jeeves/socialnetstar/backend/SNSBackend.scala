@@ -20,20 +20,20 @@ object SNSBackend extends JeevesLib {
     users = u :: users
   }
   
-  def addFriend(record1: UserRecord, record2: UserRecord) {
-    record1.add(record2);
-    record2.add(record1);
+  def addFriendship(record1: UserRecord, record2: UserRecord) {
+    record1.addFriend(record2);
+    record2.addFriend(record1);
   }
 
-  def removeFriend(record1: UserRecord, record2: UserRecord) {
-    record1.remove(record2);
-    record2.remove(record1);
+  def removeFriendship(record1: UserRecord, record2: UserRecord) {
+    record1.removeFriend(record2);
+    record2.removeFriend(record1);
   }
 
   def getFriendNetworks(user: UserRecord) =
     user.getFriends().map(_.network)
 
-  def getUsersByNetwork(network : SocialCircle) = 
+  def getUsersByCircle(network : SocialCircle) = 
     users.filter(_.network === network)
 
   def announceName(u: UserRecord) = 
