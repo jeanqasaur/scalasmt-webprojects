@@ -6,7 +6,7 @@ package cap.jeeves.socialnetstar.backend
  */
 
 import cap.scalasmt._
-import cap.jeeves.JeevesLib._
+import cap.jeeves._
 
 import cap.jeeves.socialnetstar.backend.SocialNetBackend._
 import cap.scalasmt.Expr._
