@@ -20,7 +20,7 @@ is divided into following sections:
 
         
         -->
-<project xmlns:jaxrpc="http://www.netbeans.org/ns/scala-project/jax-rpc" xmlns:scalaProject1="http://www.netbeans.org/ns/scala-project/1" basedir=".." default="default" name="SocialNetStar-impl">
+<project xmlns:jaxrpc="http://www.netbeans.org/ns/scala-project/jax-rpc" xmlns:scalaProject1="http://www.netbeans.org/ns/scala-project/1" basedir=".." default="default" name="sbt-netbeans-plugin-impl">
     <target depends="test,jar,javadoc" description="Build and test whole project." name="default"/>
     <!--
                 ======================
@@ -39,11 +39,11 @@ is divided into following sections:
         <condition property="scala.home" value="${env.SCALA_HOME}">
             <isset property="env.SCALA_HOME"/>
         </condition>
-        <fail unless="scala.home">
+        <!--fail unless="scala.home">
                     You must set SCALA_HOME or environment property and append "-J-Dscala.home=scalahomepath"
                     property to the end of "netbeans_default_options" in NetBeansInstallationPath/etc/netbeans.conf to point to
                     Scala installation directory.
-                </fail>
+        </fail-->
         <property name="scala.compiler" value="${scala.home}/lib/scala-compiler.jar"/>
         <property name="scala.library" value="${scala.home}/lib/scala-library.jar"/>
         <property name="scala.lib" value="${scala.home}/lib"/>
@@ -410,7 +410,9 @@ is divided into following sections:
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
     </target>
+
     <target depends="init,deps-jar,-pre-pre-compile,-pre-compile,-do-compile,-post-compile" description="Compile project." name="compile"/>
+
     <target name="-pre-compile-single">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
@@ -458,7 +460,7 @@ is divided into following sections:
             <map from="${build.classes.dir.resolved}" to="${dist.jar.resolved}"/>
         </pathconvert>
         <echo>java -cp "${run.classpath.with.dist.jar}" ${main.class}
-                </echo>
+        </echo>
     </target>
     <target depends="init,compile,-pre-pre-jar,-pre-jar" if="manifest.available+main.class+mkdist.available" name="-do-jar-with-libraries">
         <property location="${build.classes.dir}" name="build.classes.dir.resolved"/>
@@ -484,7 +486,7 @@ is divided into following sections:
         <echo>To run this application from the command line without Ant, try:</echo>
         <property location="${dist.jar}" name="dist.jar.resolved"/>
         <echo>java -jar "${dist.jar.resolved}"
-                </echo>
+        </echo>
     </target>
     <target name="-post-jar">
         <!-- Empty placeholder for easier customization. -->
@@ -707,4 +709,5 @@ is divided into following sections:
         <!-- You can override this target in the ../build.xml file. -->
     </target>
     <target depends="init,deps-clean,-do-clean,-post-clean" description="Clean build products." name="clean"/>
+
 </project>
