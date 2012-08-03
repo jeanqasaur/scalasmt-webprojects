@@ -38,7 +38,7 @@ class User(var username:String) {
 	def validate(pass:String) = {
 		password == md5(pass)
 	}
-	
+
 	def makeCalendar(name:String) {
 		calendars += name -> new Calendar(name)
 	}
@@ -99,4 +99,3 @@ class Event(var title:String, var date:Date, var description:String, var locatio
 		else return 0
 	}
 }
-
