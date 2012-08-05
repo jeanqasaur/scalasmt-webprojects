@@ -1,0 +1,46 @@
+<%@ val title: String %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
+<%@ val paper: cap.jeeves.jconf.backend.PaperRecord %>
+<html>
+  <head>
+    <title>${title}</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  </head>
+<body>
+  <div id="wrapper">
+    #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+    <div id="content">
+    <h1>Edit Paper.</h1>
+    <form action="<%= paper.showPostLink(ctxt) %>" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="paperId" value="<%= paper.uid %>" />
+    <table>
+      <tr>
+        <td><b>Paper Title</b></td>
+        <td>
+          <input type="text" name="title" value="<%= paper.showTitle(ctxt) %>" maxlength=100 />
+        </td>
+      </tr>
+      <tr>
+        <td><b>Author</b></td>
+        <td><%= user.showName(ctxt) %></td>
+      </tr>
+      <tr>
+        <td><b>File</b></td>
+        <td>
+          <input type="file" name="thefile" />
+          #if (paper.showFile(ctxt) != "")
+            <br><%= paper.showFile(ctxt) %><br>
+          #end
+        </td>
+      </tr>
+      <tr><td><input type="submit" class="button" value="Submit" /></td></tr>
+    </table>
+    </form>
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>

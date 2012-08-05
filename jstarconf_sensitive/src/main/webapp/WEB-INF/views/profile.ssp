@@ -1,0 +1,81 @@
+<%@ val title: String %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
+<html>
+  <head>
+    <title>${title}</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+    ${include("snippets/goToLink.ssp")}
+  </head>
+<body>
+  <div id="wrapper">
+    #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+    #do(layout("snippets/processing.ssp")) #end
+
+    <div id="content">
+    #if (user == null)
+      <p><i>The profile you have requested is not available.</i></p>
+    #else
+      <h1>User Profile.</h1>
+      <p><small>
+        <a href="edit_profile" onclick="javascript:goToLink('edit_profile')">Edit Profile</a>
+        <a href="send_password" onclick="javascript:goToLink('send_password')">Resend Password</a>
+      </small></p>
+      <table>
+        <tr><td><b>Username</b></td><td><%= user.email %></td></tr>
+        <tr><td><b>Name</b></td><td><%= user.showName (ctxt) %></td></tr>
+        <tr>
+          <td><b>Affliation</b></td>
+          <td><%= user.showAffiliation (ctxt) %></td>
+        </tr>
+        #if (user.role == cap.jeeves.jconf.backend.AuthorStatus)
+          <tr>
+            <td><b>Student status</b></td>
+            <td>
+              #if (user.showIsGrad(ctxt))
+                Grad
+              #else
+                Undergrad
+              #end
+           </td>
+          </tr>
+          <tr>
+            <td><b>ACM number</b></td>
+            <td><%= user.showAcmNum(ctxt) %></td>
+          </tr>
+          <tr>
+            <td><b>Conflicts</b></td>
+            <td>
+              #for (conflict <- cap.jeeves.jconf.backend.JConfBackend.getPotentialConflicts)
+                #if (user.showHasConflict(ctxt, conflict.uid)) 
+                  <%= conflict.showName(ctxt) %><br>
+                #end
+              #end
+            </td>
+          </tr>
+        #end
+        <tr>
+          <td><b>Role</b></td>
+          <td>#match (user.role)
+              #case(cap.jeeves.jconf.backend.PublicStatus)
+                Public viewer
+              #case(cap.jeeves.jconf.backend.AuthorStatus)
+                Author
+              #case(cap.jeeves.jconf.backend.ReviewerStatus)
+                Reviewer
+              #case(cap.jeeves.jconf.backend.PCStatus)
+                PC member
+              #otherwise
+                <i>Internal error.</i>
+              #end
+          </td>
+        </tr>
+      </table>
+    #end
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>
