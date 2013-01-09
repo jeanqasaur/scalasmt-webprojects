@@ -28,9 +28,9 @@
     <p>Hello, <%= name %>.</p>
 
     <p>
-    #if (ctxt.stage == cap.jeeves.jconf.backend.SubmissionStage)
+    #if (ctxt.stage == cap.jeeves.jconf.backend.Submission)
       <i>Submissions are open until <%= submissionDeadline %>.</i>
-    #elseif (ctxt.stage == cap.jeeves.jconf.backend.ReviewStage)
+    #elseif (ctxt.stage == cap.jeeves.jconf.backend.Review)
       <i>The review process is occuring until <%= notificationDeadline %>.</i>
     #else
       <i>The decision process is finished as of <%= notificationDeadline %>.</i>
@@ -39,7 +39,7 @@
 
     <h1>Papers.</h1>
 
-    #if (ctxt.stage == cap.jeeves.jconf.backend.SubmissionStage)
+    #if (ctxt.stage == cap.jeeves.jconf.backend.Submission)
       <p><a href="new_paper" onclick="javascript:goToLink('new_paper')">Start new paper</a></p>
     #end
 

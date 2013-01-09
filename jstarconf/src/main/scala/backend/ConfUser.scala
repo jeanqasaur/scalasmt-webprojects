@@ -6,6 +6,7 @@ package cap.jeeves.jconf.backend
  */
 
 import cap.scalasmt._
+import cap.jeeves.JeevesTypes._
 import JConfBackend._
 
  import org.squeryl.PrimitiveTypeMode._
@@ -32,14 +33,14 @@ case class ConfUser(
     /*************/
     /* Policies. */
     /*************/
-    private def isSelf (ctxt: Symbolic) : Formula = ctxt.viewer~'uid === uid
+    private def isSelf (ctxt: Sensitive) : Formula = ctxt.viewer~'uid === uid
 
-    private def isReviewer (ctxt: Symbolic): Formula =
+    private def isReviewer (ctxt: Sensitive): Formula =
       ctxt.viewer.status === ReviewerStatus
-    private def isPC (ctxt: Symbolic): Formula = ctxt.viewer.status === PCStatus
+    private def isPC (ctxt: Sensitive): Formula = ctxt.viewer.status === PCStatus
 
     private val selfL = mkLevel ();
-    restrict (selfL, (ctxt: Symbolic) => isSelf (ctxt));
+    restrict (selfL, (ctxt: Sensitive) => isSelf (ctxt));
     logConfUserPolicy();
     def showIsSelf(ctxt: ConfContext): Boolean = {
       concretize(ctxt, selfL)
@@ -65,7 +66,7 @@ case class ConfUser(
     }
 
     private val numL = mkLevel()
-    restrict (numL, (ctxt: Symbolic) => (isSelf (ctxt) || isPC (ctxt)))
+    restrict (numL, (ctxt: Sensitive) => (isSelf (ctxt) || isPC (ctxt)))
     var acmNum = mkSensitive(numL, StringVal(_acmNum), StringVal(""))
     def setAcmNum (newNum: String): Unit = {
       _acmNum = newNum
@@ -103,7 +104,7 @@ case class ConfUser(
     }
 
     // Papers to review.
-    def getReviewPapers (): List[Symbolic] = {
+    def getReviewPapers (): List[Sensitive] = {
       val papers: List[PaperRecord] =
         JConfTables.getPapersByReviewer(uid.toInt);
       papers.map(p => mkSensitive(selfL, p, defaultPaper))
@@ -114,7 +115,7 @@ case class ConfUser(
     }
 
     // Reviews submitted.
-    def getReviews (): List[Symbolic] = {
+    def getReviews (): List[Sensitive] = {
       val reviews: List[PaperReview] =
         JConfTables.getReviewsByReviewer(uid.toInt);
       reviews.map(r => mkSensitive(selfL, r, defaultReview))

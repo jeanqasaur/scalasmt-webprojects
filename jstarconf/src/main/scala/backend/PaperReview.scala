@@ -8,6 +8,7 @@ import cap.scalasmt._
 import org.squeryl.PrimitiveTypeMode._
 
 import JConfBackend._
+import cap.jeeves.JeevesTypes._
 
 class PaperReview(
             val  uid: BigInt
@@ -24,12 +25,12 @@ class PaperReview(
   /*************/
   private val _reviewerL = mkLevel ();
   private val _scoreL = mkLevel ();
-  private def _isInternalF (ctxt: Symbolic): Formula = {
+  private def _isInternalF (ctxt: Sensitive): Formula = {
     val vrole = ctxt.viewer.role;
     (vrole === ReviewerStatus) || (vrole === PCStatus);
   }
   restrict(_reviewerL,
-    (ctxt: Symbolic) => !((ctxt.viewer~'uid === _reviewerId)
+    (ctxt: Sensitive) => !((ctxt.viewer~'uid === _reviewerId)
       || (ctxt.viewer.role === PCStatus)) );
   logPaperReviewPolicy();
 
@@ -42,7 +43,7 @@ class PaperReview(
       case None => defaultUser
     }
   }
-  def getReviewerTag(): Symbolic =
+  def getReviewerTag(): Sensitive =
     mkSensitive(_reviewerL, ReviewedBy(_reviewerId), EmptyTag)
   def showReviewerTag(ctxt: ConfContext): PaperTag = {
     println("showing reviewer tag")
@@ -77,29 +78,29 @@ class PaperReview(
   /* URL links. */
   private val _reviewL = mkLevel()
   restrict ( _reviewL
-    , (ctxt: Symbolic) => !((ctxt.viewer.role === ReviewerStatus) ||
+    , (ctxt: Sensitive) => !((ctxt.viewer.role === ReviewerStatus) ||
         (ctxt.viewer.role === PCStatus) ||
         ((ctxt.viewer.role === AuthorStatus) &&
         ctxt.stage === Public)) )
   private val _editL = mkLevel()
   restrict( _editL
-    , (ctxt: Symbolic) => !((ctxt.viewer~'uid === reviewer)
+    , (ctxt: Sensitive) => !((ctxt.viewer~'uid === reviewer)
       && (ctxt.stage === Review)) )
 
   private val _reviewLink: String = "review?id=" + uid + "&key=" + key
-  val reviewLink: Symbolic = 
+  val reviewLink: Sensitive = 
     mkSensitive(_reviewL, StringVal(_reviewLink), StringVal(""))
   def showReviewLink(ctxt: ConfContext): String = {
     (concretize(ctxt, reviewLink).asInstanceOf[StringVal]).v
   }
   private val _editReviewLink = "edit_review?id=" + uid + "&key=" + key
-  val editReviewLink: Symbolic = 
+  val editReviewLink: Sensitive = 
     mkSensitive(_editL, StringVal(_editReviewLink), StringVal(""))
   def showEditReviewLink(ctxt: ConfContext): String = {
     (concretize(ctxt, editReviewLink).asInstanceOf[StringVal]).v
   }
   private val _postReviewLink = "review?id=" + uid + "&key=" + key
-  val postReviewLink: Symbolic =
+  val postReviewLink: Sensitive =
     mkSensitive(_editL, StringVal(_postReviewLink), StringVal(""))
   def showPostReviewLink(ctxt: ConfContext): String = {
     println("showing post review link")

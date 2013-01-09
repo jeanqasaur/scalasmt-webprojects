@@ -7,6 +7,7 @@ package cap.jeeves.jconf.backend
 
 import JConfBackend._
 import cap.scalasmt._
+import cap.jeeves.JeevesTypes._
 
 import org.squeryl.PrimitiveTypeMode._
 
@@ -51,23 +52,23 @@ class PaperRecord(         val uid: BigInt
   /*************/
   /* Policies. */
   /*************/
-  private def isAuthor (ctxt: Symbolic): Formula =
+  private def isAuthor (ctxt: Sensitive): Formula =
     authors.has(ctxt.viewer~'uid);
-  private def isInternal (ctxt: Symbolic): Formula =
+  private def isInternal (ctxt: Sensitive): Formula =
     (ctxt.viewer.role === ReviewerStatus) ||
     (ctxt.viewer.role === PCStatus)
-  private def isPC (ctxt: Symbolic): Formula = (ctxt.viewer.role === PCStatus)
-  private def authorCanSeeReview (ctxt: Symbolic): Formula =
+  private def isPC (ctxt: Sensitive): Formula = (ctxt.viewer.role === PCStatus)
+  private def authorCanSeeReview (ctxt: Sensitive): Formula =
     (ctxt.stage === Public)
-  private def isPublic (ctxt: Symbolic): Formula =
+  private def isPublic (ctxt: Sensitive): Formula =
     (ctxt.stage === Public) && (getTags ()).has(Accepted)
 
   restrict ( _authorL
-         , (ctxt: Symbolic) =>
+         , (ctxt: Sensitive) =>
             (isAuthor (ctxt) || isPC (ctxt) || isPublic (ctxt)) );
   logPaperRecordPolicy();
   restrict (titleL
-    , (ctxt: Symbolic) => (isAuthor (ctxt)
+    , (ctxt: Sensitive) => (isAuthor (ctxt)
       || isInternal (ctxt) || isPublic (ctxt)));
   logPaperRecordPolicy();
 
@@ -79,7 +80,7 @@ class PaperRecord(         val uid: BigInt
     title =
       mkSensitive(titleL, StringVal(_title), emptyStringVal)
   }
-  var title: Symbolic =
+  var title: Sensitive =
     mkSensitive(titleL, StringVal(_title), emptyStringVal)
   def showTitle(ctxt: ConfContext): String = {
     println("showing paper title")
@@ -98,22 +99,22 @@ class PaperRecord(         val uid: BigInt
   def showFile(ctxt: ConfContext): String = _file
 
   /* Managing tags. */
-  private def addTagPermission (tag : PaperTag) : Symbolic = {
+  private def addTagPermission (tag : PaperTag) : Sensitive = {
     val level = mkLevel ();
     tag match {
       case NeedsReview(reviewerId) =>
         restrict (level
-          , (ctxt: Symbolic) =>
+          , (ctxt: Sensitive) =>
             (isPC (ctxt) || (ctxt.viewer~'uid === reviewerId)) );
         logPaperRecordPolicy();
       case ReviewedBy (reviewer) =>
-      restrict (level, (ctxt: Symbolic) => isPC (ctxt));
+      restrict (level, (ctxt: Sensitive) => isPC (ctxt));
         logPaperRecordPolicy();
       // Can see the "Accepted(b)" tag if is an internal user at the decision
       // stage or if all information is visible.
       case Accepted =>
         restrict (level
-          , (ctxt: Symbolic) => (isInternal (ctxt) || ctxt.stage === Public) );
+          , (ctxt: Sensitive) => (isInternal (ctxt) || ctxt.stage === Public) );
         logPaperRecordPolicy();
       case EmptyTag => ()
     }
@@ -124,14 +125,14 @@ class PaperRecord(         val uid: BigInt
     _tags = newtag::_tags
     JConfTables.addDBTag(conversions, uid.toInt, newtag)
   }
-  def getTags (): List[Symbolic] = {
+  def getTags (): List[Sensitive] = {
     _tags.map(t => addTagPermission(t))
   }
   def removeTag (tag : PaperTag) : Unit = {
     _tags.filterNot(_ == tag)
     JConfTables.removeDBTag(conversions, uid.toInt, tag)
   }
-  def hasTag (tag : Symbolic) : Formula = (getTags ()).has(tag)
+  def hasTag (tag : Sensitive) : Formula = (getTags ()).has(tag)
   def showTags (ctxt: ConfContext): List[PaperTag] = {
     (getTags ()).map(t => concretize(ctxt, t).asInstanceOf[PaperTag])
   }
@@ -141,7 +142,7 @@ class PaperRecord(         val uid: BigInt
   }
 
   // We only add to reviews and don't take away.
-  var reviews: List[Symbolic] = {
+  var reviews: List[Sensitive] = {
     JConfTables.getReviewsByPaper(uid.toInt).map(r => addReviewPolicy(r))
   }
   /*
@@ -171,10 +172,10 @@ class PaperRecord(         val uid: BigInt
   def showIsReviewedBy(ctxt: ConfContext, reviewer: ConfUser): Boolean = {
     concretize(ctxt, isReviewedBy(reviewer))
   }
-  def addReviewPolicy (r: PaperReview): Symbolic = {
+  def addReviewPolicy (r: PaperReview): Sensitive = {
     val level = mkLevel();
     restrict( level
-      , (ctxt: Symbolic) => ( (isInternal (ctxt) && (!isAuthor (ctxt))) ||
+      , (ctxt: Sensitive) => ( (isInternal (ctxt) && (!isAuthor (ctxt))) ||
                 (isAuthor (ctxt) && authorCanSeeReview (ctxt)) ) );
     logPaperRecordPolicy();
     mkSensitive(level, r, defaultReview)
@@ -182,7 +183,7 @@ class PaperRecord(         val uid: BigInt
   def showReviews (ctxt: ConfContext): List[PaperReview] = {
     reviews.map(r => concretize(ctxt, r).asInstanceOf[PaperReview])
   }
-  def getReviewByReviewer (reviewerId: BigInt): Symbolic = {
+  def getReviewByReviewer (reviewerId: BigInt): Sensitive = {
     val review = {
       JConfTables.getReviewByPaperReviewer(uid.toInt, reviewerId.toInt) match {
         case Some(r) => r
@@ -211,18 +212,18 @@ class PaperRecord(         val uid: BigInt
   /* URLs. */
   private val _editL = mkLevel()
   restrict(_editL
-    , (ctxt: Symbolic) => (isAuthor (ctxt) && (ctxt.stage === Submission)) )
+    , (ctxt: Sensitive) => (isAuthor (ctxt) && (ctxt.stage === Submission)) )
 
   def showLink(ctxt: ConfContext): String = {
     "paper?id=" + uid + "&key=" + key
   }
 
   private val path: String = new java.io.File("").getAbsolutePath()
-  def getBackupLoc(): Symbolic = {
+  def getBackupLoc(): Sensitive = {
     val backupLoc = path + "/papers/" + "jcp" + key + "_" + _file
     mkSensitive(_editL, StringVal(backupLoc), emptyStringVal)
   }
-  def getTomcatLoc(): Symbolic = {
+  def getTomcatLoc(): Sensitive = {
     val tomcatLoc = path + "/webapps/src2012/papers/" + "jcp" + key + "_" + _file
     mkSensitive(_editL, StringVal(tomcatLoc), emptyStringVal)
   }
@@ -245,9 +246,9 @@ class PaperRecord(         val uid: BigInt
   }
 
   private val _assignL = mkLevel ()
-  restrict (_assignL, (ctxt: Symbolic) => isPC (ctxt))
+  restrict (_assignL, (ctxt: Sensitive) => isPC (ctxt))
   private val _assignLink = "assign_paper?id=" + uid + "&key=" + key
-  def getAssignLink(userId: BigInt): Symbolic = {
+  def getAssignLink(userId: BigInt): Sensitive = {
     mkSensitive(_assignL
       , StringVal(_assignLink + "&userId=" + userId)
       , emptyStringVal)
@@ -258,7 +259,7 @@ class PaperRecord(         val uid: BigInt
   }
 
   private val _editLink = "edit_paper?id=" + uid + "&key=" + key
-  val editLink: Symbolic = {
+  val editLink: Sensitive = {
     mkSensitive(_editL, StringVal(_editLink), emptyStringVal)
   }
   def showEditLink(ctxt: ConfContext): String = {
@@ -266,7 +267,7 @@ class PaperRecord(         val uid: BigInt
   }
 
   private val _withdrawLink = "withdraw_paper?id=" + uid + "&key=" + key
-  val withdrawLink: Symbolic = {
+  val withdrawLink: Sensitive = {
     mkSensitive(_editL, StringVal(_withdrawLink), emptyStringVal)
   }
   def showWithdrawLink(ctxt: ConfContext): String = {
@@ -274,7 +275,7 @@ class PaperRecord(         val uid: BigInt
   }
 
   private val _postLink = "paper?id=" + uid + "&key=" + key
-  def postLink: Symbolic = {
+  def postLink: Sensitive = {
     mkSensitive(_editL, StringVal(_postLink), emptyStringVal)
   }
   def showPostLink(ctxt: ConfContext): String = {
