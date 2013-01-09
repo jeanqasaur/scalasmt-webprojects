@@ -1,0 +1,46 @@
+<%@ val title: String %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
+<%@ val papers: List[cap.jeeves.jconf.backend.PaperRecord] %>
+<%@ val conflicts: List[cap.jeeves.jconf.backend.ConfUser] %>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  </head>
+<body>
+  <div id="wrapper">
+    #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+    <div id="content">
+    #if (user.role == cap.jeeves.jconf.backend.PCStatus)
+      <h1>Edit Paper Assignments.</h1>
+
+      <form action="paper_assignments" method="post">
+      <table border=1>
+      #for (p <- papers)
+        #if (p.uid > 1)
+          <tr>
+            <td><%= p.showTitle(ctxt) %></td>
+            <td>
+              <input type="checkbox" name="changed<%= p.uid %>" value="yes" />
+              Updated
+            </td>
+            <td>
+              #do(layout("snippets/assign_review_radio.ssp"
+                , Map("ctxt" -> ctxt, "paper" -> p, "conflicts" -> conflicts)))
+              #end
+            </td>
+          </tr>
+        #end
+      #end
+      </table>
+      <input type="submit" class="button" value="Submit" />
+      </form>
+      </div>
+    #end
+  
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>

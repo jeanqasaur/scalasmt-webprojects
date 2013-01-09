@@ -1,0 +1,62 @@
+<%@ val title: String %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
+<%@ val review: cap.jeeves.jconf.backend.PaperReview %>
+<%@ val reviewer: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val paper: cap.jeeves.jconf.backend.PaperRecord %>
+<html>
+  <head>
+    <title>${title}</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+    ${include("snippets/goToLink.ssp")}
+  </head>
+<body>
+  <div id="wrapper">
+    #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+    #do(layout("snippets/processing.ssp")) #end
+
+    <div id="content">
+    <h1>Paper Review.</h1>
+      #{
+        val reviewEditLink = review.showEditReviewLink(ctxt)
+      }#
+      #if (!reviewEditLink.isEmpty())
+        <p><small><a href="<%= reviewEditLink %>" onclick="javascript:goToLink('<%= reviewEditLink %>')">Edit Review</a></small></p>
+      #end
+      <table>
+        <tr>
+          <td><b>Paper</b></td>
+          <td><%= paper.showTitle(ctxt) %></td>
+        </tr>
+        <tr>
+          <td><b>Reviewer</b></td>
+          <td><%= reviewer.showName(ctxt) %> (<%= reviewer.email %>)</td>
+        </tr>
+        <tr>
+          <td><b>Problem and Motivation</b></td>
+          <td><%= review.showProblemScore(ctxt) %></td>
+        </tr>
+        <tr>
+          <td><b>Background and Related Work</b></td>
+          <td><%= review.showBackgroundScore(ctxt) %></td>
+        </tr>
+        <tr>
+          <td><b>Approach and Uniqueness</b></td>
+          <td><%= review.showApproachScore(ctxt) %></td>
+        </tr>
+        <tr>
+          <td><b>Results and Contributions</b></td>
+          <td><%= review.showResultScore(ctxt) %></td>
+        </tr>
+        <tr>
+          <td><b>Comments</b></td>
+          <td><%= review.showBody(ctxt) %></td>
+        </tr>
+      </table>
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>
