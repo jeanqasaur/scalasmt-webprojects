@@ -1,0 +1,18 @@
+<script language="javascript" type="text/javascript">
+function showDiv() {if (document.getElementById) { // DOM3 = IE5, NS6
+document.getElementById('hideShow').style.visibility = 'visible';
+}
+else {
+if (document.layers) { // Netscape 4
+document.hideShow.visibility = 'visible';
+}
+else { // IE 4
+document.all.hideShow.style.visibility = 'visible';
+}
+}
+} function goToLink(lname){
+showDiv();
+return;
+//document.location.href = lname;
+}
+</script>
