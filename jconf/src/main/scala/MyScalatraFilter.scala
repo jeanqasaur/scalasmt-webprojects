@@ -453,7 +453,7 @@ with JeevesLib {
       case s => s
     }
     val templatePath = "/WEB-INF/scalate/templates/" + templateBase + ".scaml"
-    servletContext.getResource(templatePath) match {
+    applicationContext.getResource(templatePath) match {
       case url: URL => 
         contentType = "text/html"
         templateEngine.layout(templatePath)
