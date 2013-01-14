@@ -1,6 +1,7 @@
 package cap.jeeves.jconf.backend
 
 import cap.jeeveslib._
+import cap.jeeveslib.ast.S
 import cap.jeeveslib.jeeves._
 
 import scala.collection.mutable.Map
@@ -45,7 +46,7 @@ object JConfBackend extends JeevesLib[ConfContext] {
     println("***")
   }
 
-  val emptyStringVal = StringVal("")
+  val emptyStringVal = S("")
 
   val defaultUser = {
     getUserById(1) match {

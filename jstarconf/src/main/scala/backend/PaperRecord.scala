@@ -6,7 +6,7 @@ package cap.jeeves.jconf.backend
 */
 
 import JConfBackend._
-import cap.jeeveslib.ast.{Atom, Formula, IntExpr, Object, ObjectExpr}
+import cap.jeeveslib.ast.{Atom, Formula, IntExpr, Object, ObjectExpr, S}
 import org.squeryl.PrimitiveTypeMode._
 
 import scala.collection.immutable.List;
@@ -77,13 +77,13 @@ class PaperRecord(         val uid: BigInt
   def setTitle(name: String) = {
     _title = name
     title =
-      mkSensitive(titleL, StringVal(_title), emptyStringVal)
+      mkSensitive(titleL, S(_title), emptyStringVal)
   }
-  var title: ObjectExpr[StringVal] =
-    mkSensitive(titleL, StringVal(_title), emptyStringVal)
+  var title: ObjectExpr[S] =
+    mkSensitive(titleL, S(_title), emptyStringVal)
   def showTitle(ctxt: ConfContext): String = {
     println("showing paper title")
-    (concretize(ctxt, title).asInstanceOf[StringVal]).v
+    (concretize(ctxt, title).asInstanceOf[S]).s
   }
 
   def authors : List[IntExpr] = {
@@ -221,21 +221,21 @@ class PaperRecord(         val uid: BigInt
   }
 
   private val path: String = new java.io.File("").getAbsolutePath()
-  def getBackupLoc(): ObjectExpr[StringVal] = {
+  def getBackupLoc(): ObjectExpr[S] = {
     val backupLoc = path + "/papers/" + "jcp" + key + "_" + _file
-    mkSensitive(_editL, StringVal(backupLoc), emptyStringVal)
+    mkSensitive(_editL, S(backupLoc), emptyStringVal)
   }
-  def getTomcatLoc(): ObjectExpr[StringVal] = {
+  def getTomcatLoc(): ObjectExpr[S] = {
     val tomcatLoc = path + "/webapps/src2012/papers/" + "jcp" + key + "_" + _file
-    mkSensitive(_editL, StringVal(tomcatLoc), emptyStringVal)
+    mkSensitive(_editL, S(tomcatLoc), emptyStringVal)
   }
   // Permanent storage location for file.
   def showFileLocations(ctxt: ConfContext): (String, String) = {
     val backupLoc = {
-      concretize(ctxt, getBackupLoc ()).asInstanceOf[StringVal]
+      concretize(ctxt, getBackupLoc ()).asInstanceOf[S]
     }
-    val tomcatLoc = concretize(ctxt, getTomcatLoc ()).asInstanceOf[StringVal]
-    (backupLoc.v, tomcatLoc.v)
+    val tomcatLoc = concretize(ctxt, getTomcatLoc ()).asInstanceOf[S]
+    (backupLoc.s, tomcatLoc.s)
   }
   // Where the file is stored for display online.
   def getFileStorageLocation(paperSecretId: String, filename: String): String = {
@@ -250,38 +250,38 @@ class PaperRecord(         val uid: BigInt
   private val _assignL = mkLevel ()
   restrict (_assignL, (ctxt: ObjectExpr[ConfContext]) => isPC (ctxt))
   private val _assignLink = "assign_paper?id=" + uid + "&key=" + key
-  def getAssignLink(userId: BigInt): ObjectExpr[StringVal] = {
+  def getAssignLink(userId: BigInt): ObjectExpr[S] = {
     mkSensitive(_assignL
-      , StringVal(_assignLink + "&userId=" + userId)
+      , S(_assignLink + "&userId=" + userId)
       , emptyStringVal)
   }
   def showAssignLink(ctxt: ConfContext, userId: BigInt): String = {
     concretize(
-      ctxt, getAssignLink(userId)).asInstanceOf[StringVal].v
+      ctxt, getAssignLink(userId)).asInstanceOf[S].s
   }
 
   private val _editLink = "edit_paper?id=" + uid + "&key=" + key
-  val editLink: ObjectExpr[StringVal] = {
-    mkSensitive(_editL, StringVal(_editLink), emptyStringVal)
+  val editLink: ObjectExpr[S] = {
+    mkSensitive(_editL, S(_editLink), emptyStringVal)
   }
   def showEditLink(ctxt: ConfContext): String = {
-    concretize(ctxt, editLink).asInstanceOf[StringVal].v
+    concretize(ctxt, editLink).asInstanceOf[S].s
   }
 
   private val _withdrawLink = "withdraw_paper?id=" + uid + "&key=" + key
-  val withdrawLink: ObjectExpr[StringVal] = {
-    mkSensitive(_editL, StringVal(_withdrawLink), emptyStringVal)
+  val withdrawLink: ObjectExpr[S] = {
+    mkSensitive(_editL, S(_withdrawLink), emptyStringVal)
   }
   def showWithdrawLink(ctxt: ConfContext): String = {
-    concretize(ctxt, withdrawLink).asInstanceOf[StringVal].v
+    concretize(ctxt, withdrawLink).asInstanceOf[S].s
   }
 
   private val _postLink = "paper?id=" + uid + "&key=" + key
-  def postLink: ObjectExpr[StringVal] = {
-    mkSensitive(_editL, StringVal(_postLink), emptyStringVal)
+  def postLink: ObjectExpr[S] = {
+    mkSensitive(_editL, S(_postLink), emptyStringVal)
   }
   def showPostLink(ctxt: ConfContext): String = {
-    concretize(ctxt, postLink).asInstanceOf[StringVal].v
+    concretize(ctxt, postLink).asInstanceOf[S].s
   }
 
   def getUploadLink(file: String): String = {

@@ -7,7 +7,7 @@ package cap.jeeves.jconf.backend
 import org.squeryl.PrimitiveTypeMode._
 
 import JConfBackend._
-import cap.jeeveslib.ast.{Atom, Formula, IntExpr, ObjectExpr}
+import cap.jeeveslib.ast.{Atom, Formula, IntExpr, ObjectExpr, S}
 
 class PaperReview(
             val  uid: BigInt
@@ -88,22 +88,22 @@ class PaperReview(
       && (ctxt.stage === Review)) )
 
   private val _reviewLink: String = "review?id=" + uid + "&key=" + key
-  val reviewLink: ObjectExpr[StringVal] =
-    mkSensitive(_reviewL, StringVal(_reviewLink), StringVal(""))
+  val reviewLink: ObjectExpr[S] =
+    mkSensitive(_reviewL, S(_reviewLink), S(""))
   def showReviewLink(ctxt: ConfContext): String = {
-    (concretize(ctxt, reviewLink).asInstanceOf[StringVal]).v
+    (concretize(ctxt, reviewLink).asInstanceOf[S]).s
   }
   private val _editReviewLink = "edit_review?id=" + uid + "&key=" + key
-  val editReviewLink: ObjectExpr[StringVal] =
-    mkSensitive(_editL, StringVal(_editReviewLink), StringVal(""))
+  val editReviewLink: ObjectExpr[S] =
+    mkSensitive(_editL, S(_editReviewLink), S(""))
   def showEditReviewLink(ctxt: ConfContext): String = {
-    (concretize(ctxt, editReviewLink).asInstanceOf[StringVal]).v
+    (concretize(ctxt, editReviewLink).asInstanceOf[S]).s
   }
   private val _postReviewLink = "review?id=" + uid + "&key=" + key
-  val postReviewLink: ObjectExpr[StringVal] =
-    mkSensitive(_editL, StringVal(_postReviewLink), StringVal(""))
+  val postReviewLink: ObjectExpr[S] =
+    mkSensitive(_editL, S(_postReviewLink), S(""))
   def showPostReviewLink(ctxt: ConfContext): String = {
     println("showing post review link")
-    (concretize(ctxt, postReviewLink).asInstanceOf[StringVal]).v
+    (concretize(ctxt, postReviewLink).asInstanceOf[S]).s
   }
 }
