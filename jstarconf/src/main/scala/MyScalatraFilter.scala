@@ -1,4 +1,4 @@
-import cap.jeeves._
+import cap.jeeveslib.jeeves._
 import cap.jeeves.jconf.backend._
 import cap.jeeves.jconf.frontend._
 import cap.jeeves.jconf.backend.JConfBackend._
@@ -17,7 +17,7 @@ import scalate.ScalateSupport
 
 class MyScalatraFilter
 extends ScalatraFilter with ScalateSupport with FileUploadSupport
-with JeevesLib {
+with JeevesLib[ConfContext] {
   class IllegalAccessError extends Exception
   class JConfInternalError extends Exception
 
