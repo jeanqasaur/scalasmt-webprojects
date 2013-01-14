@@ -1,14 +1,12 @@
 package cap.jeeves.jconf.backend
 
-import cap.scalasmt._
-import cap.jeeves._
+import cap.jeeveslib._
+import cap.jeeveslib.jeeves._
 
 import scala.collection.mutable.Map
 import scala.collection.mutable.Set
 
-import Expr._
-
-object JConfBackend extends JeevesLib {
+object JConfBackend extends JeevesLib[ConfContext] {
   class AccessError extends Exception
   class PermissionsError extends Exception
   class NoSuchUserError(uid: Int) extends Exception

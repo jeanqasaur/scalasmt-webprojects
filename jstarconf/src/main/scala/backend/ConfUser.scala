@@ -5,13 +5,12 @@ package cap.jeeves.jconf.backend
  * @author jeanyang
  */
 
-import cap.scalasmt._
-import cap.jeeves.JeevesTypes._
+import cap.jeeveslib.ast.{Atom, Formula, ObjectExpr}
 import JConfBackend._
 
  import org.squeryl.PrimitiveTypeMode._
 
-sealed trait UserStatus extends JeevesRecord
+sealed trait UserStatus extends Atom
 case object PublicStatus extends UserStatus
 case object AuthorStatus extends UserStatus
 case object ReviewerStatus extends UserStatus
@@ -29,18 +28,20 @@ case class ConfUser(
   , private var _acmNum: String = ""
   ,         val role: UserStatus
   , private var _conflicts: List[BigInt] )
-  extends JeevesRecord {
+  extends Atom {
     /*************/
     /* Policies. */
     /*************/
-    private def isSelf (ctxt: Sensitive) : Formula = ctxt.viewer~'uid === uid
+    private def isSelf (ctxt: ObjectExpr[ConfContext]) : Formula =
+      ctxt.viewer~'uid === uid
 
-    private def isReviewer (ctxt: Sensitive): Formula =
+    private def isReviewer (ctxt: ObjectExpr[ConfContext]): Formula =
       ctxt.viewer.status === ReviewerStatus
-    private def isPC (ctxt: Sensitive): Formula = ctxt.viewer.status === PCStatus
+    private def isPC (ctxt: ObjectExpr[ConfContext]): Formula =
+      ctxt.viewer.status === PCStatus
 
     private val selfL = mkLevel ();
-    restrict (selfL, (ctxt: Sensitive) => isSelf (ctxt));
+    restrict (selfL, (ctxt: ObjectExpr[ConfContext]) => isSelf (ctxt));
     logConfUserPolicy();
     def showIsSelf(ctxt: ConfContext): Boolean = {
       concretize(ctxt, selfL)
@@ -66,7 +67,8 @@ case class ConfUser(
     }
 
     private val numL = mkLevel()
-    restrict (numL, (ctxt: Sensitive) => (isSelf (ctxt) || isPC (ctxt)))
+    restrict (numL, (ctxt: ObjectExpr[ConfContext]) =>
+      (isSelf (ctxt) || isPC (ctxt)))
     var acmNum = mkSensitive(numL, StringVal(_acmNum), StringVal(""))
     def setAcmNum (newNum: String): Unit = {
       _acmNum = newNum
@@ -104,7 +106,7 @@ case class ConfUser(
     }
 
     // Papers to review.
-    def getReviewPapers (): List[Sensitive] = {
+    def getReviewPapers (): List[ObjectExpr[PaperRecord]] = {
       val papers: List[PaperRecord] =
         JConfTables.getPapersByReviewer(uid.toInt);
       papers.map(p => mkSensitive(selfL, p, defaultPaper))
@@ -115,7 +117,7 @@ case class ConfUser(
     }
 
     // Reviews submitted.
-    def getReviews (): List[Sensitive] = {
+    def getReviews (): List[ObjectExpr[PaperReview]] = {
       val reviews: List[PaperReview] =
         JConfTables.getReviewsByReviewer(uid.toInt);
       reviews.map(r => mkSensitive(selfL, r, defaultReview))

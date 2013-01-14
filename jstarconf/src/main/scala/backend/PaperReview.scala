@@ -4,11 +4,10 @@ package cap.jeeves.jconf.backend
  * User records for jconf case study.
  * @author jeanyang
  */
-import cap.scalasmt._
 import org.squeryl.PrimitiveTypeMode._
 
 import JConfBackend._
-import cap.jeeves.JeevesTypes._
+import cap.jeeveslib.ast.{Atom, Formula, IntExpr, ObjectExpr}
 
 class PaperReview(
             val  uid: BigInt
@@ -19,18 +18,18 @@ class PaperReview(
   , private var _problemScore: Int = 3
   , private var _backgroundScore: Int = 3
   , private var _approachScore: Int = 3
-  , private var _resultScore: Int = 3) extends JeevesRecord {
+  , private var _resultScore: Int = 3) extends Atom {
   /*************/
   /* Policies. */
   /*************/
   private val _reviewerL = mkLevel ();
   private val _scoreL = mkLevel ();
-  private def _isInternalF (ctxt: Sensitive): Formula = {
+  private def _isInternalF (ctxt: ObjectExpr[ConfContext]): Formula = {
     val vrole = ctxt.viewer.role;
     (vrole === ReviewerStatus) || (vrole === PCStatus);
   }
   restrict(_reviewerL,
-    (ctxt: Sensitive) => !((ctxt.viewer~'uid === _reviewerId)
+    (ctxt: ObjectExpr[ConfContext]) => !((ctxt.viewer~'uid === _reviewerId)
       || (ctxt.viewer.role === PCStatus)) );
   logPaperReviewPolicy();
 
@@ -43,7 +42,7 @@ class PaperReview(
       case None => defaultUser
     }
   }
-  def getReviewerTag(): Sensitive =
+  def getReviewerTag(): ObjectExpr[PaperTag] =
     mkSensitive(_reviewerL, ReviewedBy(_reviewerId), EmptyTag)
   def showReviewerTag(ctxt: ConfContext): PaperTag = {
     println("showing reviewer tag")
@@ -78,29 +77,30 @@ class PaperReview(
   /* URL links. */
   private val _reviewL = mkLevel()
   restrict ( _reviewL
-    , (ctxt: Sensitive) => !((ctxt.viewer.role === ReviewerStatus) ||
+    , (ctxt: ObjectExpr[ConfContext]) =>
+        !((ctxt.viewer.role === ReviewerStatus) ||
         (ctxt.viewer.role === PCStatus) ||
         ((ctxt.viewer.role === AuthorStatus) &&
         ctxt.stage === Public)) )
   private val _editL = mkLevel()
   restrict( _editL
-    , (ctxt: Sensitive) => !((ctxt.viewer~'uid === reviewer)
+    , (ctxt: ObjectExpr[ConfContext]) => !((ctxt.viewer~'uid === reviewer)
       && (ctxt.stage === Review)) )
 
   private val _reviewLink: String = "review?id=" + uid + "&key=" + key
-  val reviewLink: Sensitive = 
+  val reviewLink: ObjectExpr[StringVal] =
     mkSensitive(_reviewL, StringVal(_reviewLink), StringVal(""))
   def showReviewLink(ctxt: ConfContext): String = {
     (concretize(ctxt, reviewLink).asInstanceOf[StringVal]).v
   }
   private val _editReviewLink = "edit_review?id=" + uid + "&key=" + key
-  val editReviewLink: Sensitive = 
+  val editReviewLink: ObjectExpr[StringVal] =
     mkSensitive(_editL, StringVal(_editReviewLink), StringVal(""))
   def showEditReviewLink(ctxt: ConfContext): String = {
     (concretize(ctxt, editReviewLink).asInstanceOf[StringVal]).v
   }
   private val _postReviewLink = "review?id=" + uid + "&key=" + key
-  val postReviewLink: Sensitive =
+  val postReviewLink: ObjectExpr[StringVal] =
     mkSensitive(_editL, StringVal(_postReviewLink), StringVal(""))
   def showPostReviewLink(ctxt: ConfContext): String = {
     println("showing post review link")
