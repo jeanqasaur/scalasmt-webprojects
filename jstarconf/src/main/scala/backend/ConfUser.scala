@@ -5,7 +5,7 @@ package cap.jeeves.jconf.backend
  * @author jeanyang
  */
 
-import cap.jeeveslib.ast.{Atom, Formula, ObjectExpr}
+import cap.jeeveslib.ast.{Atom, Formula, ObjectExpr, S}
 import JConfBackend._
 
  import org.squeryl.PrimitiveTypeMode._
@@ -69,13 +69,13 @@ case class ConfUser(
     private val numL = mkLevel()
     restrict (numL, (ctxt: ObjectExpr[ConfContext]) =>
       (isSelf (ctxt) || isPC (ctxt)))
-    var acmNum = mkSensitive(numL, StringVal(_acmNum), StringVal(""))
+    var acmNum = mkSensitive(numL, S(_acmNum), S(""))
     def setAcmNum (newNum: String): Unit = {
       _acmNum = newNum
-      acmNum = mkSensitive(numL, StringVal(_acmNum), StringVal(""))
+      acmNum = mkSensitive(numL, S(_acmNum), S(""))
     }
     def showAcmNum (ctxt: ConfContext): String = {
-      (concretize(ctxt, acmNum).asInstanceOf[StringVal]).v
+      (concretize(ctxt, acmNum).asInstanceOf[S]).s
     }
 
     // Submitted papers.
@@ -131,12 +131,12 @@ case class ConfUser(
     def setPassword (p: String) = {
       _password = p
       password =
-        mkSensitive(selfL, StringVal(_password), StringVal("default"))
+        mkSensitive(selfL, S(_password), S("default"))
     }
     var password =
-      mkSensitive(selfL, StringVal(_password), StringVal("default"))
+      mkSensitive(selfL, S(_password), S("default"))
     def showPassword (ctxt: ConfContext): String = {
-      concretize(ctxt, password).asInstanceOf[StringVal].v
+      concretize(ctxt, password).asInstanceOf[S].s
     }
     def emailPassword(): Unit = {
       JConfMail.sendMail(
