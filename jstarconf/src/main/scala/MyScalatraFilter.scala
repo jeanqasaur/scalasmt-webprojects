@@ -22,7 +22,7 @@ with JeevesLib[ConfContext] {
   class JConfInternalError extends Exception
 
   val date = new java.util.Date()
-  System.setProperty("smt.home", "/opt/z3/bin/z3")
+  System.setProperty("smt.home", "/Users/amadudurham/opt/z3/bin/z3")
 
   Init.initDB ()
   Init.initDirectory ()
