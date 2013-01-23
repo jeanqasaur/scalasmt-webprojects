@@ -1,0 +1,108 @@
+<%@ val title: String %>
+<%@ val name: String %>
+<%@ val msg: String %>
+<%@ val submissionDeadline: String %>
+<%@ val notificationDeadline: String %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
+<%@ val submittedPapers: List[cap.jeeves.jconf.backend.PaperRecord] %>
+<%@ val reviewPapers: List[cap.jeeves.jconf.backend.PaperRecord] %>
+<%@ val reviews: List[cap.jeeves.jconf.backend.PaperReview] %>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+    ${include("snippets/goToLink.ssp")}
+  </head>
+<body>
+  <div id="wrapper">
+    #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+    #do(layout("snippets/processing.ssp")) #end
+
+    <div id="content">
+    #if (!msg.isEmpty())
+      <p><i><%= msg %></i></p>
+    #end
+    
+    <p>Hello, <%= name %>.</p>
+
+    <p>
+    #if (ctxt.stage == cap.jeeves.jconf.backend.SubmissionStage)
+      <i>Submissions are open until <%= submissionDeadline %>.</i>
+    #elseif (ctxt.stage == cap.jeeves.jconf.backend.ReviewStage)
+      <i>The review process is occuring until <%= notificationDeadline %>.</i>
+    #else
+      <i>The decision process is finished as of <%= notificationDeadline %>.</i>
+    #end
+    </p>
+
+    <h1>Papers.</h1>
+
+    #if (ctxt.stage == cap.jeeves.jconf.backend.SubmissionStage)
+      <p><a href="new_paper" onclick="javascript:goToLink('new_paper')">Start new paper</a></p>
+    #end
+
+    #if (user.role == cap.jeeves.jconf.backend.PCStatus)
+      <a href="assign_papers" onclick="javascript:goToLink('assign_papers')">Assign papers</a></p>
+    #end
+
+    <h2>Submitted.</h2>
+    <ul>
+      #for (p <- submittedPapers)
+        <li>
+          #{
+            val paperLink: String = p.showLink(ctxt)
+            val withdrawLink: String = p.showWithdrawLink(ctxt)
+          }#
+          <b><a href="<%= paperLink %>" onclick="javascript:goToLink('<%= paperLink %>')"><%= p.uid %>: <%= p.showTitle(ctxt) %></a></b>
+          #if (!withdrawLink.isEmpty())
+            <a href="<%= withdrawLink %>" onclick="javascript:goToLink('<%= withdrawLink %>')">Withdraw paper</a>
+          #end
+          <br>
+        </li>
+      #end
+    </ul>
+    #{
+      val hasReviews =
+        ((user.role == cap.jeeves.jconf.backend.ReviewerStatus) ||
+          (user.role == cap.jeeves.jconf.backend.PCStatus))
+    }#
+    #if (hasReviews)
+      <h2>To Review.</h2>
+      <table>
+          <tr>
+            <td><b>Paper</b></td>
+            <td><b>Review Status</b></td>
+          </tr>
+        #for (p <- reviewPapers)
+          <tr>
+            <td>
+              #{
+                val reviewPaperLink: String = p.showLink(ctxt)
+              }#
+              <a href="<%= reviewPaperLink %>" onclick="javascript:goToLink('<%= reviewPaperLink %>')"><%= p.uid %>: <b><%= p.showTitle(ctxt) %></b></a>
+            </td>
+            <td>
+              #{
+                val review = p.showReviewByReviewer(ctxt, user.uid)
+                val reviewEditLink = review.showEditReviewLink(ctxt)
+              }#
+              #if (review.uid > -1)
+                #if (!reviewEditLink.isEmpty())
+                  <a href="<%= reviewEditLink %>" onclick="javascript:goToLink('<%= reviewEditLink %>')">Edit Review</a>
+                #end
+              #end
+            </td>
+          </tr>
+        #end
+      </ul>
+      </table>
+    #end
+
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>

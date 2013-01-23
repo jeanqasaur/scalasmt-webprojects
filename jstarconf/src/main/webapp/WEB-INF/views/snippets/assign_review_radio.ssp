@@ -1,0 +1,13 @@
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
+<%@ val paper: cap.jeeves.jconf.backend.PaperRecord %>
+<%@ val conflicts: List[cap.jeeves.jconf.backend.ConfUser] %>
+#for (conflict <- conflicts)
+  #if (!paper.hasConflict(conflict.uid))
+    <input type="checkbox" name="assignment" value="<%= paper.uid %>:<%= conflict.uid %>"
+    #if (cap.jeeves.jconf.backend.JConfBackend.isAssigned(paper, conflict))
+      checked
+    #end
+      />
+    <%= conflict.showName(ctxt) %>
+  #end
+#end

@@ -1,0 +1,37 @@
+<%@ val title: String %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>${title}</title>
+  <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  ${include("snippets/goToLink.ssp")}
+</head>
+<body>
+<div id="wrapper">
+  #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+  #do(layout("snippets/processing.ssp")) #end
+
+  <div id="content">
+    <p>Welcome to the JConf system!  Please enter your password, which should have been sent to your e-mail.</p>
+
+    <p><i>If you did not receive your password, please e-mail jeanyang [at] mit [dot] edu.</i></p>
+
+    <form action="login_user" method="post">
+    <table>
+      <tr>
+        <td><b>E-mail</b></td>
+        <td><input type="text" name="username" value="<%= user.email %>" size=15 maxlength=50 /></td>
+      </tr>
+      <tr>
+        <td><b>Password</b></td>
+        <td><input type="password" name="password" size=15 maxlength=20 /></td>
+      </tr>
+    </table>
+    <input type="submit" onclick="javascript:goToLink('login_user')" name="action" class="button" value="Validate" />
+    </form>
+  </div>
+  ${include("footer.ssp")}
+</div>
+</body>
+</html>
