@@ -114,8 +114,8 @@ object Main {
 				var date = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse("2013-01-25")
 				addAssignment("jeanyang", "Sprint1", date, "Sprints mean running!")
 				addAssignment("bshaibu", "Pizza Party", date, "pizza. everywhere.")					
-				addSubmission("bshaibu","Sprint1","println('Hello World!')")
-				addSubmission("amadu", "Sprint1", "println('Hellow World!')")
+				//addSubmission("bshaibu","Sprint1","println('Hello World!')")
+				//addSubmission("amadu", "Sprint1", "println('Hellow World!')")
 				println("Hello World! Reached the end!")
 			}
 		}
