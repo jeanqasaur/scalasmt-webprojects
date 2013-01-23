@@ -42,7 +42,7 @@ object Main {
 		//SELECT * FROM users {WHERE id=1; || WHERE username="bshaibu"};
 		var user = CourseManager.users.where(a => a.username === userName).single
 		println(CourseManager.assignments.where(a => a.name === assignmentName).single)
-/* 		var assignment = CourseManager.assignments.where(a => a.name === assignmentName).single
+ 		var assignment = CourseManager.assignments.where(a => a.name === assignmentName).single
 		var input = "User: " + userName + ",Enter the password:"
 		val password = readLine(input)
 		if (user.validate(password)) {
@@ -56,7 +56,7 @@ object Main {
 					printDdl
 				}
 			}
-		} */
+		}
 	}
 
 	def main(args: Array[String]): Unit = {
