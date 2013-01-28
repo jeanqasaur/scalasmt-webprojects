@@ -15,44 +15,44 @@ object Main {
 	var submissionCount = 1
 	val assignmentPrivilegeLevel = "Instructor"
 	
-	def addAssignment(userName: String, name: String, dueDate: Date, prompt: String): Unit = {
+	def addAssignment(userName: String, name: String, dueDate: Date, prompt: String, password: String): Unit = {
 		//SELECT * FROM users {WHERE id=1; || WHERE username="bshaibu"};
 		var user = CourseManager.users.where(a => a.username === userName).single
 		if (user.privileges == assignmentPrivilegeLevel) {
 			var assignment = new Assignment(assignmentCount, name, dueDate, prompt,user.id)
-			assignmentCount +=1
-			var input = "User: " + userName + ",Enter the password:"
-			val password = readLine(input)	
 			if (user.validate(password)) { 
-				try {
-					transaction {
-						import CourseManager._
+				inTransaction {
+					try {
 						assignments.insert(assignment)
+						assignmentCount +=1
 						printDdl
+						println(assignment.name + " added successfully!")
 					}
 				}
 			}
 		}
 		else {
-			println("Only " + assignmentPrivilegeLevel + "s can add assignments!")
+			println("Submission failed; Only " + assignmentPrivilegeLevel + "s can add assignments!")
 		}
 	}
 	
-	def addSubmission(userName: String, assignmentName: String, fileRef: String): Unit = {
+	def addSubmission(userName: String, assignmentName: String, fileRef: String, password: String): Unit = {
 		//SELECT * FROM users {WHERE id=1; || WHERE username="bshaibu"};
-		var user = CourseManager.users.where(a => a.username === userName).single
-		println(CourseManager.assignments.where(a => a.name === assignmentName).single)
- 		var assignment = CourseManager.assignments.where(a => a.name === assignmentName).single
+		var user = CourseManager.users.where(u => u.username === userName).single
+		//println(from(CourseManager.assignments)(s => where(s.name === assignmentName) select(s)))
+		//println(CourseManager.assignments.where(a => a.name === assignmentName).single)
+ 		//var assignment = CourseManager.assignments.where(a => a.name === assignmentName).single
+		//var assignment = from(assignments)(s => where(s.name === assignmentName) select(s))
+		var assignment = assignments.where(u => u.name === assignmentName).single
 		var input = "User: " + userName + ",Enter the password:"
-		val password = readLine(input)
 		if (user.validate(password)) {
 			var date = new java.util.Date();
 			var now = new java.sql.Timestamp(date.getTime())
 			var submission = new Submission(submissionCount, assignment.id, user.id, fileRef, now)
-			submissionCount +=1	
 			try {
 				inTransaction {
 					CourseManager.submissions.insert(submission)
+					submissionCount +=1
 					printDdl
 				}
 			}
@@ -78,10 +78,10 @@ object Main {
 			transaction {	CourseManager.create	}
 		}
 		catch {
-			case e: Exception => println("Tables already exist!")
+			case e: Exception => 
+			println("Tables already exist!")
 			try {
 				transaction {
-					import CourseManager._
 					drop
 					create
 					printDdl
@@ -90,7 +90,6 @@ object Main {
 		}
 		try {
 			transaction {
-				import CourseManager._
 				var uml = new User(1,"mclovin","Mohamed","McLovin",Some("superbad@mit.edu"))
 				uml.setPassword("secrets")
 				var ben = new Student(2,"bshaibu","Benjamin","Shaibu",Some("bshaibu@mit.edu"))
@@ -98,24 +97,22 @@ object Main {
 				var jean = new Instructor(3,"jeanyang","Jean","Yang",Some("jeanyang@csail.mit.edu"))
 				jean.setPassword("write")
 				var amadu = new Student(4,"amadu","Amadu","Durham",Some("amadu@mit.edu"))
-				amadu.setPassword("k")
+				amadu.setPassword("1401")
 				users.insert(uml)
 				users.insert(ben);
 				users.insert(jean);
 				users.insert(amadu);
-				ben.print()
-				//println("Old is Student:"+ben.isInstanceOf[Student]) true
-				//println("Old is User:"+ben.isInstanceOf[User]) true
 				
-				//var user = CourseManager.users.where(a => a.username === "bshaibu").single
-				//need to check if it's the right class
-				//println("New is Student:"+user.isInstanceOf[Student]) false
-				//println("New is User:"+user.isInstanceOf[User]) true	
 				var date = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse("2013-01-25")
-				addAssignment("jeanyang", "Sprint1", date, "Sprints mean running!")
-				addAssignment("bshaibu", "Pizza Party", date, "pizza. everywhere.")					
-				//addSubmission("bshaibu","Sprint1","println('Hello World!')")
-				//addSubmission("amadu", "Sprint1", "println('Hellow World!')")
+				addAssignment("jeanyang", "Sprint1", date, "Sprints mean running!","write")
+				addAssignment("bshaibu", "Pizza Party", date, "pizza. everywhere.","giraffes")
+				date = new java.util.Date();
+				var now = new java.sql.Timestamp(date.getTime())
+				submissions.insert(new Submission(submissionCount, 1, 2, "hello world", now))
+				val queriedA:Assignment = CourseManager.assignments.where(a => a.name === "Sprint1").single
+				println(queriedA.name +" is found!")
+				addSubmission("bshaibu","Sprint1","print('Hello World!')","giraffes")
+				addSubmission("amadu", "Sprint1", "println('Hellow World!')","1401")
 				println("Hello World! Reached the end!")
 			}
 		}
