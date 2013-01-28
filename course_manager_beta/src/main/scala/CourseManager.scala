@@ -1,6 +1,7 @@
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.Schema
 import org.squeryl.annotations.Column
+import org.squeryl.adapters.MySQLAdapter
  
 object CourseManager extends Schema {
 	//When the table name doesn't match the class name, it is specified here :
@@ -8,5 +9,5 @@ object CourseManager extends Schema {
 	
 	val assignments = table[Assignment]("ASSIGNMENTS")
 	
-	val submissions = table[Submission]	("SUBMISSIONS")
+	val submissions = table[Submission]("SUBMISSIONS")
  }
