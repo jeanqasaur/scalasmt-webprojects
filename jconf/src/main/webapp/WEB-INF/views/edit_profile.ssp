@@ -1,0 +1,99 @@
+<%@ val title: String %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
+<html>
+  <head>
+    <title>${title}</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  ${include("snippets/goToLink.ssp")}
+  </head>
+<body>
+  <div id="wrapper">
+    #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+    #do(layout("snippets/processing.ssp")) #end
+
+    <div id="content">
+    <h1>Edit Profile.</h1>
+    <form action="profile" method="post">
+    <table>
+      <tr>
+        <td><b>Username</b></td><td><%= user.email %></td></td>
+      </tr>
+      <tr>
+        <td><b>Name</b></td>
+        <td>
+          <input type="text" name="name" value="<%= user.showName(ctxt) %>" />
+        </td>
+      </tr>
+      <tr>
+        <td><b>Affiliation</b></td>
+        <td>
+          <input type="text" name="affiliation" maxlength=50 value="<%= user.showAffiliation(ctxt) %>" />
+        </td>
+      </tr>
+      #if (user.role == cap.jeeves.jconf.backend.AuthorStatus)
+        <tr>
+          <td><b>Student status</b></td>
+          <td>
+            <input type="radio" name="isGrad" value="no"
+              #if (!user.showIsGrad(ctxt))
+                checked
+              #end
+              /> Undergrad
+            <input type="radio" name="isGrad" value="yes"
+              #if (user.showIsGrad(ctxt))
+                checked
+              #end
+              /> Grad
+          </td>
+        </tr>
+        <tr>
+          <td><b>ACM number</b></td>
+          <td><input type="text" name="acmNum" maxlength=20
+             value="<%= user.showAcmNum(ctxt) %>" />
+          </td>
+        </tr>
+        <tr>
+          <td><b>Conflicts</b></td>
+          <td>
+             #for (conflict <- cap.jeeves.jconf.backend.JConfBackend.getPotentialConflicts)
+              <input type="checkbox" name="conflict" value="<%= conflict.uid %>"
+                #if (user.showHasConflict(ctxt, conflict.uid))
+                  checked
+                #end
+                />
+                  <%= conflict.showName(ctxt) %><br>
+              #end
+          </td>
+        </tr>
+      #end
+      <tr>
+        <td><b>Role</b></td>
+        <td>#match (user.role)
+            #case(cap.jeeves.jconf.backend.PublicStatus)
+              Public viewer
+            #case(cap.jeeves.jconf.backend.AuthorStatus)
+              Author
+            #case(cap.jeeves.jconf.backend.ReviewerStatus)
+              Reviewer
+            #case(cap.jeeves.jconf.backend.PCStatus)
+              PC member
+            #otherwise
+              <i>Internal error.</i>
+            #end
+        </td>
+      </tr>
+      #if (user.showIsSelf(ctxt))
+        <tr>
+          <td><input type="submit" onclick="javascript:goToLink('profile')" class="button" value="Submit" /></td>
+        </tr>
+      #end
+    </table>
+    </form>
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>
