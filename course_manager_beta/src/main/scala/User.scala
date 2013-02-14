@@ -31,4 +31,9 @@ class User(val id: Long,
     def print(): Unit =	{
         println("My name is "+username+".")
     }
+	
+	override def equals(other: Any) = other match { 
+		case that: User => this.id == that.id && this.username == that.username && this.firstName == that.firstName && this.lastName == that.lastName && this.email == that.email
+		case _ => false
+	}
 }
