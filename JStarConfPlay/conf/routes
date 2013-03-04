@@ -4,7 +4,6 @@
 
 # Home page
 GET     /                           controllers.Application.index
-GET	/			    controllers.Application.index
 
 # About
 GET	/about			    controllers.Application.about

@@ -1,0 +1,16 @@
+@(loginForm: Form[(String,String)])
+
+@import helper._
+
+@main("Login") {
+    
+    <h1>Welcome to Jeeves Content Management System</h1>
+
+    @form(routes.Application.sendPassword) {
+    
+       @inputText(loginForm("username"))
+
+       @inputPassword(loginForm("password"))
+    }
+    
+}
