@@ -5,7 +5,7 @@ class Student(id: Long,
 		username:String,
 		firstName: String,
 		lastName: String,
-		email: Option[String]) 
+		email: String) 
 	extends User(id,username,firstName,lastName,email) {
   
   

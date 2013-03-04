@@ -40,5 +40,10 @@ class Assignment(val id: Long,
 	def getSubmissionCount(): Int = {
 	  assignmentSubmissions.size
 	}
+	
+	/**/
+	override def toString(): String = {
+	  "Assignment(" + name + ", id=" + id.toString() + ", prompt=" + prompt + ")"	  
+	}
 
 }
