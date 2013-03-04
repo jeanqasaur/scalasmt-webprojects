@@ -10,9 +10,18 @@ class User(val id: Long,
 			val username:String,
 			var firstName: String,
 			var lastName: String,
-			var email: Option [String]) {
+			var email: String) {
+	
+	def this() {
+	  this(-1,"","","","")
+	}
+	
+	def this(id: Long, username:String, firstName: String, lastName: String) {
+		this(id, username, firstName, lastName,username+"@mit.edu")
+	}
+  
 	private var password : String = ""
-	var privileges = "None"
+	var permissionLevel = "None"
 	
 	/* Level Variables */
 	  
@@ -31,7 +40,6 @@ class User(val id: Long,
 		password == md5(pass)
 	}
 	
-	
 	/*Action Methods */
 	def submitAssignment(assignment: Assignment, name:String) {
 		//assignments += name -> null
@@ -44,6 +52,20 @@ class User(val id: Long,
 	  new Assignment(0, assignmentName, dueDate, maxPoints, prompt, username)	  
 	}
 	
+	def setPermission(pL: String): Boolean = {	        
+		if (pL.equalsIgnoreCase("Student")) {
+			permissionLevel = "Student"
+			true
+		}
+		else if (pL.equalsIgnoreCase("Instructor")) {
+		  permissionLevel = "Instructor"
+		  true
+		}
+		else {
+		  false
+		}
+	}
+	
 /*	def getSubmissions(): List[Option[Submission]] = {
 	  new List[Some(new Submission())]
 	}*/
@@ -53,6 +75,9 @@ class User(val id: Long,
         println("My name is "+username+".")
     }
     
+    override def toString(): String = {
+      "User("+username+")"
+    }
     /*override def equals(that: Any) = that match {
       case other: Base
     }*/

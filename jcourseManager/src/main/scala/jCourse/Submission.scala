@@ -16,7 +16,7 @@ class Submission(val id: Long,
     extends Atom {
 	
 	/* Variables */
-	private var grade = -1
+	private var grade = -1.0
 	//Level Variables
 	private var _submitterL = mkLevel()
 	private var _instructorL = mkLevel()
@@ -25,12 +25,16 @@ class Submission(val id: Long,
 	
 	
 	/* Getters and Setters */
-	def setGrade(score: Int) {
+	def setGrade(score: Double) {
 	  val grade = score
 	}
 	
-	def getGrade(): Int = {
+	def getGrade(): Double = {
 		grade
+	}
+	
+	def printContext(): String = {
+	  return activeUser.toString()
 	}
 	
 	def getRef(): String = {
