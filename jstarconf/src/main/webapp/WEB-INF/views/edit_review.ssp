@@ -1,0 +1,87 @@
+<%@ val title: String %>
+<%@ val user: cap.jeeves.jconf.backend.ConfUser %>
+<%@ val ctxt: cap.jeeves.jconf.backend.ConfContext %>
+<%@ val paper: cap.jeeves.jconf.backend.PaperRecord %>
+<%@ val review: cap.jeeves.jconf.backend.PaperReview %>
+<%@ val reviewer: cap.jeeves.jconf.backend.ConfUser %>
+<html>
+  <head>
+    <title>${title}</title>
+    <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+    ${include("snippets/goToLink.ssp")}
+  </head>
+<body>
+  <div id="wrapper">
+    #do(layout("snippets/header.ssp", Map("user" -> user))) #end
+
+    #do(layout("snippets/processing.ssp")) #end
+
+    #{
+      val reviewLink: String = review.showPostReviewLink(ctxt)
+    }#
+
+    <div id="content">
+    <h1>Edit Review.</h1>
+    <form action="<%= reviewLink %>" method="post">
+    <table>
+      <tr>
+        <td><b>Paper</b></td>
+        <td><%= paper.showTitle(ctxt) %> ( <%= paper.uid %> ) </td>
+      </tr>
+      <tr>
+        <td><b>Reviewer</b></td>
+        <td><%= reviewer.showName(ctxt) %> ( <%= reviewer.email %> )</td>
+      </tr>
+      <tr>
+        <td><b>Problem and motivation</b></td>
+        <td>
+          #do(layout("snippets/radio_buttons.ssp",
+              Map("fieldName" -> "problemScore"
+                , "fieldValue" -> review.showProblemScore(ctxt)))) #end
+        </td>
+      </tr>
+      <tr>
+        <td><b>Background and Related Work</b></td>
+        <td>
+          #do(layout("snippets/radio_buttons.ssp",
+              Map("fieldName" -> "backgroundScore"
+                , "fieldValue" -> review.showBackgroundScore(ctxt)))) #end
+        </td>
+      </tr>
+      <tr>
+        <td><b>Approach and Uniqueness</b></td>
+        <td>
+          #do(layout("snippets/radio_buttons.ssp",
+              Map("fieldName" -> "approachScore"
+                , "fieldValue" -> review.showApproachScore(ctxt)))) #end
+        </td>
+      </tr>
+      <tr>
+        <td><b>Results and Contributions</b></td>
+        <td>
+          #do(layout("snippets/radio_buttons.ssp",
+              Map("fieldName" -> "resultScore"
+                , "fieldValue" -> review.showResultScore(ctxt)))) #end
+        </td>
+      </tr>
+      <tr>
+        <td><b>Comments</b></td>
+        <td>
+          <textarea rows="15" cols="40" name="body" maxlength=3000>
+            <%= review.showBody(ctxt) %>
+          </textarea>
+        </td>
+      </tr>
+      #if (paper.showNeedsReviewBy(ctxt))
+        <tr>
+          <td><input type="submit" onclick="javascript:goToLink('<%= reviewLink %>')" class="button" value="Submit" /></td>
+        </tr>
+      #end
+    </table>
+    </form>
+    </div>
+
+    ${include("footer.ssp")}
+  </div>
+</body>
+</html>
