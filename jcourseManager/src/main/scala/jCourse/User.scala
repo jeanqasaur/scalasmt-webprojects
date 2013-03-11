@@ -5,23 +5,29 @@ import java.security.MessageDigest
 import scala.collection.mutable.HashMap
 import scala.None
 import java.util.Date
+import cap.jeeveslib.ast.Atom
+
+sealed trait PermissionLevel extends Atom
+case object NoLevel extends PermissionLevel
+case object InstructorLevel extends PermissionLevel
+case object StudentLevel extends PermissionLevel
 
 class User(val id: Long,
 			val username:String,
 			var firstName: String,
 			var lastName: String,
-			var email: String) {
+			var email: String,
+			var permissionLevel: PermissionLevel) {
 	
 	def this() {
-	  this(-1,"","","","")
+	  this(-1,"","","","",NoLevel)
 	}
 	
-	def this(id: Long, username:String, firstName: String, lastName: String) {
-		this(id, username, firstName, lastName,username+"@mit.edu")
+	def this(id: Long, username:String, firstName: String, lastName: String, permissionLevel: PermissionLevel) {
+		this(id, username, firstName, lastName,username+"@mit.edu",permissionLevel)
 	}
   
 	private var password : String = ""
-	var permissionLevel = "None"
 	
 	/* Level Variables */
 	  
@@ -54,11 +60,11 @@ class User(val id: Long,
 	
 	def setPermission(pL: String): Boolean = {	        
 		if (pL.equalsIgnoreCase("Student")) {
-			permissionLevel = "Student"
+			permissionLevel = StudentLevel
 			true
 		}
 		else if (pL.equalsIgnoreCase("Instructor")) {
-		  permissionLevel = "Instructor"
+		  permissionLevel = InstructorLevel
 		  true
 		}
 		else {
@@ -66,9 +72,9 @@ class User(val id: Long,
 		}
 	}
 	
-/*	def getSubmissions(): List[Option[Submission]] = {
-	  new List[Some(new Submission())]
-	}*/
+	def printActiveUser(): Unit = {
+	  println(activeUser)
+	}
 	
 	/* Default Methods */
     def print(): Unit =	{
@@ -78,7 +84,13 @@ class User(val id: Long,
     override def toString(): String = {
       "User("+username+")"
     }
+    
+    
     /*override def equals(that: Any) = that match {
       case other: Base
     }*/
+    
+    /*	def getSubmissions(): List[Option[Submission]] = {
+	  new List[Some(new Submission())]
+	}*/
 }

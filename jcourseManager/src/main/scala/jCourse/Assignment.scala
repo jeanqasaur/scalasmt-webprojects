@@ -41,6 +41,10 @@ class Assignment(val id: Long,
 	  assignmentSubmissions.size
 	}
 	
+	def printActiveUser(): Unit = {
+	  println(activeUser)
+	}
+	
 	/**/
 	override def toString(): String = {
 	  "Assignment(" + name + ", id=" + id.toString() + ", prompt=" + prompt + ")"	  
