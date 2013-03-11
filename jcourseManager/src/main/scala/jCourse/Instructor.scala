@@ -1,4 +1,4 @@
-package jCourse
+/*package jCourse
 
 import Main._
 class Instructor(id: Long,
@@ -8,4 +8,4 @@ class Instructor(id: Long,
 		email: String) 
 	extends User(id,username,firstName,lastName,email) {
   
-}
+}*/
