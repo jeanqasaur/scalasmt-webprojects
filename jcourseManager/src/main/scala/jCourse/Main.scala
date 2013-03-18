@@ -43,7 +43,6 @@ object Main extends JeevesLib[cmContext] {
 	}
 	
 	private def isInstructor(ctxt: ObjectExpr[cmContext]): Formula = {
-	  //ctxt.viewer.permissionLevel === InstructorLevel
 	  activeUser.permissionLevel == InstructorLevel
 	}
 	
@@ -156,12 +155,29 @@ object Main extends JeevesLib[cmContext] {
 	}
 	
 	def main(args: Array[String]): Unit = {
-	
-
-		
-		
-		logOut()
 		println("Welcome to jCourseManager!")
+		
+		Main.addUser("ProfessorA", "Instructor", "One", "prof1@mit.edu", "beFair", InstructorLevel)
+		Main.addUser("ProfessorB", "Professor", "Two", "prof2@mit.edu", "firehose", InstructorLevel)
+		Main.addUser("StudentA", "Student", "One", "stud1@mit.edu", "dilligent", StudentLevel)
+		Main.addUser("StudentB", "Student", "Two", "stud2@mit.edu", "nope", StudentLevel)	
+		
+		loginUser("ProfessorA","beFair")
+		Main.addAssignment("Assignment One", new Date(2013, 3, 4), 100, "Eat your vegetables.", "ProfessorA")
+		Main.addAssignment("Assignment Two", new Date(2013, 3, 27), 93, "Design a chatwindow.", "ProfesosrA")
+		loginUser("ProfessorB","firehose")
+		Main.addAssignment("Assignment Three", new Date(2013, 4, 1), 1000, "Solve P?=NP.", "ProfessorB")
+		
+		loginUser("StudentA","dilligent")
+		Main.addSubmission("sub1", "Assignment One", "I ate Broccoli.", System.currentTimeMillis())
+		Main.addSubmission("sub2", "Assignment Two", "I redid AIM", System.currentTimeMillis())
+		loginUser("StudentB","nope")
+		Main.addSubmission("sub3", "Assignment Three", "Obviously P=NP because everyone else is wrong.", System.currentTimeMillis())
+		
+		loginUser("ProfessorA","beFair")
+		Main.addAssignment("Assignment Four", new Date(2013, 5, 4), 100, "Create a factorial program.", "ProfessorA")
+
+		/*
 		println("Available Actions:")
 		println("login, logout, viewSubmissions, viewAssignments, viewUserSubmission, gradeAssignment, exit, back")
 		var displayState = "start"
@@ -191,7 +207,6 @@ object Main extends JeevesLib[cmContext] {
 					println( ln )
 				}
 			}			
-		}
-		
+		}	*/		
 	}
 }
