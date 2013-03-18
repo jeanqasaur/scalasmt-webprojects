@@ -37,7 +37,7 @@ class Assignment(val id: Long,
 	}
 	
 	/* Getters and Setter */
-	def getSubmissionCount(): Int = {
+	def getSubmissionCount(context: ObjectExpr[cmContext]): Int = {
 	  assignmentSubmissions.size
 	}
 	

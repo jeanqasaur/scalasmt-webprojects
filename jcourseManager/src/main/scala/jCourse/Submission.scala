@@ -24,19 +24,20 @@ class Submission(val id: Long,
 	
 	/* Policies */
 	private def isUser(ctxt: ObjectExpr[cmContext]): Formula = {
-	  userList.contains(activeUser.username);
+	  //userList.contains(ctxt.viewer.username)
+	  userList.contains(activeUser.username)
 	}
 	
-	private def isSubmitter(ctxt: ObjectExpr[cmContext]): Formula = {
+	private def isSubmitter(ctxt: ObjectExpr[cmContext]): Formula = {	  
 	  //ctxt.viewer.username === submitterName
 	  activeUser.username == submitterName
 	}
+	
 	private def isInstructor(ctxt: ObjectExpr[cmContext]): Formula = {
-	  //ctxt.viewer.permissionLevel === InstructorLevel
+	  ctxt.viewer.permissionLevel === InstructorLevel	  
 	  activeUser.permissionLevel == InstructorLevel
 	}	
 	
-	//restrict (levelVariable, (ctxt: typeOf(condition)) => ctxt === condition)	
 	restrict(_viewerL, (ctxt: ObjectExpr[cmContext]) => ( isSubmitter(ctxt) || isInstructor(ctxt) ) )
 	restrict(_editorL, (ctxt: ObjectExpr[cmContext]) => isSubmitter(ctxt) )
 	restrict(_adminL, (ctxt: ObjectExpr[cmContext]) => isInstructor(ctxt) )
@@ -48,14 +49,11 @@ class Submission(val id: Long,
 	    grade = score
 	    true
 	  }
-	  else {	false }
+	  else { false }
 	}
 	
 	def getGrade(context: ObjectExpr[cmContext]): String = {
-	  //Make Sensitve Object		//val sensObj = mkSensitive(levelVariable, highComponentObject, lowComponentObject);	
 	  val returnVal = mkSensitive(_viewerL, grade.toString, "Access Denied");
-	  //val returnVal = mkSensitive(_editorL, grade.toString, "Access Denied");
-	  //Concretize SensitiveVal		//val result = concretize (context, sensObj)
 	  return (concretize(context, returnVal).asInstanceOf[S]).s
 	}
 	
@@ -63,11 +61,11 @@ class Submission(val id: Long,
 	  return activeUser.toString()
 	}
 	
-	def getRef(): String = {
+	def getRef(context: ObjectExpr[cmContext]): String = {
 	  fileRef
 	}
 	
-	def editRef(newRef: String): Unit = {
+	def editRef(context: ObjectExpr[cmContext], newRef: String): Unit = {
 	  fileRef = newRef
 	}
 	
