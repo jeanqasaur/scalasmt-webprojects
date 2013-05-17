@@ -1,5 +1,6 @@
 package jCourse
 
+import jCourse._
 import Main._
 import cap.jeeveslib.ast._
 import java.util.Date
@@ -37,7 +38,7 @@ class Assignment(val id: Long,
 	}
 	
 	/* Getters and Setter */
-	def getSubmissionCount(context: ObjectExpr[cmContext]): Int = {
+	def getSubmissionCount(context: ObjectExpr[CmContext]): Int = {
 	  assignmentSubmissions.size
 	}
 	

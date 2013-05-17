@@ -7,6 +7,7 @@ import scala.None
 import java.util.Date
 import cap.jeeveslib.ast.Atom
 import cap.jeeveslib.ast.ObjectExpr
+import jCourse._
 
 sealed trait PermissionLevel extends Atom
 case object NoLevel extends PermissionLevel
@@ -52,7 +53,7 @@ class User(val id: Long,
 		//assignments += name -> null
 	}
 	
-	def createAssignment(context: ObjectExpr[cmContext],
+	def createAssignment(context: ObjectExpr[CmContext],
 	    assignmentName: String, 
 	    dueDate: Date, 
 	    maxPoints: Int,

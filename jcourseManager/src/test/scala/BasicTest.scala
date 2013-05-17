@@ -17,6 +17,10 @@ class BasicTest extends FunSuite with BeforeAndAfter with JeevesLib[Dummy] {
 		assert(concretize(l === LOW, x) === -1)	
 	}
 	
+	test("Local Context Works") {	 
+	  //TO-DO fill in TODO	
+	}
+	
 	test ("Create Environment") {
 		Main.addUser("ProfessorA", "Instructor", "One", "prof1@mit.edu", "beFair", InstructorLevel)
 		Main.addUser("ProfessorB", "Professor", "Two", "prof2@mit.edu", "firehose", InstructorLevel)
