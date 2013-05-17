@@ -1,5 +1,6 @@
 package jCourse
 
+import jCourse._
 import cap.jeeveslib.ast._
 import cap.jeeveslib.ast.JeevesTypes._
 import cap.jeeveslib.jeeves._
@@ -11,12 +12,10 @@ import java.util.{Date, Calendar}
 import scala.collection.mutable.HashMap
 //import scala.collection.mutable.Iterable
 
-case class cmContext(viewer: User) extends Atom
-
-object Main extends JeevesLib[cmContext] {
+object Main extends JeevesLib[CmContext] {
 	/*Set Active User*/
 	var activeUser = new User();
-	var userCtxt = new cmContext(activeUser)
+	var userCtxt = new CmContext(activeUser)
 	
 	/* Initialize dictionaries */
 	val userList = new HashMap[String, User]
@@ -38,17 +37,17 @@ object Main extends JeevesLib[cmContext] {
 	private var _adminL = mkLevel()
 	
 	/*Policies*/
-	private def isUser(ctxt: ObjectExpr[cmContext]): Formula = {
+	private def isUser(ctxt: ObjectExpr[CmContext]): Formula = {
 	  userList.contains(activeUser.username);
 	}
 	
-	private def isInstructor(ctxt: ObjectExpr[cmContext]): Formula = {
+	private def isInstructor(ctxt: ObjectExpr[CmContext]): Formula = {
 	  activeUser.permissionLevel == InstructorLevel
 	}
 	
-	restrict(_viewerL, (ctxt: ObjectExpr[cmContext]) => isUser(ctxt)  )
-	restrict(_editorL, (ctxt: ObjectExpr[cmContext]) => isUser(ctxt) )
-	restrict(_adminL, (ctxt: ObjectExpr[cmContext]) => isInstructor(ctxt) )
+	restrict(_viewerL, (ctxt: ObjectExpr[CmContext]) => isUser(ctxt)  )
+	restrict(_editorL, (ctxt: ObjectExpr[CmContext]) => isUser(ctxt) )
+	restrict(_adminL, (ctxt: ObjectExpr[CmContext]) => isInstructor(ctxt) )
 	
 	/* Methods */
 	def addUser(username:String,
@@ -129,7 +128,7 @@ object Main extends JeevesLib[cmContext] {
 	  var possibleUser = userList(uname)	
 	  if (possibleUser.validate(password)) {
 	    activeUser = possibleUser
-	    userCtxt = new cmContext(activeUser)
+	    userCtxt = new CmContext(activeUser)
 	    true	    
 	  }
 	  else {
@@ -139,16 +138,16 @@ object Main extends JeevesLib[cmContext] {
 	
 	def logOut(): Unit = {
 	  var activeUser = new User();
-	  var userCtxt = new cmContext(activeUser)
+	  var userCtxt = new CmContext(activeUser)
 	}
 	
-	def showUsersSubmissions(ctxt: cmContext, uname: String): String = {
+	def showUsersSubmissions(ctxt: CmContext, uname: String): String = {
 		val subs = submissionList.values.filter(submission => submission.submitterName == uname).toList.toString
 		val returnVal = mkSensitive(_adminL, subs, "Access Denied");
 		return (concretize(userCtxt, returnVal).asInstanceOf[S]).s
 	}
 	
-	def showMySubmissions(ctxt: cmContext): String = {
+	def showMySubmissions(ctxt: CmContext): String = {
 		val subs = submissionList.values.filter(submission => submission.submitterName == activeUser.username).toList.toString
 		val returnVal = mkSensitive(_viewerL, subs, "Access Denied");
 		return (concretize(userCtxt, returnVal).asInstanceOf[S]).s
@@ -164,7 +163,7 @@ object Main extends JeevesLib[cmContext] {
 		
 		loginUser("ProfessorA","beFair")
 		Main.addAssignment("Assignment One", new Date(2013, 3, 4), 100, "Eat your vegetables.", "ProfessorA")
-		Main.addAssignment("Assignment Two", new Date(2013, 3, 27), 93, "Design a chatwindow.", "ProfesosrA")
+		Main.addAssignment("Assignment Two", new Date(2013, 3, 27), 93, "Design a chatwindow.", "ProfessorA")
 		loginUser("ProfessorB","firehose")
 		Main.addAssignment("Assignment Three", new Date(2013, 4, 1), 1000, "Solve P?=NP.", "ProfessorB")
 		

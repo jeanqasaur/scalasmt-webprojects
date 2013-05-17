@@ -1,6 +1,7 @@
 package jCourse
 
 import Main._
+import jCourse._
 import cap.jeeveslib.ast.{Atom, Formula, IntExpr, Object, ObjectExpr, S}
 import cap.jeeveslib.ast._
 import cap.jeeveslib.ast.JeevesTypes._
@@ -17,33 +18,36 @@ class Submission(val id: Long,
 	
 	/* Variables */
 	private var grade = -1.0
-	//Level Variables
+	//Labels
 	private var _viewerL = mkLevel()
 	private var _editorL = mkLevel()
 	private var _adminL = mkLevel()
 	
 	/* Policies */
-	private def isUser(ctxt: ObjectExpr[cmContext]): Formula = {
-	  //userList.contains(ctxt.viewer.username)
-	  userList.contains(activeUser.username)
+	private def isUser(ctxt: ObjectExpr[CmContext]): Formula = {
+	  userList.contains(ctxt.viewer.username)
+	  //userList.contains(activeUser.username)
 	}
 	
-	private def isSubmitter(ctxt: ObjectExpr[cmContext]): Formula = {	  
-	  //ctxt.viewer.username === submitterName
-	  activeUser.username == submitterName
+	private def isSubmitter(ctxt: ObjectExpr[CmContext]): Formula = {	  
+	  ctxt.viewer.username === submitterName
+	  //activeUser.username == submitterName
 	}
 	
-	private def isInstructor(ctxt: ObjectExpr[cmContext]): Formula = {
-	  ctxt.viewer.permissionLevel === InstructorLevel	  
-	  activeUser.permissionLevel == InstructorLevel
+	private def isInstructor(ctxt: ObjectExpr[CmContext]): Formula = {
+/*	  println(ctxt)
+	  println("Context Level:"+ctxt.viewer.permissionLevel.toString())
+	  println("Required Level:"+InstructorLevel) */
+	  ctxt.viewer.permissionLevel === InstructorLevel  
+	  //activeUser.permissionLevel == InstructorLevel
 	}	
 	
-	restrict(_viewerL, (ctxt: ObjectExpr[cmContext]) => ( isSubmitter(ctxt) || isInstructor(ctxt) ) )
-	restrict(_editorL, (ctxt: ObjectExpr[cmContext]) => isSubmitter(ctxt) )
-	restrict(_adminL, (ctxt: ObjectExpr[cmContext]) => isInstructor(ctxt) )
+	restrict(_viewerL, (ctxt: ObjectExpr[CmContext]) => ( isSubmitter(ctxt) || isInstructor(ctxt) ) )
+	restrict(_editorL, (ctxt: ObjectExpr[CmContext]) => isSubmitter(ctxt) )
+	restrict(_adminL, (ctxt: ObjectExpr[CmContext]) => isInstructor(ctxt) )
 	
 	/* Getters and Setters */
-	def setGrade(context: ObjectExpr[cmContext], score: Double): Boolean = {
+	def setGrade(context: ObjectExpr[CmContext], score: Double): Boolean = {
 	  val returnVal = mkSensitiveInt(_adminL, 1, 0);	  
 	  if (concretize(context,returnVal) == 1) {
 	    grade = score
@@ -52,8 +56,8 @@ class Submission(val id: Long,
 	  else { false }
 	}
 	
-	def getGrade(context: ObjectExpr[cmContext]): String = {
-	  val returnVal = mkSensitive(_viewerL, grade.toString, "Access Denied");
+	def getGrade(context: ObjectExpr[CmContext]): String = {
+	  val returnVal = mkSensitive(_viewerL, S(grade.toString), S("Access Denied"));
 	  return (concretize(context, returnVal).asInstanceOf[S]).s
 	}
 	
@@ -61,11 +65,11 @@ class Submission(val id: Long,
 	  return activeUser.toString()
 	}
 	
-	def getRef(context: ObjectExpr[cmContext]): String = {
+	def getRef(context: ObjectExpr[CmContext]): String = {
 	  fileRef
 	}
 	
-	def editRef(context: ObjectExpr[cmContext], newRef: String): Unit = {
+	def editRef(context: ObjectExpr[CmContext], newRef: String): Unit = {
 	  fileRef = newRef
 	}
 	
