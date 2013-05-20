@@ -1,0 +1,31 @@
+@(map: Map[String,Any])
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>@map("title")</title>
+  <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="wrapper">
+  @if(map.contains("user")) {
+  	@header(Map("user" -> map("user")))
+  }else {
+  	@header(Map())
+  }
+
+  <div id="content">
+  <p>This conference management system was built using the <a href="http://sites.google.com/site/jeevesprogramming/" target="blank">Jeeves programming language</a>, a research language created by Jean Yang and Kuat Yessenov of the <a href="http://groups.csail.mit.edu/cap/" target="blank">Computer-Aided Programming Group</a> at MIT under the direction of <a href="http://people.csail.mit.edu/asolar/" target="blank">Professor Armando Solar-Lezama</a>.</p>
+
+<p>Jeeves is a language for automatically enforcing privacy policies.  The programmer provides declarative privacy policies, implements core functionality agnostic to these policies, and relies on the language runtime to produce outputs consistent with the policies.</p>
+
+  <p><a href="http://people.csail.mit.edu/jeanyang/" target="blank">Jean Yang</a> created this website using Scala (with the <a href="http://code.google.com/p/scalasmt/" target="blank">Jeeves library</a>), Squeryl for interfacing with SQL, and Scalatra for the front end.  The implementation of this conference management system uses Jeeves policies for describing privacy within the system.  The backend performs SMT-solving using Z3 to produce outputs.  (Please be patient with page loading, as we have not optimized this process yet.)  You may browse the source code <a href="http://code.google.com/p/scalasmt-webprojects/source/browse/#hg%2Fjconf%2Fsrc%2Fmain%2Fscala" target="blank">here</a>.</p>
+
+  <p>Please do not hesitate to contact Jean (jeanyang [at] mit [dot]) if you have any issues using this site.</p>
+
+  <p>Thank you for your patience as we get Jeeves ready for real-world use!</p>
+  </div>
+
+  @footer()
+</div>
+</body>
+</html>

@@ -14,7 +14,8 @@ object ApplicationBuild extends Build {
       "commons-lang" % "commons-lang" % "2.6",
       "com.h2database" % "h2" % "1.3.168",
       "mysql" % "mysql-connector-java" % "5.1.19",
-      "postgresql" % "postgresql" % "9.1-901-1.jdbc4"
+      "postgresql" % "postgresql" % "9.1-901-1.jdbc4",
+      "org.fusesource.scalate" % "scalate-core" % "1.5.3"
       )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(

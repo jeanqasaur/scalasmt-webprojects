@@ -1,0 +1,14 @@
+@(map: Map[String,Any])
+<div id="header">
+  <a href="@routes.Application.index"><h1>JConf</h1></a>
+</div>
+<div id="menu">
+  <ul>
+    <li><a href="@routes.Application.about" title="About">About</a></li>
+    @if(map.contains("user")) {
+      <li><a href="@routes.Application.index" onclick="javascript:goToLink('index')" accesskey="2" title="Home">Home</a></li>
+      <li><a href="@routes.Application.profile" onclick="javascript:goToLink('profile')" accesskey="3" title="Profile">Profile</a></li>
+      <li><a href="@routes.Application.logout" onclick="javascript:goToLink('logout')" accesskey="4" title="Logout">Logout</a></li>
+    }
+  </ul>
+</div>

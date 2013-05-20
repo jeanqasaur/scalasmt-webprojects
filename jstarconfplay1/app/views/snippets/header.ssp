@@ -1,0 +1,14 @@
+<%@ val user: cap.jeeves.jconf.backend.ConfUser = null %>
+<div id="header">
+  <a href="index"><h1>JConf</h1></a>
+</div>
+<div id="menu">
+  <ul>
+    <li><a href="about" onclick="javascript:goToLink('about')" accesskey="1" title="About">About</a></li>
+    #if (user != null)
+      <li><a href="index" onclick="javascript:goToLink('index')" accesskey="2" title="Home">Home</a></li>
+      <li><a href="profile" onclick="javascript:goToLink('profile')" accesskey="3" title="Profile">Profile</a></li>
+      <li><a href="logout" onclick="javascript:goToLink('logout')" accesskey="4" title="Logout">Logout</a></li>
+    #end
+  </ul>
+</div>
