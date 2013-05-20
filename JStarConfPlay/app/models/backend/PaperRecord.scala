@@ -8,6 +8,8 @@ package cap.jeeves.jconf.backend
 import JConfBackend._
 import cap.jeeveslib.ast.{Atom, Formula, IntExpr, Object, ObjectExpr, S}
 import org.squeryl.PrimitiveTypeMode._
+import play.api.libs.json._
+import play.api.data.validation.ValidationError
 
 import scala.collection.immutable.List;
 
@@ -292,4 +294,14 @@ class PaperRecord(         val uid: BigInt
   def showUploadLink(ctxt: ConfContext): String = {
     getUploadLink(showFile(ctxt))
   }
+  
+//  implicit val paperRecordReads = new Reads[PaperRecord] {
+//  def reads(js: JsValue): PaperRecord = {
+//    PaperRecord (
+//      (js \ "name").as[String],
+//      (js \ "isDead").as[Boolean],
+//      (js \ "weight").as[Float]
+//    )
+//  }
+//}
 }

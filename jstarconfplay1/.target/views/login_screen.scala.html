@@ -1,0 +1,50 @@
+@************************************************************************
+ *   						Login Page									*
+ * 		map is contains the message sent from Application.scala			*
+ *		login_form is the form used for logging in or signing up		*
+ ************************************************************************@
+
+@(map: Map[String,Any], login_form: Form[(String,String,String)])
+   		
+@import helper._
+
+<head>
+  <title>@map("title")</title>
+  <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  <META http-equiv="Content-Script-Type" content="text/javascript">
+</head>
+<body>
+	<div id="wrapper">
+		@header(Map())
+		@processing()
+		
+		<div id="content">
+			@if(map.contains("msg")) {
+				<p><i>map("msg")</i></p>
+			}else {
+				<p><i></i></p>
+			}
+			<input type="hidden" name="ac" value="log">
+			<p>
+				@helper.form(action = routes.Application.loginUserPage) {
+    
+    				@helper.inputText(login_form("username"))
+    
+    				@helper.inputPassword(login_form("password"))
+    				
+    				@helper.inputText(login_form(" "), 'id -> "button_pressed", 'type -> "hidden")
+    
+    				<input type="submit" name="action" onclick="updateInput(this.value)" value="Log In">
+    				<input type="submit" name="action" onclick="updateInput(this.value)" value="Sign Up">
+    				<input type="submit" name="action" onclick="updateInput(this.value)" value="Send Password">
+    
+					}
+			</p>
+		</div>
+	</div>
+	<SCRIPT>
+		function updateInput(log){
+    		document.getElementById("button_pressed").value = log;
+		}
+	</SCRIPT>
+</body>

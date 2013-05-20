@@ -1,0 +1,56 @@
+<%@ val map: Map[String,String] %>
+<% 
+   val title = map("title")
+   var errorMsg = "" 
+%>
+
+#if (map.contains("msg"))
+   		errorMsg = map("msg") 
+#end
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>${title}</title>
+  <link href="stylesheets/default.css" rel="stylesheet" type="text/css" />
+  ${include("snippets/goToLink.ssp")}
+</head>
+<body>
+<div id="wrapper">
+  #do(layout("snippets/header.ssp", Map())) #end
+
+  #do(layout("snippets/processing.ssp")) #end
+
+  <div id="content">
+    #if (errorMsg != null)
+      <p><i><%= errorMsg %></i></p>
+    #end
+    @form(routes.Application.userInfo) {
+
+      @inputText(userForm("userName"))
+
+      <input type="submit" value="Login">
+
+   }
+    <form action="login_user" method="post">
+    <input type="hidden" name="ac" value="log">
+    <table>
+    <tr>
+      <td><b>E-mail</b></td>
+      <td><input type="text" name="username" size=15 maxlength=50 /></td>
+    </tr>
+    <tr>
+      <td><b>Password</b></td>
+      <td><input type="password" name="password" size=15 maxlength=20 /></td>
+    </tr>
+    </table>
+    <p>
+      <input type="submit" onclick="javascript:goToLink('login_user')" name="action" class="button" value="Log In" />
+      <input type="submit" onclick="javascript:goToLink('login_user')" name="action" class="button" value="Sign Up" />
+      <input type="submit" onclick="javascript:goToLink('login_user')" name="action" class="button" value="Send Password" />
+    </p>
+    </form>
+  </div>
+  ${include("footer.ssp")}
+</div>
+</body>
+</html>

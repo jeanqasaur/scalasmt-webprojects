@@ -1,0 +1,726 @@
+2013-05-14 14:15:12,284 - [INFO] - from play in main 
+Listening for HTTP on /0:0:0:0:0:0:0:0:9000
+
+2013-05-14 14:15:45,852 - [INFO] - from play in New I/O worker #1 
+database [default] connected at jdbc:h2:mem:play
+
+2013-05-14 14:15:46,146 - [ERROR] - from application in New I/O worker #1 
+
+
+! @6ea4no0oa - Internal server error, for (GET) [/login] ->
+
+play.api.db.evolutions.InvalidDatabaseRevision: Database 'default' needs evolution![An SQL script need to be run on your database.]
+	at play.api.db.evolutions.EvolutionsPlugin$$anonfun$onStart$1$$anonfun$apply$1.apply$mcV$sp(Evolutions.scala:462) ~[play-jdbc_2.10.jar:2.1.1]
+	at play.api.db.evolutions.EvolutionsPlugin.withLock(Evolutions.scala:483) ~[play-jdbc_2.10.jar:2.1.1]
+	at play.api.db.evolutions.EvolutionsPlugin$$anonfun$onStart$1.apply(Evolutions.scala:439) ~[play-jdbc_2.10.jar:2.1.1]
+	at play.api.db.evolutions.EvolutionsPlugin$$anonfun$onStart$1.apply(Evolutions.scala:437) ~[play-jdbc_2.10.jar:2.1.1]
+	at scala.collection.immutable.List.foreach(List.scala:309) ~[scala-library.jar:na]
+	at play.api.db.evolutions.EvolutionsPlugin.onStart(Evolutions.scala:437) ~[play-jdbc_2.10.jar:2.1.1]
+	at play.api.Play$$anonfun$start$1$$anonfun$apply$mcV$sp$1.apply(Play.scala:63) ~[play_2.10.jar:2.1.1]
+	at play.api.Play$$anonfun$start$1$$anonfun$apply$mcV$sp$1.apply(Play.scala:63) ~[play_2.10.jar:2.1.1]
+	at scala.collection.immutable.List.foreach(List.scala:309) ~[scala-library.jar:na]
+	at play.api.Play$$anonfun$start$1.apply$mcV$sp(Play.scala:63) ~[play_2.10.jar:2.1.1]
+	at play.api.Play$$anonfun$start$1.apply(Play.scala:63) ~[play_2.10.jar:2.1.1]
+	at play.api.Play$$anonfun$start$1.apply(Play.scala:63) ~[play_2.10.jar:2.1.1]
+	at play.utils.Threads$.withContextClassLoader(Threads.scala:18) ~[play_2.10.jar:2.1.1]
+	at play.api.Play$.start(Play.scala:62) ~[play_2.10.jar:2.1.1]
+	at play.core.ReloadableApplication$$anonfun$get$1$$anonfun$1.apply(ApplicationProvider.scala:133) ~[play_2.10.jar:2.1.1]
+	at play.core.ReloadableApplication$$anonfun$get$1$$anonfun$1.apply(ApplicationProvider.scala:106) ~[play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) ~[scala-library.jar:na]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:106) ~[play_2.10.jar:2.1.1]
+	at play.core.ReloadableApplication$$anonfun$get$1.apply(ApplicationProvider.scala:104) ~[play_2.10.jar:2.1.1]
+	at scala.util.Either$RightProjection.flatMap(Either.scala:523) [scala-library.jar:na]
+	at play.core.ReloadableApplication.get(ApplicationProvider.scala:104) ~[play_2.10.jar:2.1.1]
+	at play.core.server.Server$class.sendHandler$1(Server.scala:56) [play_2.10.jar:2.1.1]
+	at play.core.server.Server$$anonfun$getHandlerFor$4.apply(Server.scala:88) [play_2.10.jar:2.1.1]
+	at play.core.server.Server$$anonfun$getHandlerFor$4.apply(Server.scala:87) [play_2.10.jar:2.1.1]
+	at scala.util.Either$RightProjection.flatMap(Either.scala:523) [scala-library.jar:na]
+	at play.core.server.Server$class.getHandlerFor(Server.scala:87) [play_2.10.jar:2.1.1]
+	at play.core.server.NettyServer.getHandlerFor(NettyServer.scala:34) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$6.apply(PlayDefaultUpstreamHandler.scala:115) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$6.apply(PlayDefaultUpstreamHandler.scala:115) [play_2.10.jar:2.1.1]
+	at scala.util.Either.fold(Either.scala:98) [scala-library.jar:na]
+	at play.core.server.netty.PlayDefaultUpstreamHandler.messageReceived(PlayDefaultUpstreamHandler.scala:109) [play_2.10.jar:2.1.1]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:787) [netty.jar:na]
+	at org.jboss.netty.handler.codec.http.HttpContentDecoder.messageReceived(HttpContentDecoder.java:108) [netty.jar:na]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:787) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:296) [netty.jar:na]
+	at org.jboss.netty.handler.codec.frame.FrameDecoder.unfoldAndFireMessageReceived(FrameDecoder.java:459) [netty.jar:na]
+	at org.jboss.netty.handler.codec.replay.ReplayingDecoder.callDecode(ReplayingDecoder.java:536) [netty.jar:na]
+	at org.jboss.netty.handler.codec.replay.ReplayingDecoder.messageReceived(ReplayingDecoder.java:435) [netty.jar:na]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:555) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:268) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:255) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioWorker.read(NioWorker.java:88) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.process(AbstractNioWorker.java:107) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioSelector.run(AbstractNioSelector.java:312) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.run(AbstractNioWorker.java:88) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioWorker.run(NioWorker.java:178) [netty.jar:na]
+	at org.jboss.netty.util.ThreadRenamingRunnable.run(ThreadRenamingRunnable.java:108) [netty.jar:na]
+	at org.jboss.netty.util.internal.DeadLockProofWorker$1.run(DeadLockProofWorker.java:42) [netty.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1110) [na:1.7.0_09]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:603) [na:1.7.0_09]
+	at java.lang.Thread.run(Thread.java:722) [na:1.7.0_09]
+
+2013-05-14 14:15:50,686 - [INFO] - from play in New I/O worker #1 
+database [default] connected at jdbc:h2:mem:play
+
+2013-05-14 14:15:50,770 - [INFO] - from play in New I/O worker #1 
+Application started (Dev)
+
+2013-05-14 14:15:58,006 - [ERROR] - from play in play-internal-execution-context-1 
+Cannot invoke the action, eventually got an error: java.lang.RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+
+2013-05-14 14:15:58,057 - [ERROR] - from application in play-internal-execution-context-1 
+
+
+! @6ea4noig3 - Internal server error, for (POST) [/login_user] ->
+
+play.api.Application$$anon$1: Execution exception[[RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike]]
+	at play.api.Application$class.handleError(Application.scala:289) ~[play_2.10.jar:2.1.1]
+	at play.api.DefaultApplication.handleError(Application.scala:383) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4$$anonfun$apply$28.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4$$anonfun$apply$28.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4.apply(PlayDefaultUpstreamHandler.scala:398) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend1$1.apply(Promise.scala:113) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend1$1.apply(Promise.scala:113) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend$1$$anonfun$apply$1.apply(Promise.scala:104) [play_2.10.jar:2.1.1]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) [scala-library.jar:na]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) [scala-library.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1110) [na:1.7.0_09]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:603) [na:1.7.0_09]
+	at java.lang.Thread.run(Thread.java:722) [na:1.7.0_09]
+java.lang.RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:222) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5$$anonfun$apply$6.apply(Action.scala:109) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5$$anonfun$apply$6.apply(Action.scala:109) ~[play_2.10.jar:2.1.1]
+	at play.utils.Threads$.withContextClassLoader(Threads.scala:18) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5.apply(Action.scala:108) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5.apply(Action.scala:106) ~[play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2.apply(Action.scala:106) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2.apply(Action.scala:99) ~[play_2.10.jar:2.1.1]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) [scala-library.jar:na]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) [scala-library.jar:na]
+	at akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:137) ~[akka-actor_2.10.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1417) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:262) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:975) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1478) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:104) ~[scala-library.jar:na]
+Caused by: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+	at models.JConfBackend$.<init>(JConfBackend.scala:10) ~[na:na]
+	at models.JConfBackend$.<clinit>(JConfBackend.scala) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1$$anonfun$apply$3.apply(Application.scala:176) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1$$anonfun$apply$3.apply(Application.scala:170) ~[na:na]
+	at play.api.data.Form$$anonfun$fold$1.apply(Form.scala:134) ~[play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.api.data.Form.fold(Form.scala:134) ~[play_2.10.jar:2.1.1]
+	at controllers.Application$$anonfun$loginUserPage$1.apply(Application.scala:168) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1.apply(Application.scala:167) ~[na:na]
+	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:217) ~[play_2.10.jar:2.1.1]
+	... 16 common frames omitted
+Caused by: java.lang.ClassNotFoundException: scala.collection.JavaConversions$JMapWrapperLike
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366) ~[na:1.7.0_09]
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355) ~[na:1.7.0_09]
+	at java.security.AccessController.doPrivileged(Native Method) ~[na:1.7.0_09]
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354) ~[na:1.7.0_09]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:423) ~[na:1.7.0_09]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:356) ~[na:1.7.0_09]
+	at sbt.PlayCommands$$anonfun$53$$anonfun$55$$anon$2.loadClass(PlayCommands.scala:535) ~[na:na]
+	... 26 common frames omitted
+
+2013-05-14 14:18:50,854 - [INFO] - from play in New I/O worker #1 
+database [default] connected at jdbc:h2:mem:play
+
+2013-05-14 14:18:50,873 - [INFO] - from play in New I/O worker #1 
+Application started (Dev)
+
+2013-05-14 14:20:59,888 - [INFO] - from play in New I/O worker #1 
+database [default] connected at jdbc:h2:mem:play
+
+2013-05-14 14:20:59,930 - [INFO] - from play in New I/O worker #1 
+Application started (Dev)
+
+2013-05-14 14:30:29,754 - [INFO] - from play in New I/O worker #2 
+database [default] connected at jdbc:h2:mem:play
+
+2013-05-14 14:30:29,991 - [INFO] - from play in New I/O worker #2 
+Application started (Dev)
+
+2013-05-14 14:31:16,524 - [ERROR] - from play in play-internal-execution-context-1 
+Cannot invoke the action, eventually got an error: java.lang.RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+
+2013-05-14 14:31:16,530 - [ERROR] - from application in play-internal-execution-context-1 
+
+
+! @6ea4pop8c - Internal server error, for (POST) [/login_user] ->
+
+play.api.Application$$anon$1: Execution exception[[RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike]]
+	at play.api.Application$class.handleError(Application.scala:289) ~[play_2.10.jar:2.1.1]
+	at play.api.DefaultApplication.handleError(Application.scala:383) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4$$anonfun$apply$28.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4$$anonfun$apply$28.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4.apply(PlayDefaultUpstreamHandler.scala:398) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend1$1.apply(Promise.scala:113) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend1$1.apply(Promise.scala:113) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend$1$$anonfun$apply$1.apply(Promise.scala:104) [play_2.10.jar:2.1.1]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) [scala-library.jar:na]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) [scala-library.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1110) [na:1.7.0_09]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:603) [na:1.7.0_09]
+	at java.lang.Thread.run(Thread.java:722) [na:1.7.0_09]
+java.lang.RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:222) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5$$anonfun$apply$6.apply(Action.scala:109) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5$$anonfun$apply$6.apply(Action.scala:109) ~[play_2.10.jar:2.1.1]
+	at play.utils.Threads$.withContextClassLoader(Threads.scala:18) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5.apply(Action.scala:108) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5.apply(Action.scala:106) ~[play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2.apply(Action.scala:106) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2.apply(Action.scala:99) ~[play_2.10.jar:2.1.1]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) [scala-library.jar:na]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) [scala-library.jar:na]
+	at akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:137) ~[akka-actor_2.10.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1417) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:262) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:975) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1478) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:104) ~[scala-library.jar:na]
+Caused by: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+	at models.DummyTest$.<init>(DummyTest.scala:14) ~[na:na]
+	at models.DummyTest$.<clinit>(DummyTest.scala) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1$$anonfun$apply$3.apply(Application.scala:192) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1$$anonfun$apply$3.apply(Application.scala:170) ~[na:na]
+	at play.api.data.Form$$anonfun$fold$1.apply(Form.scala:134) ~[play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.api.data.Form.fold(Form.scala:134) ~[play_2.10.jar:2.1.1]
+	at controllers.Application$$anonfun$loginUserPage$1.apply(Application.scala:168) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1.apply(Application.scala:167) ~[na:na]
+	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:217) ~[play_2.10.jar:2.1.1]
+	... 16 common frames omitted
+Caused by: java.lang.ClassNotFoundException: scala.collection.JavaConversions$JMapWrapperLike
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366) ~[na:1.7.0_09]
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355) ~[na:1.7.0_09]
+	at java.security.AccessController.doPrivileged(Native Method) ~[na:1.7.0_09]
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354) ~[na:1.7.0_09]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:423) ~[na:1.7.0_09]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:356) ~[na:1.7.0_09]
+	at sbt.PlayCommands$$anonfun$53$$anonfun$55$$anon$2.loadClass(PlayCommands.scala:535) ~[na:na]
+	... 26 common frames omitted
+
+2013-05-14 14:32:08,706 - [INFO] - from play in New I/O worker #2 
+database [default] connected at jdbc:h2:mem:play
+
+2013-05-14 14:32:08,718 - [INFO] - from play in New I/O worker #2 
+Application started (Dev)
+
+2013-05-14 14:32:16,436 - [ERROR] - from play in play-internal-execution-context-1 
+Cannot invoke the action, eventually got an error: java.lang.RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+
+2013-05-14 14:32:16,443 - [ERROR] - from application in play-internal-execution-context-1 
+
+
+! @6ea5029ok - Internal server error, for (POST) [/login_user] ->
+
+play.api.Application$$anon$1: Execution exception[[RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike]]
+	at play.api.Application$class.handleError(Application.scala:289) ~[play_2.10.jar:2.1.1]
+	at play.api.DefaultApplication.handleError(Application.scala:383) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4$$anonfun$apply$28.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4$$anonfun$apply$28.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4.apply(PlayDefaultUpstreamHandler.scala:398) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend1$1.apply(Promise.scala:113) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend1$1.apply(Promise.scala:113) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend$1$$anonfun$apply$1.apply(Promise.scala:104) [play_2.10.jar:2.1.1]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) [scala-library.jar:na]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) [scala-library.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1110) [na:1.7.0_09]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:603) [na:1.7.0_09]
+	at java.lang.Thread.run(Thread.java:722) [na:1.7.0_09]
+java.lang.RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:222) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5$$anonfun$apply$6.apply(Action.scala:109) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5$$anonfun$apply$6.apply(Action.scala:109) ~[play_2.10.jar:2.1.1]
+	at play.utils.Threads$.withContextClassLoader(Threads.scala:18) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5.apply(Action.scala:108) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5.apply(Action.scala:106) ~[play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2.apply(Action.scala:106) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2.apply(Action.scala:99) ~[play_2.10.jar:2.1.1]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) [scala-library.jar:na]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) [scala-library.jar:na]
+	at akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:137) ~[akka-actor_2.10.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1417) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:262) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:975) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1478) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:104) ~[scala-library.jar:na]
+Caused by: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+	at models.DummyTest$.<init>(DummyTest.scala:13) ~[na:na]
+	at models.DummyTest$.<clinit>(DummyTest.scala) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1$$anonfun$apply$3.apply(Application.scala:192) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1$$anonfun$apply$3.apply(Application.scala:170) ~[na:na]
+	at play.api.data.Form$$anonfun$fold$1.apply(Form.scala:134) ~[play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.api.data.Form.fold(Form.scala:134) ~[play_2.10.jar:2.1.1]
+	at controllers.Application$$anonfun$loginUserPage$1.apply(Application.scala:168) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1.apply(Application.scala:167) ~[na:na]
+	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:217) ~[play_2.10.jar:2.1.1]
+	... 16 common frames omitted
+Caused by: java.lang.ClassNotFoundException: scala.collection.JavaConversions$JMapWrapperLike
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366) ~[na:1.7.0_09]
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355) ~[na:1.7.0_09]
+	at java.security.AccessController.doPrivileged(Native Method) ~[na:1.7.0_09]
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354) ~[na:1.7.0_09]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:423) ~[na:1.7.0_09]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:356) ~[na:1.7.0_09]
+	at sbt.PlayCommands$$anonfun$53$$anonfun$55$$anon$2.loadClass(PlayCommands.scala:535) ~[na:na]
+	... 26 common frames omitted
+
+2013-05-14 14:33:01,049 - [INFO] - from play in New I/O worker #2 
+database [default] connected at jdbc:h2:mem:play
+
+2013-05-14 14:33:01,066 - [INFO] - from play in New I/O worker #2 
+Application started (Dev)
+
+2013-05-14 14:33:39,948 - [INFO] - from play in New I/O worker #2 
+database [default] connected at jdbc:h2:mem:play
+
+2013-05-14 14:33:39,962 - [INFO] - from play in New I/O worker #2 
+Application started (Dev)
+
+2013-05-15 12:34:16,523 - [INFO] - from play in New I/O worker #2 
+database [default] connected at jdbc:h2:mem:play
+
+2013-05-15 12:34:16,630 - [INFO] - from play in New I/O worker #2 
+Application started (Dev)
+
+2013-05-15 12:34:39,645 - [ERROR] - from play in play-internal-execution-context-2 
+Cannot invoke the action, eventually got an error: java.lang.RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+
+2013-05-15 12:34:39,686 - [ERROR] - from application in play-internal-execution-context-2 
+
+
+! @6eabhihei - Internal server error, for (POST) [/login_user] ->
+
+play.api.Application$$anon$1: Execution exception[[RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike]]
+	at play.api.Application$class.handleError(Application.scala:289) ~[play_2.10.jar:2.1.1]
+	at play.api.DefaultApplication.handleError(Application.scala:383) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4$$anonfun$apply$28.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4$$anonfun$apply$28.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4.apply(PlayDefaultUpstreamHandler.scala:398) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend1$1.apply(Promise.scala:113) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend1$1.apply(Promise.scala:113) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend$1$$anonfun$apply$1.apply(Promise.scala:104) [play_2.10.jar:2.1.1]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) [scala-library.jar:na]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) [scala-library.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1110) [na:1.7.0_09]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:603) [na:1.7.0_09]
+	at java.lang.Thread.run(Thread.java:722) [na:1.7.0_09]
+java.lang.RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:222) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5$$anonfun$apply$6.apply(Action.scala:109) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5$$anonfun$apply$6.apply(Action.scala:109) ~[play_2.10.jar:2.1.1]
+	at play.utils.Threads$.withContextClassLoader(Threads.scala:18) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5.apply(Action.scala:108) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5.apply(Action.scala:106) ~[play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2.apply(Action.scala:106) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2.apply(Action.scala:99) ~[play_2.10.jar:2.1.1]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) [scala-library.jar:na]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) [scala-library.jar:na]
+	at akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:137) ~[akka-actor_2.10.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1417) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:262) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:975) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1478) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:104) ~[scala-library.jar:na]
+Caused by: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+	at models.DummyTest$.<init>(DummyTest.scala:13) ~[na:na]
+	at models.DummyTest$.<clinit>(DummyTest.scala) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1$$anonfun$apply$3.apply(Application.scala:192) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1$$anonfun$apply$3.apply(Application.scala:170) ~[na:na]
+	at play.api.data.Form$$anonfun$fold$1.apply(Form.scala:134) ~[play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.api.data.Form.fold(Form.scala:134) ~[play_2.10.jar:2.1.1]
+	at controllers.Application$$anonfun$loginUserPage$1.apply(Application.scala:168) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1.apply(Application.scala:167) ~[na:na]
+	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:217) ~[play_2.10.jar:2.1.1]
+	... 16 common frames omitted
+Caused by: java.lang.ClassNotFoundException: scala.collection.JavaConversions$JMapWrapperLike
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366) ~[na:1.7.0_09]
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355) ~[na:1.7.0_09]
+	at java.security.AccessController.doPrivileged(Native Method) ~[na:1.7.0_09]
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354) ~[na:1.7.0_09]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:423) ~[na:1.7.0_09]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:356) ~[na:1.7.0_09]
+	at sbt.PlayCommands$$anonfun$53$$anonfun$55$$anon$2.loadClass(PlayCommands.scala:535) ~[na:na]
+	... 26 common frames omitted
+
+2013-05-15 12:42:13,190 - [INFO] - from play in New I/O worker #3 
+database [default] connected at jdbc:h2:mem:play
+
+2013-05-15 12:42:13,243 - [INFO] - from play in New I/O worker #3 
+Application started (Dev)
+
+2013-05-15 12:46:32,183 - [ERROR] - from play in play-internal-execution-context-1 
+Cannot invoke the action, eventually got an error: java.lang.RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+
+2013-05-15 12:46:32,244 - [ERROR] - from application in play-internal-execution-context-1 
+
+
+! @6eabj75h1 - Internal server error, for (POST) [/login_user] ->
+
+play.api.Application$$anon$1: Execution exception[[RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike]]
+	at play.api.Application$class.handleError(Application.scala:289) ~[play_2.10.jar:2.1.1]
+	at play.api.DefaultApplication.handleError(Application.scala:383) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4$$anonfun$apply$28.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4$$anonfun$apply$28.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4.apply(PlayDefaultUpstreamHandler.scala:403) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$handleAction$1$4.apply(PlayDefaultUpstreamHandler.scala:398) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend1$1.apply(Promise.scala:113) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend1$1.apply(Promise.scala:113) [play_2.10.jar:2.1.1]
+	at play.api.libs.concurrent.PlayPromise$$anonfun$extend$1$$anonfun$apply$1.apply(Promise.scala:104) [play_2.10.jar:2.1.1]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) [scala-library.jar:na]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) [scala-library.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1110) [na:1.7.0_09]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:603) [na:1.7.0_09]
+	at java.lang.Thread.run(Thread.java:722) [na:1.7.0_09]
+java.lang.RuntimeException: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:222) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5$$anonfun$apply$6.apply(Action.scala:109) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5$$anonfun$apply$6.apply(Action.scala:109) ~[play_2.10.jar:2.1.1]
+	at play.utils.Threads$.withContextClassLoader(Threads.scala:18) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5.apply(Action.scala:108) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2$$anonfun$apply$5.apply(Action.scala:106) ~[play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2.apply(Action.scala:106) ~[play_2.10.jar:2.1.1]
+	at play.api.mvc.Action$$anonfun$apply$1$$anonfun$apply$2.apply(Action.scala:99) ~[play_2.10.jar:2.1.1]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) [scala-library.jar:na]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) [scala-library.jar:na]
+	at akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:137) ~[akka-actor_2.10.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinTask$AdaptedRunnableAction.exec(ForkJoinTask.java:1417) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:262) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:975) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1478) ~[scala-library.jar:na]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:104) ~[scala-library.jar:na]
+Caused by: java.lang.NoClassDefFoundError: scala/collection/JavaConversions$JMapWrapperLike
+	at models.DummyTest$.<init>(DummyTest.scala:13) ~[na:na]
+	at models.DummyTest$.<clinit>(DummyTest.scala) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1$$anonfun$apply$3.apply(Application.scala:192) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1$$anonfun$apply$3.apply(Application.scala:170) ~[na:na]
+	at play.api.data.Form$$anonfun$fold$1.apply(Form.scala:134) ~[play_2.10.jar:2.1.1]
+	at scala.Option.map(Option.scala:145) [scala-library.jar:na]
+	at play.api.data.Form.fold(Form.scala:134) ~[play_2.10.jar:2.1.1]
+	at controllers.Application$$anonfun$loginUserPage$1.apply(Application.scala:168) ~[na:na]
+	at controllers.Application$$anonfun$loginUserPage$1.apply(Application.scala:167) ~[na:na]
+	at play.api.mvc.ActionBuilder$$anon$1.apply(Action.scala:217) ~[play_2.10.jar:2.1.1]
+	... 16 common frames omitted
+Caused by: java.lang.ClassNotFoundException: scala.collection.JavaConversions$JMapWrapperLike
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:366) ~[na:1.7.0_09]
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:355) ~[na:1.7.0_09]
+	at java.security.AccessController.doPrivileged(Native Method) ~[na:1.7.0_09]
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:354) ~[na:1.7.0_09]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:423) ~[na:1.7.0_09]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:356) ~[na:1.7.0_09]
+	at sbt.PlayCommands$$anonfun$53$$anonfun$55$$anon$2.loadClass(PlayCommands.scala:535) ~[na:na]
+	... 26 common frames omitted
+
+2013-05-15 14:17:58,415 - [INFO] - from play in New I/O worker #1 
+database [default] connected at jdbc:h2:mem:play
+
+2013-05-15 14:17:58,488 - [INFO] - from play in New I/O worker #1 
+Application started (Dev)
+
+2013-05-15 21:18:45,353 - [ERROR] - from application in New I/O worker #4 
+
+
+! @6eae8dkmi - Internal server error, for (GET) [/login] ->
+
+sbt.PlayExceptions$CompilationException: Compilation error[object DummyTest is not a member of package models]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15$$anonfun$apply$16.apply(PlayReloader.scala:349) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15$$anonfun$apply$16.apply(PlayReloader.scala:349) ~[na:na]
+	at scala.Option.map(Option.scala:133) ~[scala-library.jar:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15.apply(PlayReloader.scala:349) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15.apply(PlayReloader.scala:346) ~[na:na]
+	at scala.Option.map(Option.scala:133) ~[scala-library.jar:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2.apply(PlayReloader.scala:346) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2.apply(PlayReloader.scala:344) ~[na:na]
+	at scala.Either$LeftProjection.map(Either.scala:374) ~[na:na]
+	at sbt.PlayReloader$$anon$2.reload(PlayReloader.scala:344) ~[na:na]
+	at play.core.ReloadableApplication.get(ApplicationProvider.scala:98) ~[play_2.10.jar:2.1.1]
+	at play.core.server.Server$class.sendHandler$1(Server.scala:56) [play_2.10.jar:2.1.1]
+	at play.core.server.Server$$anonfun$getHandlerFor$4.apply(Server.scala:88) [play_2.10.jar:2.1.1]
+	at play.core.server.Server$$anonfun$getHandlerFor$4.apply(Server.scala:87) [play_2.10.jar:2.1.1]
+	at scala.util.Either$RightProjection.flatMap(Either.scala:523) [scala-library.jar:na]
+	at play.core.server.Server$class.getHandlerFor(Server.scala:87) [play_2.10.jar:2.1.1]
+	at play.core.server.NettyServer.getHandlerFor(NettyServer.scala:34) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$6.apply(PlayDefaultUpstreamHandler.scala:115) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$6.apply(PlayDefaultUpstreamHandler.scala:115) [play_2.10.jar:2.1.1]
+	at scala.util.Either.fold(Either.scala:98) [scala-library.jar:na]
+	at play.core.server.netty.PlayDefaultUpstreamHandler.messageReceived(PlayDefaultUpstreamHandler.scala:109) [play_2.10.jar:2.1.1]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:787) [netty.jar:na]
+	at org.jboss.netty.handler.codec.http.HttpContentDecoder.messageReceived(HttpContentDecoder.java:108) [netty.jar:na]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:787) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:296) [netty.jar:na]
+	at org.jboss.netty.handler.codec.frame.FrameDecoder.unfoldAndFireMessageReceived(FrameDecoder.java:459) [netty.jar:na]
+	at org.jboss.netty.handler.codec.replay.ReplayingDecoder.callDecode(ReplayingDecoder.java:536) [netty.jar:na]
+	at org.jboss.netty.handler.codec.replay.ReplayingDecoder.messageReceived(ReplayingDecoder.java:435) [netty.jar:na]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:555) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:268) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:255) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioWorker.read(NioWorker.java:88) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.process(AbstractNioWorker.java:107) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioSelector.run(AbstractNioSelector.java:312) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.run(AbstractNioWorker.java:88) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioWorker.run(NioWorker.java:178) [netty.jar:na]
+	at org.jboss.netty.util.ThreadRenamingRunnable.run(ThreadRenamingRunnable.java:108) [netty.jar:na]
+	at org.jboss.netty.util.internal.DeadLockProofWorker$1.run(DeadLockProofWorker.java:42) [netty.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1110) [na:1.7.0_09]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:603) [na:1.7.0_09]
+	at java.lang.Thread.run(Thread.java:722) [na:1.7.0_09]
+
+2013-05-15 21:22:14,948 - [ERROR] - from application in New I/O worker #4 
+
+
+! @6eae8pimp - Internal server error, for (GET) [/login] ->
+
+sbt.PlayExceptions$CompilationException: Compilation error[not found: type FExpr]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15$$anonfun$apply$16.apply(PlayReloader.scala:349) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15$$anonfun$apply$16.apply(PlayReloader.scala:349) ~[na:na]
+	at scala.Option.map(Option.scala:133) ~[scala-library.jar:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15.apply(PlayReloader.scala:349) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15.apply(PlayReloader.scala:346) ~[na:na]
+	at scala.Option.map(Option.scala:133) ~[scala-library.jar:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2.apply(PlayReloader.scala:346) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2.apply(PlayReloader.scala:344) ~[na:na]
+	at scala.Either$LeftProjection.map(Either.scala:374) ~[na:na]
+	at sbt.PlayReloader$$anon$2.reload(PlayReloader.scala:344) ~[na:na]
+	at play.core.ReloadableApplication.get(ApplicationProvider.scala:98) ~[play_2.10.jar:2.1.1]
+	at play.core.server.Server$class.sendHandler$1(Server.scala:56) [play_2.10.jar:2.1.1]
+	at play.core.server.Server$$anonfun$getHandlerFor$4.apply(Server.scala:88) [play_2.10.jar:2.1.1]
+	at play.core.server.Server$$anonfun$getHandlerFor$4.apply(Server.scala:87) [play_2.10.jar:2.1.1]
+	at scala.util.Either$RightProjection.flatMap(Either.scala:523) [scala-library.jar:na]
+	at play.core.server.Server$class.getHandlerFor(Server.scala:87) [play_2.10.jar:2.1.1]
+	at play.core.server.NettyServer.getHandlerFor(NettyServer.scala:34) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$6.apply(PlayDefaultUpstreamHandler.scala:115) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$6.apply(PlayDefaultUpstreamHandler.scala:115) [play_2.10.jar:2.1.1]
+	at scala.util.Either.fold(Either.scala:98) [scala-library.jar:na]
+	at play.core.server.netty.PlayDefaultUpstreamHandler.messageReceived(PlayDefaultUpstreamHandler.scala:109) [play_2.10.jar:2.1.1]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:787) [netty.jar:na]
+	at org.jboss.netty.handler.codec.http.HttpContentDecoder.messageReceived(HttpContentDecoder.java:108) [netty.jar:na]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:787) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:296) [netty.jar:na]
+	at org.jboss.netty.handler.codec.frame.FrameDecoder.unfoldAndFireMessageReceived(FrameDecoder.java:459) [netty.jar:na]
+	at org.jboss.netty.handler.codec.replay.ReplayingDecoder.callDecode(ReplayingDecoder.java:536) [netty.jar:na]
+	at org.jboss.netty.handler.codec.replay.ReplayingDecoder.messageReceived(ReplayingDecoder.java:435) [netty.jar:na]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:555) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:268) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:255) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioWorker.read(NioWorker.java:88) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.process(AbstractNioWorker.java:107) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioSelector.run(AbstractNioSelector.java:312) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.run(AbstractNioWorker.java:88) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioWorker.run(NioWorker.java:178) [netty.jar:na]
+	at org.jboss.netty.util.ThreadRenamingRunnable.run(ThreadRenamingRunnable.java:108) [netty.jar:na]
+	at org.jboss.netty.util.internal.DeadLockProofWorker$1.run(DeadLockProofWorker.java:42) [netty.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1110) [na:1.7.0_09]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:603) [na:1.7.0_09]
+	at java.lang.Thread.run(Thread.java:722) [na:1.7.0_09]
+
+2013-05-17 02:58:43,939 - [ERROR] - from application in New I/O worker #2 
+
+
+! @6ean864km - Internal server error, for (GET) [/login] ->
+
+sbt.PlayExceptions$CompilationException: Compilation error[type mismatch;
+ found   : cap.jeeveslib.ast.BoolVar
+ required: String]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15$$anonfun$apply$16.apply(PlayReloader.scala:349) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15$$anonfun$apply$16.apply(PlayReloader.scala:349) ~[na:na]
+	at scala.Option.map(Option.scala:133) ~[scala-library.jar:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15.apply(PlayReloader.scala:349) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15.apply(PlayReloader.scala:346) ~[na:na]
+	at scala.Option.map(Option.scala:133) ~[scala-library.jar:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2.apply(PlayReloader.scala:346) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2.apply(PlayReloader.scala:344) ~[na:na]
+	at scala.Either$LeftProjection.map(Either.scala:374) ~[na:na]
+	at sbt.PlayReloader$$anon$2.reload(PlayReloader.scala:344) ~[na:na]
+	at play.core.ReloadableApplication.get(ApplicationProvider.scala:98) ~[play_2.10.jar:2.1.1]
+	at play.core.server.Server$class.sendHandler$1(Server.scala:56) [play_2.10.jar:2.1.1]
+	at play.core.server.Server$$anonfun$getHandlerFor$4.apply(Server.scala:88) [play_2.10.jar:2.1.1]
+	at play.core.server.Server$$anonfun$getHandlerFor$4.apply(Server.scala:87) [play_2.10.jar:2.1.1]
+	at scala.util.Either$RightProjection.flatMap(Either.scala:523) [scala-library.jar:na]
+	at play.core.server.Server$class.getHandlerFor(Server.scala:87) [play_2.10.jar:2.1.1]
+	at play.core.server.NettyServer.getHandlerFor(NettyServer.scala:34) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$6.apply(PlayDefaultUpstreamHandler.scala:115) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$6.apply(PlayDefaultUpstreamHandler.scala:115) [play_2.10.jar:2.1.1]
+	at scala.util.Either.fold(Either.scala:98) [scala-library.jar:na]
+	at play.core.server.netty.PlayDefaultUpstreamHandler.messageReceived(PlayDefaultUpstreamHandler.scala:109) [play_2.10.jar:2.1.1]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:787) [netty.jar:na]
+	at org.jboss.netty.handler.codec.http.HttpContentDecoder.messageReceived(HttpContentDecoder.java:108) [netty.jar:na]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:787) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:296) [netty.jar:na]
+	at org.jboss.netty.handler.codec.frame.FrameDecoder.unfoldAndFireMessageReceived(FrameDecoder.java:459) [netty.jar:na]
+	at org.jboss.netty.handler.codec.replay.ReplayingDecoder.callDecode(ReplayingDecoder.java:536) [netty.jar:na]
+	at org.jboss.netty.handler.codec.replay.ReplayingDecoder.messageReceived(ReplayingDecoder.java:435) [netty.jar:na]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:555) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:268) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:255) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioWorker.read(NioWorker.java:88) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.process(AbstractNioWorker.java:107) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioSelector.run(AbstractNioSelector.java:312) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.run(AbstractNioWorker.java:88) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioWorker.run(NioWorker.java:178) [netty.jar:na]
+	at org.jboss.netty.util.ThreadRenamingRunnable.run(ThreadRenamingRunnable.java:108) [netty.jar:na]
+	at org.jboss.netty.util.internal.DeadLockProofWorker$1.run(DeadLockProofWorker.java:42) [netty.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1110) [na:1.7.0_09]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:603) [na:1.7.0_09]
+	at java.lang.Thread.run(Thread.java:722) [na:1.7.0_09]
+
+2013-05-17 03:12:24,005 - [ERROR] - from application in New I/O worker #3 
+
+
+! @6eana0m1f - Internal server error, for (GET) [/login] ->
+
+sbt.PlayExceptions$CompilationException: Compilation error[type mismatch;
+ found   : cap.jeeveslib.ast.BoolVar
+ required: String]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15$$anonfun$apply$16.apply(PlayReloader.scala:349) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15$$anonfun$apply$16.apply(PlayReloader.scala:349) ~[na:na]
+	at scala.Option.map(Option.scala:133) ~[scala-library.jar:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15.apply(PlayReloader.scala:349) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15.apply(PlayReloader.scala:346) ~[na:na]
+	at scala.Option.map(Option.scala:133) ~[scala-library.jar:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2.apply(PlayReloader.scala:346) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2.apply(PlayReloader.scala:344) ~[na:na]
+	at scala.Either$LeftProjection.map(Either.scala:374) ~[na:na]
+	at sbt.PlayReloader$$anon$2.reload(PlayReloader.scala:344) ~[na:na]
+	at play.core.ReloadableApplication.get(ApplicationProvider.scala:98) ~[play_2.10.jar:2.1.1]
+	at play.core.server.Server$class.sendHandler$1(Server.scala:56) [play_2.10.jar:2.1.1]
+	at play.core.server.Server$$anonfun$getHandlerFor$4.apply(Server.scala:88) [play_2.10.jar:2.1.1]
+	at play.core.server.Server$$anonfun$getHandlerFor$4.apply(Server.scala:87) [play_2.10.jar:2.1.1]
+	at scala.util.Either$RightProjection.flatMap(Either.scala:523) [scala-library.jar:na]
+	at play.core.server.Server$class.getHandlerFor(Server.scala:87) [play_2.10.jar:2.1.1]
+	at play.core.server.NettyServer.getHandlerFor(NettyServer.scala:34) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$6.apply(PlayDefaultUpstreamHandler.scala:115) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$6.apply(PlayDefaultUpstreamHandler.scala:115) [play_2.10.jar:2.1.1]
+	at scala.util.Either.fold(Either.scala:98) [scala-library.jar:na]
+	at play.core.server.netty.PlayDefaultUpstreamHandler.messageReceived(PlayDefaultUpstreamHandler.scala:109) [play_2.10.jar:2.1.1]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:787) [netty.jar:na]
+	at org.jboss.netty.handler.codec.http.HttpContentDecoder.messageReceived(HttpContentDecoder.java:108) [netty.jar:na]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:787) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:296) [netty.jar:na]
+	at org.jboss.netty.handler.codec.frame.FrameDecoder.unfoldAndFireMessageReceived(FrameDecoder.java:459) [netty.jar:na]
+	at org.jboss.netty.handler.codec.replay.ReplayingDecoder.callDecode(ReplayingDecoder.java:536) [netty.jar:na]
+	at org.jboss.netty.handler.codec.replay.ReplayingDecoder.messageReceived(ReplayingDecoder.java:435) [netty.jar:na]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:555) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:268) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:255) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioWorker.read(NioWorker.java:88) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.process(AbstractNioWorker.java:107) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioSelector.run(AbstractNioSelector.java:312) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.run(AbstractNioWorker.java:88) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioWorker.run(NioWorker.java:178) [netty.jar:na]
+	at org.jboss.netty.util.ThreadRenamingRunnable.run(ThreadRenamingRunnable.java:108) [netty.jar:na]
+	at org.jboss.netty.util.internal.DeadLockProofWorker$1.run(DeadLockProofWorker.java:42) [netty.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1110) [na:1.7.0_09]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:603) [na:1.7.0_09]
+	at java.lang.Thread.run(Thread.java:722) [na:1.7.0_09]
+
+2013-05-17 03:16:22,906 - [ERROR] - from application in New I/O worker #3 
+
+
+! @6eanaebaf - Internal server error, for (GET) [/login] ->
+
+sbt.PlayExceptions$CompilationException: Compilation error[type mismatch;
+ found   : models.ConfContext
+ required: cap.jeeveslib.ast.Formula]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15$$anonfun$apply$16.apply(PlayReloader.scala:349) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15$$anonfun$apply$16.apply(PlayReloader.scala:349) ~[na:na]
+	at scala.Option.map(Option.scala:133) ~[scala-library.jar:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15.apply(PlayReloader.scala:349) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2$$anonfun$apply$15.apply(PlayReloader.scala:346) ~[na:na]
+	at scala.Option.map(Option.scala:133) ~[scala-library.jar:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2.apply(PlayReloader.scala:346) ~[na:na]
+	at sbt.PlayReloader$$anon$2$$anonfun$reload$2.apply(PlayReloader.scala:344) ~[na:na]
+	at scala.Either$LeftProjection.map(Either.scala:374) ~[na:na]
+	at sbt.PlayReloader$$anon$2.reload(PlayReloader.scala:344) ~[na:na]
+	at play.core.ReloadableApplication.get(ApplicationProvider.scala:98) ~[play_2.10.jar:2.1.1]
+	at play.core.server.Server$class.sendHandler$1(Server.scala:56) [play_2.10.jar:2.1.1]
+	at play.core.server.Server$$anonfun$getHandlerFor$4.apply(Server.scala:88) [play_2.10.jar:2.1.1]
+	at play.core.server.Server$$anonfun$getHandlerFor$4.apply(Server.scala:87) [play_2.10.jar:2.1.1]
+	at scala.util.Either$RightProjection.flatMap(Either.scala:523) [scala-library.jar:na]
+	at play.core.server.Server$class.getHandlerFor(Server.scala:87) [play_2.10.jar:2.1.1]
+	at play.core.server.NettyServer.getHandlerFor(NettyServer.scala:34) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$6.apply(PlayDefaultUpstreamHandler.scala:115) [play_2.10.jar:2.1.1]
+	at play.core.server.netty.PlayDefaultUpstreamHandler$$anonfun$6.apply(PlayDefaultUpstreamHandler.scala:115) [play_2.10.jar:2.1.1]
+	at scala.util.Either.fold(Either.scala:98) [scala-library.jar:na]
+	at play.core.server.netty.PlayDefaultUpstreamHandler.messageReceived(PlayDefaultUpstreamHandler.scala:109) [play_2.10.jar:2.1.1]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:787) [netty.jar:na]
+	at org.jboss.netty.handler.codec.http.HttpContentDecoder.messageReceived(HttpContentDecoder.java:108) [netty.jar:na]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline$DefaultChannelHandlerContext.sendUpstream(DefaultChannelPipeline.java:787) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:296) [netty.jar:na]
+	at org.jboss.netty.handler.codec.frame.FrameDecoder.unfoldAndFireMessageReceived(FrameDecoder.java:459) [netty.jar:na]
+	at org.jboss.netty.handler.codec.replay.ReplayingDecoder.callDecode(ReplayingDecoder.java:536) [netty.jar:na]
+	at org.jboss.netty.handler.codec.replay.ReplayingDecoder.messageReceived(ReplayingDecoder.java:435) [netty.jar:na]
+	at org.jboss.netty.channel.SimpleChannelUpstreamHandler.handleUpstream(SimpleChannelUpstreamHandler.java:70) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:560) [netty.jar:na]
+	at org.jboss.netty.channel.DefaultChannelPipeline.sendUpstream(DefaultChannelPipeline.java:555) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:268) [netty.jar:na]
+	at org.jboss.netty.channel.Channels.fireMessageReceived(Channels.java:255) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioWorker.read(NioWorker.java:88) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.process(AbstractNioWorker.java:107) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioSelector.run(AbstractNioSelector.java:312) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.AbstractNioWorker.run(AbstractNioWorker.java:88) [netty.jar:na]
+	at org.jboss.netty.channel.socket.nio.NioWorker.run(NioWorker.java:178) [netty.jar:na]
+	at org.jboss.netty.util.ThreadRenamingRunnable.run(ThreadRenamingRunnable.java:108) [netty.jar:na]
+	at org.jboss.netty.util.internal.DeadLockProofWorker$1.run(DeadLockProofWorker.java:42) [netty.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1110) [na:1.7.0_09]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:603) [na:1.7.0_09]
+	at java.lang.Thread.run(Thread.java:722) [na:1.7.0_09]
+
